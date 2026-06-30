@@ -6,8 +6,8 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.0
-last_updated: 2026-06-29
+version: 0.1.1
+last_updated: 2026-06-30
 visibility: public
 ---
 
@@ -23,12 +23,14 @@ visibility: public
 
 | 用户意图信号 | 路由到 | 状态 |
 |---|---|---|
-| **我自己交易**：记决策/立案/持仓/平仓复盘 · 诊断我的持仓/交割单 · 炼 playbook | `elab-trade`（三 mode 合一） | ✅ 私有 |
-| **向外投研**：深度研究一只票/期权/主题（编排工具 + 圆桌出研报） | `elab-research` | ✅ 私有，可扩展登记表 |
-| 存当前分析 / 接着上次 / 出复盘报告 | `elab-save` / `elab-restore` / `elab-report` | ✅ |
-| "这个投研/期权问题成不成立"、决策卡住 | `elab-diagnosis` | ✅ 免费 |
-| "谁真赚到、我能不能复制"找对标 | `elab-benchmark` | ✅ 免费 |
-| "IV/Delta 中性/对冲到底啥意思"拆期权概念 | `elab-deconstruct` | ✅ 免费 |
+| **我自己交易**：记决策/立案/持仓/平仓复盘 · 诊断我的持仓/交割单 · 炼 playbook | `elab-trade`（三 mode 合一） | 免费（纯本地操作） |
+| **向外投研**：深度研究一只票/期权/主题（编排工具 + 圆桌出研报） | `elab-research` | 免费；自研雷达数据模式需会员 token，登记表可扩展 |
+| 存当前分析 | `elab-save` | 免费 |
+| 接着上次分析 | `elab-restore` | 免费 |
+| 出复盘报告 | `elab-report` | 免费 |
+| "这个投研/期权问题成不成立"、决策卡住 | `elab-diagnosis` | 免费 |
+| "谁真赚到、我能不能复制"找对标 | `elab-benchmark` | 免费 |
+| "IV/Delta 中性/对冲到底啥意思"拆期权概念 | `elab-deconstruct` | 免费 |
 
 > 内容创作 / 营销文案类（钩子/标题/传播/AI 味检测）不在 elab 内做；期权策略系统教学走 EdgeLab 课件，也不在 elab 内重做。
 

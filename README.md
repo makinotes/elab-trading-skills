@@ -9,11 +9,17 @@
 把 skill 目录放进 Claude Code 的 skills 目录即可：
 
 ```bash
-git clone <本仓库地址> elab-skills
+git clone https://github.com/edgelab101/elab-skills.git
+mkdir -p ~/.claude/skills/
 cp -R elab-skills/elab* ~/.claude/skills/
 ```
 
-更新：`git pull` 后重新 `cp -R`（或重跑上面两行）。
+更新：进 `elab-skills/` 跑 `git pull`，再重跑上面的 `cp -R` 那行。
+
+> 想免每次 cp，可改用软链（更新后 `git pull` 即自动生效）：
+> ```bash
+> for d in elab-skills/elab*; do ln -sfn "$(pwd)/$d" ~/.claude/skills/$(basename "$d"); done
+> ```
 
 ## Skill 清单
 

@@ -6,9 +6,9 @@ description: |
   EdgeLab "my trading" system: decision tracking + statement diagnosis + playbook distillation, in one skill.
   Trigger: /elab-trade, /决策立案, /结果回填, /交割单诊断, /沉淀playbook
 invocation: user
-version: 0.3.0
-last_updated: 2026-06-29
-visibility: private
+version: 0.3.1
+last_updated: 2026-06-30
+visibility: public
 ---
 
 # elab-trade：自己交易系统

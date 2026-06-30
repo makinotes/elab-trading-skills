@@ -11,10 +11,10 @@
 
 ### 券商 / 自己数据
 - **futu-api**（富途，需 FutuOpenD 常驻）🟢 —— 接富途行情/会员自己持仓
-- **longport**（长桥，需 API 凭据）🟢 —— 接长桥行情/持仓
+- **longbridge**（长桥，需 API 凭据）🟢 —— 接长桥行情/持仓。⚠️ 官方已把包从 `longport` 重命名为 `longbridge`（`longport` 已废弃），`pip install longbridge`，import 走 `from longbridge.openapi import ...`
 
 ### 财报 / SEC
-- **edgartools**（`pip install edgartools`）🟢 —— 拉解析 10-K/10-Q/8-K。输入 ticker，输出财报文本/财务数据 → 喂 `工作流模板/用Claude分析财报关键段`
+- **edgartools**（`pip install edgartools`）🟢 —— 拉解析 10-K/10-Q/8-K。输入 ticker，输出财报文本/财务数据 → 喂你自己的财报分析 prompt
 
 ### 期权计算
 - **py_vollib**（`pip install py_vollib`）🟢 —— 逐条算 IV、希腊字母、BS 定价。输入期权参数（标的价/行权/到期/无风险利率/期权价），输出 IV/Delta/Gamma/theta/Vega
@@ -29,10 +29,15 @@
   1. 读会员 token：`cat ~/.elab/token`（你的 `mk_live_…` key，进星球后主理人发你）
   2. 发现可用雷达：`curl -H "Authorization: Bearer $(cat ~/.elab/token)" https://invest.makinote.cn/api/v1/radars` → 返回雷达类型 + 各自最新日期
   3. 取信号：`curl -H "Authorization: Bearer $(cat ~/.elab/token)" "https://invest.makinote.cn/api/v1/signals?type=<雷达id>&limit=10"`
-     - 参数：`type`（雷达 id，如 `options_radar`/`fear_card`/`hk_close`/`thirteenf`/`crowding`）、`date`/`since`/`until`（YYYY-MM-DD）、`limit`（1..100，默认 30）
+     - 参数：`type`（雷达 id）、`date`/`since`/`until`（YYYY-MM-DD）、`limit`（1..100，默认 30）。**先调 `/radars` 拿到当前可用 type 列表再查**（别写死）
+     - 12 个对外雷达 type：`fear_card`(恐慌) / `options_radar`(期权) / `trading_premarket`·`trading_midday`·`trading_close`(美股盘前/午间/收盘) / `hk_close`(港股收盘) / `hk_ipo`(港股打新) / `whale`(机构持仓) / `x_radar`(X 资讯) / `briefing_relay`(投资简报) / `thirteenf`(13F 异动) / `crowding`(拥挤度)
      - 返回已**合规投影**（荐股类字段已剥、点评已脱敏）的安全数据
-  4. **优雅降级**：没 `~/.elab/token` 或返回 401（非会员/退费/key 过期）→ 不报错崩，告诉用户"雷达数据要会员 key（进星球向主理人要 `mk_live_` key 存到 `~/.elab/token`），这部分先用公开工具（OpenBB 等）替代"，继续跑能跑的
-  - 注：token 只在 skill 调 API 时用；和网站登录解耦（网站不经过这个 API）。429 = 限速（120 req/min/IP），退避重试
+  4. **优雅降级（按状态码）**：
+     - 401（无 token/非会员/退费/过期）→ 不崩，提示"雷达数据要会员 key（进星球向主理人要 key 存到 `~/.elab/token`）"，回落公开工具（OpenBB 等）继续跑
+     - 429（限速，120 req/min/同出口 IP，多会员共享）→ 退避重试；Claude Code 无自动重试，提示用户稍后重跑
+     - 503（`not_ready`，该日期数据仍在合规处理）→ 去掉 `date` 参数查最近 N 条，或换日期
+     - 500（服务故障，多为限流后端抖动）→ 同 401 处理，回落公开工具，别卡死
+  - 注：token 只在 skill 调 API 时用；和网站登录解耦（网站不经过这个 API）
 
 ### ❌ 别接（玩具行，警示）
 - **FinGPT / FinRobot / TradingAgents 等 LLM trade agent** 🔴 —— demo/回测过拟合，实盘没用、整合不值。这正是"复合开源 trade agent"最该避的坑
@@ -47,7 +52,7 @@
 - **<名字>**（`pip install <pkg>`）🟢/🟡 —— <一句话：怎么调、吃什么输入、吐什么输出、衔接谁>
 ```
 
-**Step 3 标接口衔接**：吃什么输入、吐什么输出、和现有工具怎么接（如"edgartools 出财报文本 → 工作流模板财报 prompt"）。
+**Step 3 标接口衔接**：吃什么输入、吐什么输出、和现有工具怎么接（如"edgartools 出财报文本 → 财报分析 prompt"）。
 
 **Step 4 标合规**：输出是纯数据/指标（OK）还是带方向建议（要剥掉方向再用）。
 
