@@ -25,10 +25,14 @@
 - **vectorbt**（`pip install vectorbt`）🟡 —— 向量化回测验想法；学习曲线陡，验策略假设时用
 
 ### 自研（EdgeLab 权益内 · 会员 token gated）
-- **invest 雷达站 / 恐慌指数 / 回测框架** 🔵 —— 取拥挤度/恐慌/信号。**调用约定**（不是 MCP，直接调现成 API）：
-  1. 读会员 token：`cat ~/.elab/token`（安装脚本写好的，自铸 token）
-  2. 调数据 API：`curl -H "Authorization: Bearer <token>" <数据API端点>`（雷达/恐慌指数数据接口，端点部署时填；**token 是自铸密钥、独立一层，和任何网站登录无关**）
-  3. **优雅降级**：没 `~/.elab/token` 或返回 401（非会员/退费）→ 不报错崩，告诉用户"自研数据要会员 token，进星球解锁；这部分先用公开工具（OpenBB 等）替代"，继续跑能跑的
+- **EdgeLab 雷达数据 API** 🔵 —— 取恐慌指数 / 期权 / 美港股 / 13F / 拥挤度等雷达信号。**唯一数据源 + 唯一对外 API，直接调，不是 MCP**：
+  1. 读会员 token：`cat ~/.elab/token`（你的 `mk_live_…` key，进星球后主理人发你）
+  2. 发现可用雷达：`curl -H "Authorization: Bearer $(cat ~/.elab/token)" https://invest.makinote.cn/api/v1/radars` → 返回雷达类型 + 各自最新日期
+  3. 取信号：`curl -H "Authorization: Bearer $(cat ~/.elab/token)" "https://invest.makinote.cn/api/v1/signals?type=<雷达id>&limit=10"`
+     - 参数：`type`（雷达 id，如 `options_radar`/`fear_card`/`hk_close`/`thirteenf`/`crowding`）、`date`/`since`/`until`（YYYY-MM-DD）、`limit`（1..100，默认 30）
+     - 返回已**合规投影**（荐股类字段已剥、点评已脱敏）的安全数据
+  4. **优雅降级**：没 `~/.elab/token` 或返回 401（非会员/退费/key 过期）→ 不报错崩，告诉用户"雷达数据要会员 key（进星球向主理人要 `mk_live_` key 存到 `~/.elab/token`），这部分先用公开工具（OpenBB 等）替代"，继续跑能跑的
+  - 注：token 只在 skill 调 API 时用；和网站登录解耦（网站不经过这个 API）。429 = 限速（120 req/min/IP），退避重试
 
 ### ❌ 别接（玩具行，警示）
 - **FinGPT / FinRobot / TradingAgents 等 LLM trade agent** 🔴 —— demo/回测过拟合，实盘没用、整合不值。这正是"复合开源 trade agent"最该避的坑
