@@ -6,7 +6,7 @@ description: |
   EdgeLab research orchestrator with pluggable tool registry + multi-analyst roundtable.
   Trigger: /elab-research, "deep-research this ticker", "roundtable on X"
 invocation: user
-version: 0.3.2
+version: 0.3.3
 last_updated: 2026-06-30
 visibility: public
 ---

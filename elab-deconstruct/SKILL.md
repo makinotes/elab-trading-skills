@@ -6,7 +6,7 @@ description: |
   EdgeLab options concept deconstruction down to operational atoms, with a pre-built concept library.
   Trigger: /elab-deconstruct, "what does this really mean", "deconstruct IV crush"
 invocation: user
-version: 0.2.1
+version: 0.2.2
 last_updated: 2026-06-30
 visibility: public
 ---
@@ -39,17 +39,21 @@ visibility: public
 | **IV crush** | 事件（财报）后不确定性消除，IV 骤降 → 期权价值缩水 | 财报前买期权要防 crush；卖方吃 crush | 不是标的跌，是波动率降——方向对了也可能亏 |
 | **Delta** | 期权价对标的价变动的一阶敏感度 | 估方向敞口；正股 Delta=1 | **call delta 0~+1，put delta −1~0（方向相反，put 是负的）**；算组合净 Delta 是把正负相抵，不是数字往 0~1 加 |
 | **Delta 中性** | 组合净 Delta≈0（正负 Delta 轧平），对标的小幅变动不敏感 | 加反向 Delta 对冲到净 0 | ≠ 无风险（还有 Gamma/Vega/theta）；大跳空 Gamma 击穿瞬间不中性 |
-| **Gamma 风险** | Delta 随标的变动的速度；近到期/平值时 Gamma 大 | 卖方近到期平值 Gamma 风险高，Delta 剧烈变 | 平值近到期越凶；**深 OTM 近到期 Gamma 反而降**（结局越确定 Delta 越不动） |
+| **Gamma 风险** | Delta 随标的价变动的速度；**平值(ATM)最大**，近到期时平值 Gamma 急升 | 卖方近到期平值 Gamma 风险高，Delta 剧烈变 | ⚠️ 近到期高 Gamma 是**平值特有**，不是所有近到期都高；**深 OTM 近到期 Gamma 反而降**（结局越确定 Delta 越不动） |
 | **theta decay** | 时间价值每天流逝，临近到期加速 | 卖方收 theta，买方扛 theta | 周末/假期也在掉 |
 | **Vega** | 期权价对 IV 变动的敏感度 | IV 每变 1 个点，期权价变约 Vega 元 | IV crush 亏的就是 Vega 那部分；远期/平值期权 Vega 大 |
-| **skew 波动率偏斜** | 不同行权价 IV 不同，通常下行 put 的 IV 更高（避险需求） | 看 skew 判断市场恐慌/偏好 | — |
+| **skew 波动率偏斜** | 不同行权价 IV 不同，通常下行 put 的 IV 更高（避险需求） | 看 skew 判断市场恐慌/偏好 | 失效：skew 随情绪变形（恐慌时陡、平静时平），不是固定结构——按它做价差要盯当前 skew，别套历史形态 |
 | **对冲** | 加反向敞口抵消现有仓位部分风险（目的扛得住非赚更多） | 分层减仓/Long Put/Bear Put Spread/Covered Call | ⚠️ Covered Call 不是真分层对冲（只一点缓冲+封上行）；BPS 是收 credit 看多**不是**对冲；裸 Short Call 是高风险策略不是对冲工具 |
 | **非对称** | 风险有限、回报敞开（或反） | 期权天生非对称（如 Long 期权下行限于权利金） | 卖方是反向非对称（收小钱冒大险） |
 | **卖方收租** | 卖期权收 premium，赚 theta + IV 回落 | IV 高位收租胜率较高 | 风险在尾部（小赚多次、一次大亏吐回） |
 | **滚动 roll** | 平近期合约同时开远期，延期/调行权价 | 不想被行权或想给更多时间时滚 | 滚 = 承认原判断没兑现，别无脑滚扛单 |
-| **被行权 assignment** | 卖方期权到价被对手行权，要履约（接货/交股） | 卖 put 可能被迫接货、卖 call 被迫交股 | 临近到期 ITM 风险高；分红前 call 易被提前行权（**仅美式期权；欧式如 SPX 不能提前行权**） |
+| **被行权 assignment** | 卖方期权到价被对手行权，要履约（接货/交股） | 卖 put 可能被迫接货、卖 call 被迫交股 | 临近到期 ITM 风险高；分红前 call 易被提前行权。⚠️ **提前行权仅美式期权（个股/多数 ETF）；指数期权如 SPX 是欧式、不能提前行权——别拿个股直觉套 SPX**（散户高频踩） |
 
-> 库里数字/参数若用户要具体值，标 [需核对]，不编。
+> 库里"易混 / 失效"列是**快查**（以易混为主）；完整的失效条件按拆解流程 Phase 2 第 4 步**对具体概念现拆**，别只停在表格那一行。
+> 库里数字/参数（如提前行权频率、Vega 具体金额）用户要具体值时标 [需核对]，不编。
 
 ## 风格 & 合规
 直接、拆到能操作为止；不放过"说不清"处；纯概念教学，不含具体标的、不给买卖方向（930）。
+
+---
+> 概念你免费拆透。想把拆懂的策略**用真实雷达/期权数据验证**，是 EdgeLab 会员的 `elab-research` 自研模式（需 token）——方法免费学，数据是会员权益。

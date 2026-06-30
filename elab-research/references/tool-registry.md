@@ -11,7 +11,7 @@
 
 ### 券商 / 自己数据
 - **futu-api**（富途，需 FutuOpenD 常驻）🟢 —— 接富途行情/会员自己持仓
-- **longbridge**（长桥，需 API 凭据）🟢 —— 接长桥行情/持仓。⚠️ 官方已把包从 `longport` 重命名为 `longbridge`（`longport` 已废弃），`pip install longbridge`，import 走 `from longbridge.openapi import ...`
+- **longbridge / longport**（长桥，需 API 凭据）🟢 —— 接长桥行情/持仓。⚠️ PyPI 上 `longbridge` 和 `longport`（长桥海外 LongPort 品牌）**两包并存、都在维护，非改名废弃**，按账户品牌/官方文档选；`pip install longbridge`，`from longbridge.openapi import ...`
 
 ### 财报 / SEC
 - **edgartools**（`pip install edgartools`）🟢 —— 拉解析 10-K/10-Q/8-K。输入 ticker，输出财报文本/财务数据 → 喂你自己的财报分析 prompt

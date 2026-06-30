@@ -6,8 +6,8 @@ description: |
   EdgeLab investment-decision diagnosis: consultation (dissolve a question) + checkup (audit your whole approach).
   Trigger: /elab-diagnosis, "diagnose my trade decision", "audit my trading approach"
 invocation: user
-version: 0.2.0
-last_updated: 2026-06-29
+version: 0.2.1
+last_updated: 2026-06-30
 visibility: public
 ---
 
@@ -92,3 +92,6 @@ visibility: public
 
 ## 风格 & 合规
 直接、短句、消解优先；不给鸡汤、不给"现在买 X"、不晒收益。能消解的不硬答——问题消失比被回答更有价值（930）。
+
+---
+> 这里做的是**方法层**消解。要**数据层支撑**（雷达信号/恐慌指数/拥挤度）填"信息不足"那层，是 EdgeLab 会员的 `elab-research` 自研模式（需 token）——方法免费学，数据是会员权益。

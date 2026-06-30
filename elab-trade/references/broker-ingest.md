@@ -13,13 +13,15 @@
 
 期权：`qty`=张数（1 张=100 股），多 `expiry/strike/cp`。
 
+**导入前必清洗（高频坑）**：① 一笔大单拆成多行成交（同时间同价/同 order_id）——按 order_id 合并或保留明细但标记，否则 FIFO 把一笔当多笔 ② 手续费/佣金可能单独成行——并进对应成交的 `fee` ③ 重复导出行去重 ④ 开平仓字段（BTO/STC/BTC/STO）缺失时**不要默认 BUY=开仓**，先让用户核对方向。
+
 ---
 
 ## 1. 富途 / moomoo
 
 ### 接入流程
 - **手动（推荐起步）**：富途牛牛 **PC 客户端** → 交易 → 历史成交 / 交割单 → 选时间段 → 导出 Excel/CSV。移动端能查、导出用 PC 顺手
-- **程序化**：装并运行 **FutuOpenD**（本地网关程序，要常驻）→ Python `pip install futu-api` → 连本地 OpenD → 拉历史成交（找"历史成交/交割单"类接口，如 `get_history_deal_list` 一类，具体名以 SDK 文档为准）
+- **程序化**：装并运行 **FutuOpenD**（本地网关程序，要常驻）→ Python `pip install futu-api` → 连本地 OpenD → 用 `OpenSecTradeContext.history_deal_list_query()` 拉历史成交（官方文档确认的方法名；接口随版本变以官方文档为准）
 
 ### 接口
 - SDK：`futu-api`（Python）；前提：富途账户**开通 OpenAPI 权限** + OpenD 在跑 + 已登录
@@ -39,11 +41,11 @@
 
 ### 接入流程
 - **手动**：App / 网页 → 我的 → 订单 / 交割单 → 导出
-- **程序化**：长桥 **OpenAPI** → Python `pip install longbridge`（⚠️ 官方已把包从 `longport` 重命名为 `longbridge`，`longport` 已废弃；import 走 `from longbridge.openapi import TradeContext`）→ 拉历史成交（`history_executions` / `today_executions` 一类，名以官方文档为准）
+- **程序化**：长桥 **OpenAPI** → Python。⚠️ **PyPI 上 `longbridge`（Longbridge 品牌）和 `longport`（LongPort 品牌，长桥海外实体）两包并存、都在维护，不是改名废弃**——按你账户所属品牌/文档选；`pip install longbridge`，import `from longbridge.openapi import TradeContext` → 拉历史成交（`history_executions` / `today_executions` 一类，名以官方文档为准）
 
 ### 接口
-- SDK：`longbridge`（Python，也有其它语言；旧 `longport` 已废弃）；前提：开发者后台申请 **App Key / App Secret / Access Token**
-- Access Token **有定期失效**，过期要重新生成
+- SDK：`longbridge`（Python，也有其它语言；`longport` 是同集团另一品牌的并存包，非废弃）；前提：开发者后台申请 **App Key / App Secret / Access Token**
+- Access Token **有定期失效**（官方约 90 天），过期 API 会失败但不一定有明确报错，先怀疑 token 过期，重新生成
 
 ### 提醒用户
 - 要先在长桥开发者后台申请 API 凭据（比富途多一步）
@@ -59,7 +61,7 @@
 
 ### 接入流程
 - **Flex Query（推荐，最省事）**：Client Portal（旧称 Account Management）→ Performance & Reports → **Flex Queries** → 新建一个 **Trades** flex query（勾选要的字段）→ 运行生成 CSV/XML。可手动下，也可用 **Flex Web Service**（拿一个 token 程序化拉），不用开着 TWS
-- **API**：TWS 或 IB Gateway 运行 + Python `ib_async`（`ib_insync` 原作者 2024 去世、已停维护，社区继任分叉 `ib_async`，`pip install ib_async`）或官方 `ibapi` → 拉 executions/fills
+- **API**：TWS 或 IB Gateway 运行 + Python `ib_async`（`ib_insync` 原作者 2024 去世、已停维护，社区继任分叉 `ib_async`，组织 `ib-api-reloaded`，`pip install ib_async`）或官方 `ibapi` → 拉 executions/fills
 
 ### 接口
 - 首选 **Flex Query**（报告式，稳定、不用挂 TWS）
