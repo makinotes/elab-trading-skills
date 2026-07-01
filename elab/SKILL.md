@@ -6,8 +6,8 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.1
-last_updated: 2026-06-30
+version: 0.1.2
+last_updated: 2026-07-01
 visibility: public
 ---
 
@@ -24,7 +24,7 @@ visibility: public
 | 用户意图信号 | 路由到 | 状态 |
 |---|---|---|
 | **我自己交易**：记决策/立案/持仓/平仓复盘 · 诊断我的持仓/交割单 · 炼 playbook | `elab-trade`（三 mode 合一） | 免费（纯本地操作） |
-| **向外投研**：深度研究一只票/期权/主题（编排工具 + 圆桌出研报） | `elab-research` | 免费；自研雷达数据模式需会员 token，登记表可扩展 |
+| **向外投研**：深度研究一只票/期权/主题（编排工具 + 强制自我证伪出中性研报） | `elab-research` | 免费；自研雷达数据模式需会员 token，登记表可扩展 |
 | 存当前分析 | `elab-save` | 免费 |
 | 接着上次分析 | `elab-restore` | 免费 |
 | 出复盘报告 | `elab-report` | 免费 |

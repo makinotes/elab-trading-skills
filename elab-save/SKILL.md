@@ -6,8 +6,8 @@ description: |
   EdgeLab · Save current research/decision state to disk for cross-session recall.
   Trigger: /elab-save, "save this", "remember this analysis"
 invocation: user
-version: 0.1.0
-last_updated: 2026-06-29
+version: 0.1.1
+last_updated: 2026-07-01
 visibility: public
 ---
 
@@ -52,6 +52,7 @@ visibility: public
 ### Step 3 写存档文件
 
 路径：`~/.elab/sessions/<slug>/<时间戳>-<标题slug>.md`（时间戳用 `date +%Y%m%d-%H%M%S` 取，禁猜）。
+**写文件前必须先 `mkdir -p ~/.elab/sessions/<slug>/`**（目录不存在直接写会失败）。
 
 frontmatter + 正文结构：
 
@@ -82,7 +83,7 @@ next_skill: <建议下一步，可空>
 **来源标签强制**：每条判断标 `[本人判断]` / `[AI推测]` / `[结果回填 YYYY-MM-DD]`，区分 AI 分析与本人判断（投研必需 + 930 合规护栏，见 EdgeLab skill 规范 §8）。
 
 ### Step 4 确认
-写完告诉用户：存到了哪个项目、标题、几条判断。**先 `mkdir -p` 目录再写。**
+写完告诉用户：存到了哪个项目、标题、几条判断。
 
 ## 合规
 

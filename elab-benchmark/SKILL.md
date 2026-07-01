@@ -6,8 +6,8 @@ description: |
   EdgeLab benchmark analysis: five filters to find a copyable trading approach, spotting fake P&L.
   Trigger: /elab-benchmark, "who should I learn from", "can I copy this strategy"
 invocation: user
-version: 0.2.1
-last_updated: 2026-06-30
+version: 0.2.2
+last_updated: 2026-07-01
 visibility: public
 ---
 
@@ -57,6 +57,16 @@ visibility: public
 ### Phase 3 结论
 - 五筛全过 → 给"**可复制要点清单**"（细颗粒度：进场条件/仓位/对冲/止盈/认错点，对齐 elab-trade playbook 条目框架），建议沉淀进 playbook
 - 卡在某筛 → 指出卡哪、为什么暂时别抄
+
+**"够细"长这样**（BPS 卖方打法样板，够不够看这个标准）：
+> - **进场条件**：IV 分位 >60、距财报 >7 天、标的在自己看多的支撑位上方；**不满足全部不进**
+> - **仓位**：单笔风险预算 ≤ 总仓 2%（用最大亏损/账户算张数，不是拍脑袋定张数）
+> - **行权价选择**：短腿 delta ~0.20-0.30，宽度按可接受最大亏损定
+> - **止盈**：收到 50% max profit 平，不贪剩下的
+> - **对冲/认错**：标的跌破支撑 或 短腿 delta 到 0.45 → 减仓/滚动/认错（预先定死，不临场犹豫）
+> - **认错点**：thesis（看多支撑）被破就走，不因为"还没到期"扛
+>
+> 对比"他做 BPS 我也做 BPS"——后者不是对标。**说不到这个颗粒度 = 你其实没看懂他怎么赢的，先别抄。**
 
 ## 案例 / 反例
 - ✅ **该对标**：能讲清逻辑 + 敢复盘亏损 + 打法你能执行的实盘者
