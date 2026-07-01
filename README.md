@@ -44,4 +44,4 @@ cp -R elab-skills/elab* ~/.claude/skills/
 
 ## License
 
-MIT
+**CC BY-NC 4.0**（署名-非商业性使用）——可自由使用、修改、分享，但**禁止商业用途**（不得转卖、打包进付费产品/课程/服务）。详见 [LICENSE](LICENSE)。
