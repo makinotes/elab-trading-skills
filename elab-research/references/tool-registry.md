@@ -3,15 +3,32 @@
 > 编排时从这挑工具。**表是活的**——网上出新工具，按"怎么加"评估后加进来即可被编排。
 > ⚠️ 包名/接口名会变，以官方文档为准；具体函数签名不确定就标 [需核对]，别编。
 
+## 〇、默认取数栈（开箱即用 · 研究一个标的默认从这几个拿）
+
+不用每次纠结用啥，**默认这套组合**（都免费/成本低、覆盖 90% 研究需求）：
+
+| 需求 | 默认用 | 补充 |
+|---|---|---|
+| 行情/历史/期权链 | **yfinance**（免费，无 key） | OpenBB（一站式）/ 长桥 CLI（有账户时更准更快）|
+| 实时报价/财报日历 | **finnhub**（免费 tier，有 key） | yfinance 兜底 |
+| EOD 历史/指数 | **stooq**（免费无 key，稳） | yfinance |
+| 财报原文 10-K/Q | **edgartools** | — |
+| 期权 IV/希腊字母 | **py_vollib** | py_vollib_vectorized（批量）|
+| EdgeLab 雷达/恐慌 | 自研 API（会员 token，见"自研"节） | — |
+
+> 有长桥账户 → 行情优先长桥 CLI（数据更干净、港股/美股都覆盖）；没有 → yfinance/stoop 免费兜底。缺 key 的（finnhub）就降级到免费源，别卡住。
+
 ## 一、登记表（每个工具：装/调 + 输入输出 + 状态）
 
 ### 数据聚合
-- **OpenBB**（`pip install openbb`）🟢 —— `from openbb import obb`，取行情/财报/新闻/**期权链**。输入 ticker，输出结构化数据。一站式，优先用
-- **yfinance**（`pip install yfinance`）🟢 —— 轻量取行情/历史/期权链；免费但偶尔不稳，做兜底
+- **OpenBB**（`pip install openbb`）🟢 —— `from openbb import obb`，取行情/财报/新闻/**期权链**。输入 ticker，输出结构化数据。一站式
+- **yfinance**（`pip install yfinance`）🟢 —— **默认行情源**，轻量取行情/历史/期权链；免费无 key，偶尔不稳做兜底
+- **finnhub**（`pip install finnhub-python`，免费 tier 需 key）🟢 —— 实时报价 / 财报日历 / 基本面；免费额度够个人研究
+- **stooq**（`pandas-datareader` 或直接 CSV URL，无 key）🟢 —— 免费 EOD 历史 + 指数，稳，yfinance 抽风时兜底
 
-### 券商 / 自己数据
-- **futu-api**（富途，需 FutuOpenD 常驻）🟢 —— 接富途行情/会员自己持仓
-- **longbridge / longport**（长桥，需 API 凭据）🟢 —— 接长桥行情/持仓。⚠️ PyPI 上 `longbridge` 和 `longport`（长桥海外 LongPort 品牌）**两包并存、都在维护，非改名废弃**，按账户品牌/官方文档选；`pip install longbridge`，`from longbridge.openapi import ...`
+### 券商 / 自己数据（需自己账户凭据）
+- **futu-api**（富途，需 FutuOpenD 常驻）🟢 —— 接富途行情 / 会员自己持仓 / 历史成交（`history_deal_list_query`）
+- **长桥 CLI / longbridge**（长桥 OpenAPI，需 API 凭据）🟢 —— **有长桥账户默认优先**：行情/持仓/历史成交，港美股都覆盖、数据干净。`pip install longbridge`，`from longbridge.openapi import QuoteContext, TradeContext`（可包成 CLI 用）。⚠️ PyPI 上 `longbridge` 和 `longport`（LongPort 品牌）**两包并存、都在维护，非改名废弃**，按账户品牌选
 
 ### 财报 / SEC
 - **edgartools**（`pip install edgartools`）🟢 —— 拉解析 10-K/10-Q/8-K。输入 ticker，输出财报文本/财务数据 → 喂你自己的财报分析 prompt
