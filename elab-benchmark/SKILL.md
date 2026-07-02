@@ -6,9 +6,11 @@ description: |
   EdgeLab benchmark analysis: five filters to find a copyable trading approach, spotting fake P&L.
   Trigger: /elab-benchmark, "who should I learn from", "can I copy this strategy"
 invocation: user
-version: 0.2.2
-last_updated: 2026-07-01
+version: 0.2.3
+last_updated: 2026-07-02
 visibility: public
+requires: []
+outputs: ["可复制要点清单 (→ elab-trade playbook)"]
 ---
 
 # elab-benchmark：投资对标分析

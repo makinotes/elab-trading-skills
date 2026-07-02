@@ -6,9 +6,11 @@ description: |
   EdgeLab options concept deconstruction down to operational atoms, with a pre-built concept library.
   Trigger: /elab-deconstruct, "what does this really mean", "deconstruct IV crush"
 invocation: user
-version: 0.2.2
-last_updated: 2026-06-30
+version: 0.2.3
+last_updated: 2026-07-02
 visibility: public
+requires: []
+outputs: []
 ---
 
 # elab-deconstruct：期权概念拆解

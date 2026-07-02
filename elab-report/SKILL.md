@@ -6,9 +6,11 @@ description: |
   EdgeLab · Merge elab-save snapshots into a deliverable research/review report.
   Trigger: /elab-report, "package this up", "make me a report"
 invocation: user
-version: 0.1.0
-last_updated: 2026-06-29
+version: 0.1.1
+last_updated: 2026-07-02
 visibility: public
+requires: ["~/.elab/sessions/ (多份 elab-save 存档)"]
+outputs: ["投研复盘报告 md"]
 ---
 
 # elab-report：投研复盘报告

@@ -6,9 +6,11 @@ description: |
   EdgeLab research orchestrator with pluggable tool registry + mandatory self-refutation.
   Trigger: /elab-research, "deep-research this ticker"
 invocation: user
-version: 0.3.5
-last_updated: 2026-07-01
+version: 0.3.6
+last_updated: 2026-07-02
 visibility: public
+requires: []
+outputs: ["中性研报 (可存进 elab-trade 04_待解)"]
 ---
 
 # elab-research：投研编排器

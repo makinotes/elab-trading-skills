@@ -6,9 +6,11 @@ description: |
   EdgeLab · Save current research/decision state to disk for cross-session recall.
   Trigger: /elab-save, "save this", "remember this analysis"
 invocation: user
-version: 0.1.1
-last_updated: 2026-07-01
+version: 0.1.2
+last_updated: 2026-07-02
 visibility: public
+requires: []
+outputs: ["~/.elab/sessions/ (存档)"]
 ---
 
 # elab-save：投研状态存档

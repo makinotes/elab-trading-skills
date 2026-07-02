@@ -6,9 +6,11 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.2
-last_updated: 2026-07-01
+version: 0.1.3
+last_updated: 2026-07-02
 visibility: public
+requires: []
+outputs: []
 ---
 
 # elab：EdgeLab 投研工具箱入口

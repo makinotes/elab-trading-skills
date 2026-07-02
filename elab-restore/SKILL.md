@@ -6,9 +6,11 @@ description: |
   EdgeLab · Restore the most recent research/decision snapshot saved by elab-save.
   Trigger: /elab-restore, "continue from last time", "where did we leave off"
 invocation: user
-version: 0.1.0
-last_updated: 2026-06-29
+version: 0.1.1
+last_updated: 2026-07-02
 visibility: public
+requires: ["~/.elab/sessions/ (elab-save 的存档)"]
+outputs: []
 ---
 
 # elab-restore：接续投研

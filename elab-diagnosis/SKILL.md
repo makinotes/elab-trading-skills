@@ -6,9 +6,11 @@ description: |
   EdgeLab investment-decision diagnosis: consultation (dissolve a question) + checkup (audit your whole approach).
   Trigger: /elab-diagnosis, "diagnose my trade decision", "audit my trading approach"
 invocation: user
-version: 0.2.2
-last_updated: 2026-07-01
+version: 0.2.3
+last_updated: 2026-07-02
 visibility: public
+requires: []
+outputs: []
 ---
 
 # elab-diagnosis：投资决策诊断
