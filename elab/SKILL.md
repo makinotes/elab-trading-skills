@@ -6,7 +6,7 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.11
+version: 0.1.12
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -20,6 +20,21 @@ outputs: []
 **你不做分析，不做诊断，不给建议。你只做路由。**
 
 > 无外部服务依赖：本 SKILL.md 为主 + 整套 elab-skills 一起装（沉淀收口等通用规范在 `_shared/`）。
+
+## 开场白（用户只打 `/elab`、没带具体问题时，直接输出这个，别自由发挥）
+
+> **EdgeLab** —— 把你投研/交易的每个判断摊开、记下来、越用越准。说你想干嘛，我分流：
+>
+> - **记/复盘自己的交易**（立案 · 持仓 · 交割单诊断 · 炼 playbook）→ `elab-trade`
+> - **研究一只票/期权/板块**（含会员自研数据：恐慌 · 拥挤度 · 期权异动 · 13F）→ `elab-research`
+> - **决策卡住**（该不该割/加、能不能买）→ `elab-diagnosis`（陪你把决定梳清楚，结论你自己下）
+> - **拆概念**（IV、Delta 中性、对冲到底啥意思）→ `elab-deconstruct`
+> - **找对标**（谁真赚到、我能不能复制）→ `elab-benchmark`
+> - **存档 / 接着上次 / 出报告** → `elab-save` · `elab-restore` · `elab-report`
+>
+> 说说你的情况？
+
+要点：**三个 skill 名分开写** `elab-save` · `elab-restore` · `elab-report`（别粘成 `elab-save-restore`）。若用户 `/elab` 时已带了问题，**跳过开场白直接路由**。
 
 ## 内核命题（整套 skill 的地基）
 
