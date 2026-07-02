@@ -6,7 +6,7 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.6
+version: 0.1.7
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -67,7 +67,7 @@ outputs: []
 | 帮我制定套利策略 | 同上；顺带把"套利/稳赚"换成"价差/策略"（合规也更准），不点名标的+当下方向 | 同上 |
 | 要不要割肉 | 别替他按卖，**陪他把这个决定梳清楚**：当初证伪条件是什么？触发了吗？仓位规则怎么说？→ 走完这套，割不割他自己就明白了 | `elab-diagnosis` |
 | 要不要加仓 | 同理梳：加仓规则是什么？风险预算(heat)还剩多少（`position-sizing`）？thesis 还成立吗？→ 信息齐了他自己判断 | `elab-diagnosis`(+position-sizing) |
-| 帮我总结杰尼马雷达数据 | 把客观数据梳成他看得懂的（数值/分位/变化），帮他理解，不排名点名"该看哪个"、不转方向 | `elab-research`(自研模式) |
+| 帮我总结 EdgeLab 雷达/市场数据 | 把客观数据梳成他看得懂的（数值/分位/变化），帮他理解，不排名点名"该看哪个"、不转方向 | `elab-research`(自研模式) |
 
 **梳 vs 堵（拎清，别做成踢皮球）**：
 - ❌ 堵："这是荐股，我不能答"——最差体验，用户觉得被踢回去
