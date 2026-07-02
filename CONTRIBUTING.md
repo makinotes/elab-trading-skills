@@ -52,4 +52,5 @@ outputs: []                    # 产出路径/格式，见 §4
 - [ ] 路由：在 `elab/SKILL.md` 路由表加一行
 - [ ] 脱敏扫描（public repo）：无 IP/token/路径/key/持仓数字
 - [ ] 合规段在位（无荐股措辞）
-- [ ] version + last_updated 填了
+- [ ] version + last_updated 填了（按 `CHANGELOG.md` 的 patch/minor/major 约定 bump）
+- [ ] **`CHANGELOG.md` 加一条**（PR 必带：改了哪个 skill、新版本、一句话改了啥）
