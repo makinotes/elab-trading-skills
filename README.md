@@ -32,8 +32,15 @@ bash update.sh
 
 它自动：`git pull` → 显示 CHANGELOG 本次变更 → 同步到 `~/.claude/skills/`（cp 或软链装法都自动处理，含 `_shared`）。
 
+**自动更新（可选，一次性设置）**——跑一次，之后每天自动跟进最新版：
+
+```bash
+bash install-autoupdate.sh        # 默认每天 9:00；bash install-autoupdate.sh 21 改 21:00
+```
+
 > 手动等价：`git pull` 后，cp 装的重跑上面的 `cp -R` 行，软链装的即自动生效。
 > 每次改动都记在 `CHANGELOG.md`（版本 + 一句话），pull 完扫一眼就知道变了什么。
+> ⚠️ 自动更新 = 主理人 push 后静默跟进；想先看变更再更就别开，用手动。
 
 ## Skill 清单
 
