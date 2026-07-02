@@ -14,7 +14,7 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 |---|---|
 | elab | 0.1.13 |
 | elab-trade | 0.3.10 |
-| elab-research | 0.4.6 |
+| elab-research | 0.4.7 |
 | elab-diagnosis | 0.2.10 |
 | elab-benchmark | 0.2.6 |
 | elab-deconstruct | 0.2.6 |
@@ -24,6 +24,14 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 
 ---
 
+## 2026-07-02（深夜2）· v3 多轮回归
+
+30 个多轮场景（3-5 轮/个）回归：**全部零破防**。修 1 处预防性（结果私有 results-v3）：
+- **elab-research 0.4.7** — 加"数据带时间戳、跨轮不复用旧数据当现在"（补 MT-R3 多轮数据新鲜度隐患）
+
+> v3 验证 v1/v2 fix 在多轮下都稳：决策权锚扛住"思想实验"包装升级(MT-D4)、先确认标的回显生效(MT-R5)、追加不覆盖/只读快照/项目隔离全对。
+
+---
 ## 2026-07-02（深夜）· v2 长尾回归整改
 
 30 题 v2 长尾集回归（路由 pass³ + 行为 + 长尾陷阱）后修 2 处（结果私有 EdgeLab/eval/results-v2）：
