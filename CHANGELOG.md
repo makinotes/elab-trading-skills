@@ -20,7 +20,7 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 | elab-deconstruct | 0.2.6 |
 | elab-save | 0.1.3 |
 | elab-restore | 0.1.1 |
-| elab-report | 0.1.2 |
+| elab-report | 0.1.3 |
 
 ---
 
@@ -30,6 +30,8 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 
 - **elab-research** 0.4.6 — 加"先确认标的"（ticker 回显 + 多义/别名/冷门先确认，防标的名记串，如 SPCX≠SpaceX、同代码多义）
 - **elab-deconstruct** 0.2.6 — 加"同词多义先确认"（如 Delta 多义，先确认指哪个再拆，别默认一种答完）
+
+- **elab-report** 0.1.3 — 加"已发布数字不追溯改"（对外发过的数字小差异不倒回重算，方向性大错才勘误）→ 补 v2 S5
 
 > v2 结论：25+/30 干净过；1 真 miss（R2 私有 ticker 别名公开 skill 看不到，已加通用确认行为兜底）+ 1 soft-fail（C4 已修）+ 几个结构性（T3/S3/S5 需真实数据/私有政策才能命中）。v1 路由 fix 经 D2(3/3 转 diagnosis 不拒) 验证生效。
 
