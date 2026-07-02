@@ -6,7 +6,7 @@ description: |
   EdgeLab research orchestrator: pluggable tools + self-refutation + optional real multi-agent debate (bull/bear + independent judge).
   Trigger: /elab-research, "deep-research this ticker", "run a bull/bear debate"
 invocation: user
-version: 0.3.7
+version: 0.3.8
 last_updated: 2026-07-02
 visibility: public
 requires: []

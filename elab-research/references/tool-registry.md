@@ -16,7 +16,9 @@
 | 期权 IV/希腊字母 | **py_vollib** | py_vollib_vectorized（批量）|
 | EdgeLab 雷达/恐慌 | 自研 API（会员 token，见"自研"节） | — |
 
-> 有长桥账户 → 行情优先长桥 CLI（数据更干净、港股/美股都覆盖）；没有 → yfinance/stoop 免费兜底。缺 key 的（finnhub）就降级到免费源，别卡住。
+> 有长桥账户 → 行情优先长桥 CLI（数据更干净、港股/美股都覆盖）；没有 → yfinance/stooq 免费兜底。缺 key 的（finnhub）就降级到免费源，别卡住。
+
+> **🔑 凭据纪律（硬规则）**：finnhub/长桥/富途等的 API key、App Secret、Access Token **一律从环境变量或本地文件读**（如 `os.getenv(...)` / `~/.finnhub_key`），**禁硬编码进 skill/脚本**；**禁把 key 值写进研报、存档、日志或任何输出**（防泄漏）。skill 里只出现"读 key"的动作，永远不出现 key 的值。
 
 ## 一、登记表（每个工具：装/调 + 输入输出 + 状态）
 
