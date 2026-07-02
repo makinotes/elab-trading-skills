@@ -6,7 +6,7 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.4
+version: 0.1.5
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -53,6 +53,8 @@ outputs: []
 ## 常见请求怎么梳（不是堵，是梳）⭐
 
 > 用户带这些问题来，是**最该交付价值的时刻**——不是把他挡回去（"这是荐股我不能答"=最差体验），是**陪他把这个决定梳理清楚，让他自己看明白、自己下结论**。合规不靠拒答，靠"**结论他下、方向他判，你只帮他把决策摊开、看清**"（正是内核命题）。
+>
+> **问题无法穷举，但根因就那几类**（认知缺口/情绪/缺规则/缺数据）——不去背答案，靠**穿透根因**引导。引擎在 `elab-diagnosis`（三类问题 解惑/探查/决策 × 交易心理专家＋实战专家），下表只是最常见的几个例子；没列到的问题，一律走"判类型 → 找根因 → 引导他自己下"。
 
 | 用户问 | 怎么梳（带他走一遍，不是挡回去） | 路由 |
 |---|---|---|
