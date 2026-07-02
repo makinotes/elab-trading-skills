@@ -16,12 +16,25 @@ mkdir -p ~/.claude/skills/
 cp -R elab-skills/elab* ~/.claude/skills/
 ```
 
-更新：进 `elab-skills/` 跑 `git pull`，再重跑上面的 `cp -R` 那行。
-
-> 想免每次 cp，可改用软链（更新后 `git pull` 即自动生效）：
+> 想免每次 cp，可改用软链（这样 `git pull` 后自动生效，不用再 cp）：
 > ```bash
 > for d in elab-skills/elab*; do ln -sfn "$(pwd)/$d" ~/.claude/skills/$(basename "$d"); done
 > ```
+
+## 更新
+
+skill 会持续迭代。更新分两步：
+
+```bash
+cd elab-skills
+git pull                       # 拉最新
+cat CHANGELOG.md | head -30    # 看这次改了啥（版本 + 变更）
+```
+
+- **用 `cp -R` 装的**：`git pull` 后再重跑一次 `cp -R elab-skills/elab* ~/.claude/skills/` 覆盖旧版
+- **用软链装的**：`git pull` 即自动生效，无需再 cp
+
+> 每次改动都记在 `CHANGELOG.md`（版本号 + 一句话），pull 完扫一眼就知道变了什么、要不要重看某个 skill。
 
 ## Skill 清单
 
