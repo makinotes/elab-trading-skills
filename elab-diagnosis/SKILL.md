@@ -6,7 +6,7 @@ description: |
   EdgeLab trade-decision guidance engine: takes any trading question, guides to root cause as trading-psychologist + practitioner. Never blocks; you draw the conclusion.
   Trigger: /elab-diagnosis, "should I cut/add/buy/sell", "diagnose my decision", "audit my approach"
 invocation: user
-version: 0.2.8
+version: 0.2.9
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -94,6 +94,7 @@ outputs: []
 - ✅ 给方法（安全）："你开仓时定的证伪条件是'跌破 X'——现在触发了没？**触发与否你来核**；触发了，问自己当初为什么定这条规则、现在还认不认这条规则。"（把判断权和标准都留在用户手里）
 - ❌ 滑向方向（越界）："证伪条件触发了，**那你应该出**。"（这已经替用户下了卖出结论 = 方向建议）
 - 通用做法：把结论表述成**反问 + 用户自己的规则**，不替他执行那一步。用户说"那我到底该不该出"逼你表态时，回："我不替你按下这个键——你的规则说什么？规则你不认了，是要改规则还是破例？改/破例的后果你担不担得起？"
+- **🔴 高风险触发词换挡**：用户一旦说出**具体合约 + 当下方向/时机**（"XX 明天到期的 call 现在买不买""今天下午 3 点该不该进 NVDA""这个价位加不加"），立即**明确换挡到纯方法层**——先声明"具体到某合约当下买卖，我不给判断"，再把它拆回规则/thesis/风险（"你进这笔的证伪条件是什么、风险框死没"）。**越具体、越临近当下，越要收，别顺着"梳"下去变成实质择时建议**。这是"梳"和"荐股"的真分界线。
 
 ## 4 回顾
 "你最初问的是 X，它在第 N 层被消解，因为 Y" 或 "真问题是 Z，框架这样、结论你下"。建议把想清楚的用 `/elab-trade` 立案存下来。
