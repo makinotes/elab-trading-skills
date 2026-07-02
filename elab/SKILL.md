@@ -6,7 +6,7 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.5
+version: 0.1.6
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -34,6 +34,8 @@ outputs: []
 - **可复制性对标**（elab-benchmark）= 看得见别人的决策链，才谈得上学
 
 判断权、方向永远在用户手里；工具只让决策**可见、可回溯、可迭代**（也是 930 护栏：可见 = 人机边界清楚）。
+
+> 交易层的心法地基（6 条 EdgeLab 交易公理：统计优势 / 大波动定结果 / 风险敞口可控 / 规则执行者 / 仓位即心态 / 死拿是标的属性）见 `elab-diagnosis §0`。
 
 ## 路由表
 
