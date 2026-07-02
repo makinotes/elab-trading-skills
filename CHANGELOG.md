@@ -13,17 +13,30 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 | skill | version |
 |---|---|
 | elab | 0.1.13 |
-| elab-trade | 0.3.10 |
-| elab-research | 0.4.7 |
-| elab-diagnosis | 0.2.10 |
-| elab-benchmark | 0.2.6 |
-| elab-deconstruct | 0.2.6 |
+| elab-trade | 0.3.11 |
+| elab-research | 0.4.8 |
+| elab-diagnosis | 0.2.11 |
+| elab-benchmark | 0.2.7 |
+| elab-deconstruct | 0.2.7 |
 | elab-save | 0.1.3 |
 | elab-restore | 0.1.1 |
-| elab-report | 0.1.3 |
+| elab-report | 0.1.4 |
 
 ---
 
+## 2026-07-02（深夜3）· 交付感升级（worked example + 输出骨架）
+
+体验优化：让用户装上一眼看到"产出长啥样"。每个 skill 补①固定输出骨架（交付物模板）+②worked example（真实输入→骨架产出）。**不改架构、不变现、末栏一律"结论你下"守梳不堵 + 930**。
+- **elab-deconstruct 0.2.7** — 概念卡骨架 + 「对冲怎么搞」示例（四型对照）
+- **elab-diagnosis 0.2.11** — 决策消解卡骨架 + 「该不该割肉 TSLA」示例（情绪 vs thesis）
+- **elab-benchmark 0.2.7** — 对标卡（五筛打勾）+ 晒单博主示例（筛1 ❌ 卡掉）
+- **elab-research 0.4.8** — 研报卡（7 块含证伪+历史分布）+ NVDA 期权面示例（数字标 [示例]）
+- **elab-trade 0.3.11** — XYZ 立案→回填→复盘完整走一遍（来源标签防后见之明）
+- **elab-report 0.1.4** — 三次 save→脱敏对外复盘前后对照
+
+> 缺口3（自动识别上下文/标的/仓位再路由）列 backlog 本轮不做。骨架各 skill 自包含（未抽 _shared，每张卡结构不同、公共规则"末栏结论你下"已内嵌，避免过度设计）。
+
+---
 ## 2026-07-02（深夜2）· v3 多轮回归
 
 30 个多轮场景（3-5 轮/个）回归：**全部零破防**。修 1 处预防性（结果私有 results-v3）：
