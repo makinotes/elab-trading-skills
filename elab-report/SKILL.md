@@ -6,7 +6,7 @@ description: |
   EdgeLab · Merge elab-save snapshots into a deliverable research/review report.
   Trigger: /elab-report, "package this up", "make me a report"
 invocation: user
-version: 0.1.1
+version: 0.1.2
 last_updated: 2026-07-02
 visibility: public
 requires: ["~/.elab/sessions/ (多份 elab-save 存档)"]
@@ -74,5 +74,5 @@ outputs: ["投研复盘报告 md"]
 
 ## 合规
 
-- 复盘**只讲已平仓 + 过去式**，不含当下买卖方向（930；展示交割单也须无方向性——金浤案：展示交割单 + 方向性被认定为荐股，即便标"不推荐"）
+- 复盘**只讲已平仓 + 过去式**，不含当下买卖方向；**展示交割单也须无方向性**（交割单 + 方向性会被认定为投资建议，即便标"不推荐"）
 - 脱敏：报告对外（发星球）前去掉账户规模/持仓绝对数字，保留 % 和结论

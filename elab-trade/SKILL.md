@@ -6,7 +6,7 @@ description: |
   EdgeLab "my trading" system: decision tracking + statement diagnosis + playbook distillation, in one skill.
   Trigger: /elab-trade, /决策立案, /结果回填, /交割单诊断, /沉淀playbook
 invocation: user
-version: 0.3.7
+version: 0.3.8
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -85,8 +85,9 @@ outputs: ["~/.elab/trades/ (决策四层结构)"]
 ## A.4 AGENTS.md 写死的纪律
 进项目先读 `我的当前判断.md`、结束前先更新；持仓中只分析不推方向；来源标签强制；03 写完不改；复盘只过去式；术语方向性零容错（BPS≠Bear Put Spread）。
 
-## A.5 Worked example（一笔全周期）
-立案卖 put（thesis=财报前 IV 高收 credit `[本人判断]`、仓位 5%、证伪=跌破支撑、IV 分位 78% `[AI推测]`）→ 持仓中财报 IV crush 更新当前判断 → 平仓回填（收 X% credit、按计划止盈？）+ 发现"IV>75 卖 put 顺"进 02_规律 → 几笔后转 Mode C 炼成 playbook 条目。
+## A.5 Worked example（一笔全周期 · 举例用卖 put，**换任何策略同理**）
+立案卖 put（thesis=财报前 IV 高收 credit `[本人判断]`、仓位 5%、证伪=跌破支撑、IV 分位 78% `[AI推测]`）→ 持仓中财报 IV crush 更新当前判断 → 平仓回填（收 X% credit、按计划止盈？）+ 发现规律进 02_规律 → 几笔后转 Mode C 炼成 playbook 条目。
+> 换成方向性做多、买 call、价差、对冲——四层结构 / 来源标签 / 立案字段完全一样，skill 不偏向任何策略。
 
 ---
 

@@ -45,14 +45,14 @@
 
 ### 自研（EdgeLab 权益内 · 会员 token gated）
 - **EdgeLab 市场数据 API** 🔵 —— 取恐慌指数 / 期权 / 美港股 / 13F / 拥挤度等**市场数据与指标**（客观数字，无买卖指令、无方向建议）。**唯一数据源 + 唯一对外 API，直接调，不是 MCP**：
-  1. 读会员 token：`cat ~/.elab/token`（你的 `mk_live_…` key，进星球后主理人发你）
+  1. 读 token：`cat ~/.elab/token`（`mk_live_…` key；如何获取见 EdgeLab 会员说明，不在本技术文档描述）
   2. 发现可用数据集：`curl -H "Authorization: Bearer $(cat ~/.elab/token)" https://invest.makinote.cn/api/v1/radars` → 返回数据集类型 + 各自最新日期
   3. 取数据：`curl -H "Authorization: Bearer $(cat ~/.elab/token)" "https://invest.makinote.cn/api/v1/signals?type=<数据集id>&limit=10"`（端点路径 `signals` 是历史命名，返回的是市场数据/指标）
      - 参数：`type`（数据集 id）、`date`/`since`/`until`（YYYY-MM-DD）、`limit`（1..100，默认 30）。**先调 `/radars` 拿到当前可用 type 列表再查**（别写死）
      - 12 个对外数据集 type：`fear_card`(恐慌指数) / `options_radar`(期权数据) / `trading_premarket`·`trading_midday`·`trading_close`(美股盘前/午间/收盘数据) / `hk_close`(港股收盘) / `hk_ipo`(港股打新) / `whale`(机构持仓) / `x_radar`(X 资讯) / `briefing_relay`(投资简报) / `thirteenf`(13F 异动) / `crowding`(拥挤度)
      - 返回已**合规投影**（荐股类字段已剥、方向/点评已脱敏）的中性市场数据；**Claude 拿到只做数据呈现和方法层分析，不转成"该买/卖/看这个"的方向建议**（930）
   4. **优雅降级（按状态码）**：
-     - 401（无 token/非会员/退费/过期）→ 不崩，提示"雷达数据要会员 key（进星球向主理人要 key 存到 `~/.elab/token`）"，回落公开工具（OpenBB 等）继续跑
+     - 401（无 token/无效/过期）→ 不崩，提示"该数据需 key（`mk_live_…` 存到 `~/.elab/token`，获取见 EdgeLab 会员说明）"，回落公开工具（OpenBB 等）继续跑
      - 429（限速，120 req/min/同出口 IP，多会员共享）→ 退避重试；Claude Code 无自动重试，提示用户稍后重跑
      - 503（`not_ready`，该日期数据仍在合规处理）→ 去掉 `date` 参数查最近 N 条，或换日期
      - 500（服务故障，多为限流后端抖动）→ 同 401 处理，回落公开工具，别卡死
