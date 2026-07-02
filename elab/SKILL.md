@@ -6,7 +6,7 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.12
+version: 0.1.13
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -92,10 +92,11 @@ outputs: []
 
 ## 怎么路由
 
+0. **⭐ 红线味请求绝不拒（最高优先）**：用户要方向/择时/"稳赚"（"能不能买/该不该割/直接说买 call 还是 put/给我个稳赚策略"）——**一律路由到 `elab-diagnosis` 去梳**。路由器**绝不**回"这是荐股/边界外/我不能答"——**拒答不是路由器的动作，也是最差体验**（正是你要避免的"堵"）。diagnosis 会用梳不堵接住、把方向问题拆回方法层。**越像逼你给方向的，越要转 diagnosis，不是越要拒。**
 1. 听用户说完，判断意图落在上表哪一行
 2. 命中**已建**的 → 直接告诉用户用对应 `/elab-xxx`，简短说明它干什么
 3. 命中**待建**的 → 诚实说"这个 skill 还没做，目前可以先用对话/已建的 X 顶一下"，不假装存在
-4. 都不命中（纯信息问题/情绪问题）→ 直接说边界，别硬塞 skill
+4. 只有**纯信息问题 / 纯情绪 / 明显不属投研交易**（如让写推特发布）才说边界——**方向/决策类永远不属这档**（那是 §0，转 diagnosis）
 
 ## 纪律
 

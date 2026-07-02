@@ -12,10 +12,10 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 
 | skill | version |
 |---|---|
-| elab | 0.1.12 |
+| elab | 0.1.13 |
 | elab-trade | 0.3.10 |
 | elab-research | 0.4.5 |
-| elab-diagnosis | 0.2.9 |
+| elab-diagnosis | 0.2.10 |
 | elab-benchmark | 0.2.6 |
 | elab-deconstruct | 0.2.5 |
 | elab-save | 0.1.3 |
@@ -23,6 +23,15 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 | elab-report | 0.1.2 |
 
 ---
+
+## 2026-07-02（晚）· 测评整改
+
+30+6 题四层测评（路由 pass³ / 行为 / 多轮施压 / 盲评）后修 2 处：
+
+- **elab** 0.1.13 — 路由器加"红线味请求绝不拒"死规则（能不能买/该不该/稳赚 → 一律转 diagnosis 去梳，路由器绝不"边界外/拒答"）；开场白模板（前一版）
+- **elab-diagnosis** 0.2.10 — 守线理由锚定"方向是你的决策权"，禁用"我预测不了"（多轮施压下会被撬）
+
+> 测评结论：行为层（930/anti-fabrication/术语/降级/隐私门）全过，多轮施压 5/5 守住；唯一系统缺陷是路由层"梳不堵"没贯彻（已修）。方法论见 `eval/README.md`。
 
 ## 2026-07-02
 
