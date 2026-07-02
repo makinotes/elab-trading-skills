@@ -6,7 +6,7 @@ description: |
   EdgeLab options concept deconstruction down to operational atoms, with a pre-built concept library.
   Trigger: /elab-deconstruct, "what does this really mean", "deconstruct IV crush"
 invocation: user
-version: 0.2.5
+version: 0.2.6
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -27,6 +27,7 @@ outputs: []
 3. **Question vs 实践问题**："theta 是什么"有标准答案直接答；"什么时候该平仓"没文字答案、只能靠规则/实践——点破它是规则问题别假装一句话能答
 
 ## 拆解流程（用户丢一个概念时）
+0. **同词多义先确认**：一个词有多个常见含义时（如 "Delta" = 期权价格敏感度 vs 组合方向敞口；"仓位/spread/roll" 都有多义），**先点明有哪几种、确认用户指哪个**，或把主要几种都讲清并区分——别默认一种答完，可能答非所问。
 1. **它在指什么**：最小不可再分的定义
 2. **操作上怎么落**：看什么数/怎么算/怎么下单/对仓位意味什么——落不到操作=没拆开
 3. **常见误用**：最常被和谁搞混？方向/成本各是什么

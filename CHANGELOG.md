@@ -14,16 +14,26 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 |---|---|
 | elab | 0.1.13 |
 | elab-trade | 0.3.10 |
-| elab-research | 0.4.5 |
+| elab-research | 0.4.6 |
 | elab-diagnosis | 0.2.10 |
 | elab-benchmark | 0.2.6 |
-| elab-deconstruct | 0.2.5 |
+| elab-deconstruct | 0.2.6 |
 | elab-save | 0.1.3 |
 | elab-restore | 0.1.1 |
 | elab-report | 0.1.2 |
 
 ---
 
+## 2026-07-02（深夜）· v2 长尾回归整改
+
+30 题 v2 长尾集回归（路由 pass³ + 行为 + 长尾陷阱）后修 2 处（结果私有 EdgeLab/eval/results-v2）：
+
+- **elab-research** 0.4.6 — 加"先确认标的"（ticker 回显 + 多义/别名/冷门先确认，防标的名记串，如 SPCX≠SpaceX、同代码多义）
+- **elab-deconstruct** 0.2.6 — 加"同词多义先确认"（如 Delta 多义，先确认指哪个再拆，别默认一种答完）
+
+> v2 结论：25+/30 干净过；1 真 miss（R2 私有 ticker 别名公开 skill 看不到，已加通用确认行为兜底）+ 1 soft-fail（C4 已修）+ 几个结构性（T3/S3/S5 需真实数据/私有政策才能命中）。v1 路由 fix 经 D2(3/3 转 diagnosis 不拒) 验证生效。
+
+---
 ## 2026-07-02（晚）· 测评整改
 
 30+6 题四层测评（路由 pass³ / 行为 / 多轮施压 / 盲评）后修 2 处：
