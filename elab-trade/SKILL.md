@@ -6,7 +6,7 @@ description: |
   EdgeLab "my trading" system: decision tracking + statement diagnosis + playbook distillation, in one skill.
   Trigger: /elab-trade, /决策立案, /结果回填, /交割单诊断, /沉淀playbook
 invocation: user
-version: 0.3.4
+version: 0.3.5
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -93,9 +93,15 @@ outputs: ["~/.elab/trades/ (决策四层结构)"]
 诊断已有持仓 / 复盘一批交割单。含：先确认券商（富途/长桥/IBKR，接入详见 `references/broker-ingest.md`）→ 字段归一 → **FIFO 配对算法** → 持仓诊断框架 → **交割单复盘方法论（思路/因素/结论）**。读那份分册执行。
 
 # Mode C · playbook 沉淀 → `references/playbook-mode.md`
-把 02_规律 + 复盘炼成成型可复用 playbook。含：**一条规律怎么才算数（样本/逻辑/运气vs技巧/失效条件四关）** → 条目框架（每字段怎么填）→ 沉淀流程 → 回头用闭环。读那份分册执行。
+把想法/规律/复盘炼成成型可复用 playbook。含：**`§〇 想法区`（raw 交易想法暂存 → 晋级漏斗）** → **一条规律怎么才算数（样本/逻辑/运气vs技巧/失效条件四关）** → 条目框架（每字段怎么填）→ 沉淀流程 → 回头用闭环。读那份分册执行。**"沉淀自己的交易想法"= 先落想法区，别等成型。**
 
 ---
+
+## 沉淀收口（所有 mode 结尾默认提醒一次 · 详 `_shared/capture-closing.md`）
+聊出有价值的东西别丢，按类型问用户存哪档（提醒不硬存）：
+- **想接着做的状态** → `/elab-save`
+- **交易想法（没验证）** → playbook `§〇 想法区`，标 `[想法 待验证]`
+- **成型规律/打法** → Mode C 炼成 playbook 条目
 
 ## 合规（所有 mode）
 个人决策记录 + 复盘教学素材，不构成投资建议；不输出当下买卖方向；对外（发星球）经 `elab-report` 脱敏（去账户规模/持仓绝对数，留 % 和方法）。

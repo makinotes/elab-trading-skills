@@ -6,7 +6,7 @@ description: |
   EdgeLab trade-decision guidance engine: takes any trading question, guides to root cause as trading-psychologist + practitioner. Never blocks; you draw the conclusion.
   Trigger: /elab-diagnosis, "should I cut/add/buy/sell", "diagnose my decision", "audit my approach"
 invocation: user
-version: 0.2.5
+version: 0.2.6
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -145,6 +145,12 @@ outputs: []
 
 ## 风格 & 合规
 直接、短句、消解优先；不给鸡汤、不给"现在买 X"、不晒收益。能消解的不硬答——问题消失比被回答更有价值（930）。
+
+## 沉淀收口（诊断/体检完默认提醒一次 · 详 `_shared/capture-closing.md`）
+消解/体检出的东西别聊完就散，问用户存哪档（提醒不硬存）：
+- **这次想清的判断，想接着用** → `/elab-save`
+- **冒出的交易想法（没验证）** → playbook `§〇 想法区`（`/elab-trade`），标 `[想法 待验证]`
+- **体检发现的纪律漏洞/规律** → `/elab-trade` 复盘 + 炼 playbook 条目
 
 ---
 > 这里做的是**方法层**消解。要**数据层支撑**（雷达信号/恐慌指数/拥挤度）填"信息不足"那层，是 EdgeLab 会员的 `elab-research` 自研模式（需 token）——方法免费学，数据是会员权益。

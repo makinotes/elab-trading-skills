@@ -6,7 +6,7 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.7
+version: 0.1.8
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -87,3 +87,4 @@ outputs: []
 - 只路由，不展开分析（展开是子 skill 的事）
 - 触发词放宽：`/elab`、「帮我看看」「我有个问题」都进这里
 - 不编造不存在的 skill 能力；待建的就说待建
+- **沉淀收口（跨 skill 默认）**：任何 elab 对话聊出有价值的产出（判断/规律/交易想法）→ **结尾默认提醒用户沉淀一次**，按类型路由（状态→`elab-save`／交易想法未验证→ playbook `§〇 想法区`／成型规律→ playbook 条目）。统一规范见 `_shared/capture-closing.md`。提醒不硬存。

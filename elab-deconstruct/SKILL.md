@@ -6,7 +6,7 @@ description: |
   EdgeLab options concept deconstruction down to operational atoms, with a pre-built concept library.
   Trigger: /elab-deconstruct, "what does this really mean", "deconstruct IV crush"
 invocation: user
-version: 0.2.3
+version: 0.2.4
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -56,6 +56,11 @@ outputs: []
 
 ## 风格 & 合规
 直接、拆到能操作为止；不放过"说不清"处；纯概念教学，不含具体标的、不给买卖方向（930）。
+
+## 沉淀收口（拆完默认提醒一次 · 详 `_shared/capture-closing.md`）
+拆懂的概念/易混对照别拆完就忘，问用户（提醒不硬存）：
+- **拆出的概念笔记/易混对照** → `/elab-trade` 的 `02_规律/`（当认知资产存着，下次直接查）
+- **拆的过程冒出的交易想法（如"IV>75 卖 put 收租"）** → playbook `§〇 想法区`，标 `[想法 待验证]`
 
 ---
 > 概念你免费拆透。想把拆懂的策略**用真实雷达/期权数据验证**，是 EdgeLab 会员的 `elab-research` 自研模式（需 token）——方法免费学，数据是会员权益。

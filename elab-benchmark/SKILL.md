@@ -6,7 +6,7 @@ description: |
   EdgeLab benchmark analysis: five filters to find a copyable trading approach, spotting fake P&L.
   Trigger: /elab-benchmark, "who should I learn from", "can I copy this strategy"
 invocation: user
-version: 0.2.3
+version: 0.2.4
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -76,6 +76,11 @@ outputs: ["可复制要点清单 (→ elab-trade playbook)"]
 
 ## 合规（930）
 帮判断**方法可复制性**，不输出"现在买 X"；不喊单不跟单；对标的是策略逻辑不是买卖时点。
+
+## 沉淀收口（对标完默认提醒一次 · 详 `_shared/capture-closing.md`）
+对标出的"可复制要点清单"别丢——它天生就是 playbook 素材，问用户（提醒不硬存）：
+- **想先记下这套打法、还没验证能不能复制** → playbook `§〇 想法区`（`/elab-trade`），标 `[想法 待验证]`
+- **已确认可复制、要照着做** → `/elab-trade` 炼成正式 playbook 条目（要点清单已对齐条目框架）
 
 ---
 > 对标判断免费做。想用**真实雷达/历史数据**验证某套打法在当前市况还成不成立，是 EdgeLab 会员的 `elab-research` 自研模式（需 token）——方法免费学，数据是会员权益。
