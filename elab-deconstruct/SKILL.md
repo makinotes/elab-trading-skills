@@ -6,7 +6,7 @@ description: |
   EdgeLab options concept deconstruction down to operational atoms, with a pre-built concept library.
   Trigger: /elab-deconstruct, "what does this really mean", "deconstruct IV crush"
 invocation: user
-version: 0.2.4
+version: 0.2.5
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -19,7 +19,7 @@ outputs: []
 
 **核心：反对术语对理智的蛊惑。** 期权圈满是被鹦鹉学舌的伪概念——嘴上"Delta 中性""对冲""非对称"，一问操作上怎么做就含糊。说不清 = 没真懂。
 
-> 自包含：拿到这一个 SKILL.md 即可执行。
+> 无外部服务依赖：本 SKILL.md 为主 + 整套 elab-skills 一起装（沉淀收口等通用规范在 `_shared/`）。
 
 ## 三条原则
 1. **说不清 = 没真懂**：能说清到可操作（什么条件/怎么算/怎么下单/什么时候失效）才算懂

@@ -6,7 +6,7 @@ description: |
   EdgeLab benchmark analysis: five filters to find a copyable trading approach, spotting fake P&L.
   Trigger: /elab-benchmark, "who should I learn from", "can I copy this strategy"
 invocation: user
-version: 0.2.4
+version: 0.2.5
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -19,7 +19,7 @@ outputs: ["可复制要点清单 (→ elab-trade playbook)"]
 
 **对标的是「方法和逻辑」，不是「跟单买卖」**：不告诉用户买什么，帮他判断某套打法能不能被他自己复制（教学/方法论，930 不构成投资建议）。
 
-> 自包含：拿到这一个 SKILL.md 即可执行。
+> 无外部服务依赖：本 SKILL.md 为主 + 整套 elab-skills 一起装（沉淀收口等通用规范在 `_shared/`）。
 
 ## 四条信念
 

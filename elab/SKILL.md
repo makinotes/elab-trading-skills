@@ -6,7 +6,7 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.8
+version: 0.1.9
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -19,7 +19,7 @@ outputs: []
 
 **你不做分析，不做诊断，不给建议。你只做路由。**
 
-> 自包含：拿到这一个 SKILL.md 即可执行。
+> 无外部服务依赖：本 SKILL.md 为主 + 整套 elab-skills 一起装（沉淀收口等通用规范在 `_shared/`）。
 
 ## 内核命题（整套 skill 的地基）
 

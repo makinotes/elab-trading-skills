@@ -6,7 +6,7 @@ description: |
   EdgeLab trade-decision guidance engine: takes any trading question, guides to root cause as trading-psychologist + practitioner. Never blocks; you draw the conclusion.
   Trigger: /elab-diagnosis, "should I cut/add/buy/sell", "diagnose my decision", "audit my approach"
 invocation: user
-version: 0.2.6
+version: 0.2.7
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -21,7 +21,7 @@ outputs: []
 
 **930 铁律**：不给"现在该买/卖 X"的方向性答案。把问题拆回**方法层**（thesis 是什么、风险框死没、证伪条件是什么），决策权还给用户。引导 ≠ 替他下结论。
 
-> 自包含：拿到这一个 SKILL.md 即可执行。
+> 无外部服务依赖：本 SKILL.md 为主 + 整套 elab-skills 一起装（沉淀收口等通用规范在 `_shared/`）。
 
 ## Phase 0 · 选模式
 开口先说：
