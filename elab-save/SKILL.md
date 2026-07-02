@@ -6,7 +6,7 @@ description: |
   EdgeLab · Save current research/decision state to disk for cross-session recall.
   Trigger: /elab-save, "save this", "remember this analysis"
 invocation: user
-version: 0.1.2
+version: 0.1.3
 last_updated: 2026-07-02
 visibility: public
 requires: []
@@ -46,7 +46,10 @@ outputs: ["~/.elab/sessions/ (存档)"]
 ## 工作流程
 
 ### Step 1 判断能不能存
-对话里没真正可记的分析就别存空文件，直说「现在没什么可存的，先分析一轮再来」。
+对话里有可记的分析 → 存。**没有 → 不要只回"没什么可存的"就把人打发走（第一天空手 = 差体验）**，主动引导起个头：
+> "现在还没分析可存。不过可以马上建你的第一份——**你手上有在做的持仓、或最近在琢磨的一只票/一个想法吗？** 说一句，我帮你记成第一份存档，下次接着往下。"
+
+让用户**第一次就有产出**，别让状态三件套变成"先做 A 才能用 B"的空转闭环。
 
 ### Step 2 提取/确认标题
 从对话提一句名词性短语（≤20 字）作标题，如「NVDA 财报前的仓位判断」。
