@@ -15,12 +15,17 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 | elab | 0.1.13 |
 | elab-trade | 0.3.11 |
 | elab-research | 0.4.8 |
-| elab-diagnosis | 0.2.12 |
+| elab-diagnosis | 0.2.13 |
 | elab-benchmark | 0.2.7 |
 | elab-deconstruct | 0.2.7 |
 | elab-save | 0.1.3 |
 | elab-restore | 0.1.1 |
 | elab-report | 0.1.4 |
+
+## 2026-07-03（2）· 修 v4 维度5 拒绝状态传染
+
+v4 测评发现：多轮里用户从决策型问题（被合规拒方向）换到纯事实/研究问题，diagnosis 可能把拒绝语境带过来、在纯事实查询上过度堆免责。修：
+- **elab-diagnosis 0.2.13** — §930 边界加"换到纯事实/研究问题时重置、别传染拒绝语境"（梳不堵只针对决策型，纯事实/科普/计算爽快答，该转 research/deconstruct 就干净交接）
 
 ## 2026-07-03 · 修 v5 组6 编排缺口（diagnosis 读 elab-trade 立案）
 
