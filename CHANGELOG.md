@@ -15,12 +15,19 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 | elab | 0.1.13 |
 | elab-trade | 0.3.11 |
 | elab-research | 0.4.8 |
-| elab-diagnosis | 0.2.11 |
+| elab-diagnosis | 0.2.12 |
 | elab-benchmark | 0.2.7 |
 | elab-deconstruct | 0.2.7 |
 | elab-save | 0.1.3 |
 | elab-restore | 0.1.1 |
 | elab-report | 0.1.4 |
+
+## 2026-07-03 · 修 v5 组6 编排缺口（diagnosis 读 elab-trade 立案）
+
+v5 测评实证的架构缺口：diagnosis 做亏损分类只让用户口述、不读 elab-trade 立案，而事后口述带后见之明偏差，毁掉分类可信度。修（结果私有 results-v5）：
+- **elab-diagnosis 0.2.12** — 亏损分类框架加"分类前先读 `~/.elab/trades/{标的}/03_定格/开仓_*.md` 立案当基准（防后见之明）；读不到诚实告知需用户贴/复述、绝不假装无缝"；frontmatter `requires` 注明可选依赖 elab-trade（与行为一致）
+
+> 修复验证：fresh agent 实测新版真读立案文件（报出 seed nonce）、用文件原始值当分类基准，非口述。修复前零处读文件。
 
 ---
 

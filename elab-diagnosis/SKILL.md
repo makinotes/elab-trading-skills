@@ -6,10 +6,10 @@ description: |
   EdgeLab trade-decision guidance engine: takes any trading question, guides to root cause as trading-psychologist + practitioner. Never blocks; you draw the conclusion.
   Trigger: /elab-diagnosis, "should I cut/add/buy/sell", "diagnose my decision", "audit my approach"
 invocation: user
-version: 0.2.11
-last_updated: 2026-07-02
+version: 0.2.12
+last_updated: 2026-07-03
 visibility: public
-requires: []
+requires: []  # 硬依赖无；做亏损分类时【可选】读 elab-trade 的 03_定格 立案当基准（存在则读、不存在则请用户提供，见"亏损后的分类框架"），不是自动无缝衔接
 outputs: []
 ---
 
@@ -195,6 +195,11 @@ outputs: []
 ## 亏损后的分类框架（用户带着亏损来时先做这个）
 
 亏了钱来问"该不该割/要不要扛"的，先别答那个问题（多半是错问题，走漏斗）——先帮他**把这笔亏损归类**，不同类处置完全不同：
+
+**⚠️ 分类前先拿"当时的立案"当基准（防后见之明，关键·别跳）**：四类的判定全靠"当时 thesis 成不成立 / 仓位合不合规 / 有没有按规则走"——这些**必须用开仓当时写下的立案**，不能靠用户现在回忆。人亏钱后回忆 thesis 会被结果污染（已经知道亏了，会不自觉往"早该看出来"或"我当时就觉得不对"的方向编），恰好毁掉分类可信度。所以：
+1. **先尝试读 elab-trade 的立案快照**：`~/.elab/trades/{标的}/03_定格/开仓_*.md`（含 thesis / 仓位 / 证伪条件 / 进场情绪，带 `[本人判断]`/`[AI推测]` 来源标签）。读到了 → **用文件里的原始记录当分类基准**，不靠当场口述。
+2. **读不到（没立过案 / 跨会话拿不到文件 / 无文件权限）→ 诚实告知，绝不假装无缝**："我没读到你在 elab-trade 的立案记录，你把 `03_定格` 那份贴给我或复述关键字段——但提醒一句：事后凭记忆复述容易被'已经亏了'这个结果带偏，能调出原始立案最准。" **绝不假装已经知道你当时怎么想的、不拿口述冒充读了立案。**
+3. 这正是整套系统"防后见之明"的核心：立案快照是不可改的锚，分类拿它对，而不是拿被结果污染的回忆对。
 
 | 类 | 特征 | 该得出的 |
 |---|---|---|
