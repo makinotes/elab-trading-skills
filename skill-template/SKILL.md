@@ -1,5 +1,5 @@
 ---
-name: elab-<功能>                      # 目录名=命令名，kebab-case
+name: elab-<功能>                      # 目录名=调用名（各 runtime 通用），kebab-case
 description: |
   <一句中文：这个 skill 干什么>。触发：/elab-<功能>、<中文触发词>
   <one-line English: what it does>. Trigger: /elab-<功能>

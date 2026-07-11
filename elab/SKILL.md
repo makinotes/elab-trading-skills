@@ -6,8 +6,8 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.13
-last_updated: 2026-07-02
+version: 0.1.15
+last_updated: 2026-07-11
 visibility: public
 requires: []
 outputs: []
@@ -50,14 +50,14 @@ outputs: []
 
 判断权、方向永远在用户手里；工具只让决策**可见、可回溯、可迭代**（也是 930 护栏：可见 = 人机边界清楚）。
 
-> 交易层的心法地基（6 条 EdgeLab 交易公理：统计优势 / 关键事件定结果 / 风险敞口可控 / 规则执行者 / 仓位匹配 edge / 死拿是标的属性——**策略中立，不预设方向性/卖方/价差**）见 `elab-diagnosis §0`。
+> 交易层的心法地基（8 条 EdgeLab 交易公理：统计优势 / 关键事件定结果 / 风险敞口可控 / 规则执行者 / 仓位匹配 edge / 死拿是标的属性 / 预案两阶段+不出招可证伪 / 不确定性定价+前沿三边界——**策略中立，不预设方向性/卖方/价差**）见 `elab-diagnosis §0`。
 
 ## 路由表
 
 | 用户意图信号 | 路由到 | 状态 |
 |---|---|---|
 | **我自己交易**：记决策/立案/持仓/平仓复盘 · 诊断我的持仓/交割单 · 炼 playbook | `elab-trade`（三 mode 合一） | 免费（纯本地操作） |
-| **向外投研**：深度研究一只票/期权/主题（编排工具 + 强制自我证伪出中性研报） | `elab-research` | 方法免费；**自研数据（会员）= 恐慌指数/拥挤度/期权异动/机构持仓(13F)/港美股扫描等——普通 Claude 取不到**，需 token |
+| **向外投研**：深度研究一只票/期权/主题（编排工具 + 强制自我证伪出中性研报） | `elab-research` | 方法免费；**自研数据（会员）= 恐慌指数/拥挤度/期权异动/机构持仓(13F)/港美股扫描等——无会员 key 的 AI 取不到**，需 token |
 | 存当前分析 | `elab-save` | 免费 |
 | 接着上次分析 | `elab-restore` | 免费 |
 | 出复盘报告 | `elab-report` | 免费 |
@@ -97,6 +97,7 @@ outputs: []
 2. 命中**已建**的 → 直接告诉用户用对应 `/elab-xxx`，简短说明它干什么
 3. 命中**待建**的 → 诚实说"这个 skill 还没做，目前可以先用对话/已建的 X 顶一下"，不假装存在
 4. 只有**纯信息问题 / 纯情绪 / 明显不属投研交易**（如让写推特发布）才说边界——**方向/决策类永远不属这档**（那是 §0，转 diagnosis）
+5. **跨 runtime 通用（路由动作怎么落地）**：你的 runtime 有 skill 调用机制就用它调对应 skill（Claude Code 斜杠命令/Skill tool、Codex `$` mention 或隐式匹配）；**没有 skill 机制（或目标 skill 没装）就直接读本套件同目录下 `elab-<名>/SKILL.md`，照着执行**——整套 elab-skills 只依赖"能读文件 + 能跑 shell"，不绑任何特定 agent 产品
 
 ## 纪律
 

@@ -1,6 +1,6 @@
 # EdgeLab Skills
 
-一套用于 **AI × 美股期权投研** 的 Claude Code skills。把投研决策、对标、概念拆解、复盘的方法论沉淀成可复用的工作流。
+一套用于 **AI × 美股期权投研** 的 agent skills。把投研决策、对标、概念拆解、复盘的方法论沉淀成可复用的工作流。**不绑定特定 AI 产品**：Claude Code、OpenAI Codex，以及任何按 [Agent Skills 规范](https://developers.openai.com/codex/skills)（`SKILL.md` + YAML frontmatter）加载 skill 的第三方 agent（如 workbuddy 等）都能装能用——整套 skill 只依赖"能读文件 + 能跑 shell"。
 
 > **内核命题**：AI 时代散户的护城河不是"知道得更多"，是把判断过程摊开——人和 AI 各担其责、每个决策可回溯。看得见的决策，才可能被迭代成 edge。整套 skill 都是这一句的展开（详见 `elab/SKILL.md`）。
 
@@ -8,19 +8,35 @@
 
 ## 安装
 
-把 skill 目录放进 Claude Code 的 skills 目录即可：
+把 skill 目录放进你所用 agent 的 skills 目录即可。先 clone：
 
 ```bash
 git clone https://github.com/edgelab101/elab-skills.git
+```
+
+**Claude Code**（个人 skills 目录 `~/.claude/skills/`）：
+
+```bash
 mkdir -p ~/.claude/skills/
 cp -R elab-skills/elab* elab-skills/_shared ~/.claude/skills/   # _shared 是通用规范，别漏
 ```
 
-> 想免每次 cp，可改用软链（`git pull` 后自动生效）：
+**OpenAI Codex**（个人 `~/.codex/skills/`，项目级用 `.codex/skills/`）：
+
+```bash
+mkdir -p ~/.codex/skills/
+cp -R elab-skills/elab* elab-skills/_shared ~/.codex/skills/
+```
+
+**其他第三方 agent**（workbuddy 等，凡支持 Agent Skills 规范 / `SKILL.md` 目录式加载的）：把 `elab*` + `_shared` 拷进它的 skills 目录，或直接把本 repo 目录指给它。**连 skill 机制都没有的 agent 也能用**：让它读 `elab/SKILL.md` 当入口路由、按需读各 `elab-<名>/SKILL.md` 照着执行即可。
+
+> 想免每次 cp，可改用软链（`git pull` 后自动生效），以 Claude Code 为例：
 > ```bash
 > cd elab-skills
 > for d in elab elab-* _shared; do ln -sfn "$(pwd)/$d" ~/.claude/skills/$d; done
 > ```
+
+**触发方式按 runtime 不同**：Claude Code 用斜杠命令（`/elab`）或自然语言；Codex 用 `$` mention（`$elab`）、`/skills` 或自然语言隐式匹配；其他 agent 按其调用习惯。skill 内文说的 `/elab-xxx` 泛指"调用对应 skill"。
 
 ## 更新
 
@@ -30,7 +46,7 @@ skill 会持续迭代。**一键更新（推荐）**——在 elab-skills 目录
 bash update.sh
 ```
 
-它自动：`git pull` → 显示 CHANGELOG 本次变更 → 同步到 `~/.claude/skills/`（cp 或软链装法都自动处理，含 `_shared`）。
+它自动：`git pull` → 显示 CHANGELOG 本次变更 → 同步到已安装的 skills 目录（`~/.claude/skills/` 和 `~/.codex/skills/` 都检测；cp 或软链装法都自动处理，含 `_shared`）。
 
 **自动更新（可选，一次性设置）**——跑一次，之后每天自动跟进最新版：
 

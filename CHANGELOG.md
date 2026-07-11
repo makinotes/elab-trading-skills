@@ -12,15 +12,29 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 
 | skill | version |
 |---|---|
-| elab | 0.1.13 |
-| elab-trade | 0.3.11 |
-| elab-research | 0.4.8 |
-| elab-diagnosis | 0.2.13 |
+| elab | 0.1.15 |
+| elab-trade | 0.3.12 |
+| elab-research | 0.4.9 |
+| elab-diagnosis | 0.2.14 |
 | elab-benchmark | 0.2.7 |
 | elab-deconstruct | 0.2.7 |
 | elab-save | 0.1.3 |
 | elab-restore | 0.1.1 |
 | elab-report | 0.1.4 |
+
+## 2026-07-11 · 跨 runtime 可移植（Claude Code / Codex / 第三方 Agent Skills 加载器）
+
+整套 skill 去 Claude 绑定，任何"能读文件 + 能跑 shell"的 agent runtime 都能装能用（状态层 `~/.elab/` + `date`/`mkdir`/`curl` 本就是 shell 级，无需改）：
+- **elab-research 0.4.9** — ① `[Claude推断]` 标签全部统一为 `[AI推测]`（对齐 `_shared/schema.md` 来源标签 SSOT，修掉平行标签漂移）② 辩论模式去 "Task tool" 硬编码：改为"你 runtime 的子 agent 机制"+ 判断标准（能否起拿不到当前上下文的新 context 独立跑），无子 agent 机制降级 §三 单轮证伪 ③ "Claude 当大脑/判断由 Claude 做"等措辞改模型中立 + 开头声明不绑定特定 agent 产品；references/tool-registry.md 同步（"Claude Code 无自动重试"→通用表述）
+- **elab-trade 0.3.12** — handoff 段 `[Claude推断]` → `[AI推测]`（同标签统一）
+- **elab 0.1.15** — 路由 §怎么路由 加第 5 条跨 runtime 通用回退：有 skill 机制就调 skill，没有就直接读同目录 `elab-<名>/SKILL.md` 照着执行；路由表"普通 Claude 取不到"→"无会员 key 的 AI 取不到"
+- **README / update.sh / CONTRIBUTING / skill-template**（不占 skill 版本号）— 安装文档补 Codex（`~/.codex/skills/`）与第三方 loader 路径 + 各 runtime 触发方式说明；update.sh 自动检测 `~/.claude` 和 `~/.codex` 双目标同步；"目录名=斜杠命令名"改"目录名=调用名"
+
+## 2026-07-06 · 交易公理 6 条 → 8 条（主理人交易哲学沉淀）
+
+主理人 2026 H1 复盘后口述交易哲学，沉淀进私有 playbook.yaml v4.7（§philosophy 新增 uncertainty_pricing_philosophy / pre_plan_two_stage_decision / pareto_frontier_boundary_conditions 三小节 + quotes ×4），脱敏版同步焊进公理：
+- **elab-diagnosis 0.2.14** — §0 公理 6 条 → 8 条：新增 公理7 预案两阶段+不出招可证伪（内化阈值 / 未触发条件绑定 / "条件满足了还不动才是错误"）、公理8 不确定性定价+胜率赔率前沿三边界（完整变量集含仓位与波动率环境 / 前沿随波动率环境移动 / 期望值最大≠最优，目标函数=风险调整后收益 + 三个递进的放弃）。脱敏：无私有数字，策略中立不预设方向性/卖方/价差
+- **elab 0.1.14** — 心法地基引述行同步 6 条 → 8 条
 
 ## 2026-07-03（2）· 修 v4 维度5 拒绝状态传染
 

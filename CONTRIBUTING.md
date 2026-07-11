@@ -3,7 +3,7 @@
 > 给扩展者 / fork 者。这套 skill 的可复制骨架 = 纯路由入口 + 状态三件套 + 来源标签 + 不可改快照 + 工具登记表 + 合规护栏内嵌。照下面做，新 skill 能无缝接进来。
 
 ## 1. 命名 + 放哪
-- 目录名 = 斜杠命令名：`elab-<功能>`（kebab-case，功能性英文）。
+- 目录名 = 调用名：`elab-<功能>`（kebab-case，功能性英文）。Claude Code 里就是斜杠命令名，Codex 里是 `$` mention 名，通用 Agent Skills 规范里是 skill name。
 - 放 repo 根：`elab-<功能>/SKILL.md`。多文件用 `elab-<功能>/references/*.md`。
 - fork 到别的领域：把前缀 `elab-` 换成你的品牌前缀，`~/.elab/` 换成 `~/.<brand>/`，其余骨架不动。
 
