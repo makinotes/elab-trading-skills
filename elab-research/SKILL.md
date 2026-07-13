@@ -6,8 +6,8 @@ description: |
   EdgeLab research orchestrator: pluggable tools + self-refutation + optional real multi-agent debate (bull/bear + independent judge).
   Trigger: /elab-research, "deep-research this ticker", "run a bull/bear debate"
 invocation: user
-version: 0.4.9
-last_updated: 2026-07-11
+version: 0.4.10
+last_updated: 2026-07-13
 visibility: public
 requires: []
 outputs: ["中性研报 (可存进 elab-trade 04_待解)"]
@@ -89,7 +89,7 @@ AI 当编排"大脑"，把研究对象拆成子问题、分派给工具取数算
 - **不替用户拍方向**——把"信哪边"留给用户
 
 **930**：辩论的是**逻辑/证据/风险**，产出是**分歧 + 置信度**，不是"买不买"。子 agent prompt 里写死"不给买卖方向"。
-**降级**：runtime 没有子 agent 机制 / 用户不想费 token → 回退 §三 单轮自我证伪（默认够用）。**判断标准**：能不能"起一个拿不到当前对话上下文的新 context 独立跑任务"——能才叫真辩论；不能就别硬演，演出来的是伪分歧。
+**降级**：runtime 没有子 agent 机制 / 用户不想费 token → 回退 §三 单轮自我证伪（默认够用）。**降级要向用户说一句**（"当前 runtime 起不了独立子 agent，辩论改走单轮自我证伪"），别静默替换——用户点名要辩论、拿到的却是单轮证伪，不说明会误以为真吵过。**判断标准**：能不能"起一个拿不到当前对话上下文的新 context 独立跑任务"——能才叫真辩论；不能就别硬演，演出来的是伪分歧。
 
 **⚠️ 首次使用提醒（跑辩论模式前先说一句，别默默开跑）**：
 - **费 token**：3 个独立子 agent 各自取数+推理，比普通研究贵不少——先问"要不要上辩论（费 token），还是普通研究够了"。
@@ -100,7 +100,7 @@ AI 当编排"大脑"，把研究对象拆成子问题、分派给工具取数算
 ## 四、怎么扩展（工具/action 加入 + 更新）
 见 `references/tool-registry.md`：登记表（每个工具怎么调）+ 怎么加一个新工具（玩具筛 4 关 + 登记模板）+ 怎么保持更新（定期派调研 agent 扫 → 筛 → 登记）。**这就是"网上出新东西就能融进来"的机制。**
 
-## 输出骨架：研报卡
+## 五、输出骨架：研报卡
 
 研究完成后，按此固定结构收成一张「研报卡」（这是交付物，不是聊天记录）：
 

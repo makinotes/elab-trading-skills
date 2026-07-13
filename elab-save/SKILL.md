@@ -6,8 +6,8 @@ description: |
   EdgeLab · Save current research/decision state to disk for cross-session recall.
   Trigger: /elab-save, "save this", "remember this analysis"
 invocation: user
-version: 0.1.3
-last_updated: 2026-07-02
+version: 0.1.4
+last_updated: 2026-07-13
 visibility: public
 requires: []
 outputs: ["~/.elab/sessions/ (存档)"]
@@ -41,7 +41,7 @@ outputs: ["~/.elab/sessions/ (存档)"]
 
 ## 项目隔离（slug）
 
-每份存档属于一个**项目**。默认项目名 = `basename $(pwd)`，非 `[a-z0-9-]` 字符替换成 `-`；家目录/无明确项目时默认 `default`。显式指定用 `--slug <名>`。对话里只说「项目」。
+每份存档属于一个**项目**。默认项目名 = `basename $(pwd)`，非 `[a-z0-9-]` 字符替换成 `-`；家目录/无明确项目时默认 `default`。显式指定用 `--slug <名>`（同样做规范化：转小写、非 `[a-z0-9-]` 替换成 `-`）。对话里只说「项目」。
 
 ## 工作流程
 
@@ -57,6 +57,8 @@ outputs: ["~/.elab/sessions/ (存档)"]
 ### Step 3 写存档文件
 
 路径：`~/.elab/sessions/<slug>/<时间戳>-<标题slug>.md`（时间戳用 `date +%Y%m%d-%H%M%S` 取，禁猜）。
+`<标题slug>`：标题里的空格和 `/` 替换成 `-`，**中文保留**（`[a-z0-9-]` 规则只管项目 slug，套到中文标题上会把整个标题吞成连字符）。
+**每次存档都新建文件**（时间戳保证不重名），**绝不覆盖已有快照**——不可改快照原则（schema §四）在 save 侧的约束。
 **写文件前必须先 `mkdir -p ~/.elab/sessions/<slug>/`**（目录不存在直接写会失败）。
 
 frontmatter + 正文结构：
@@ -85,7 +87,7 @@ next_skill: <建议下一步，可空>
 - …
 ```
 
-**来源标签强制**：每条判断标 `[本人判断]` / `[AI推测]` / `[结果回填 YYYY-MM-DD]`，区分 AI 分析与本人判断（投研必需 + 930 合规护栏，见 EdgeLab skill 规范 §8）。
+**来源标签强制**：每条判断标 `[本人判断]` / `[AI推测]` / `[结果回填 YYYY-MM-DD]`，区分 AI 分析与本人判断（投研必需 + 930 合规护栏，来源标签 SSOT 见 `_shared/schema.md §三`）。
 
 ### Step 4 确认
 写完告诉用户：存到了哪个项目、标题、几条判断。

@@ -15,7 +15,7 @@ LINE="0 ${HOUR} * * * cd '$REPO' && bash update.sh >> '$REPO/.update.log' 2>&1"
 # 去重旧行后写入
 ( crontab -l 2>/dev/null | grep -v "elab-skills.*update.sh" || true; echo "$LINE" ) | crontab -
 
-echo "✅ 已设置：每天 ${HOUR}:00 自动 git pull + 同步到 ~/.claude/skills/"
+echo "✅ 已设置：每天 ${HOUR}:00 自动 git pull + 同步到 ~/.claude/skills/ 和 ~/.codex/skills/（哪个存在就同步哪个）"
 echo "   日志：$REPO/.update.log"
 echo "   取消：crontab -e 删掉含 update.sh 那行"
 echo

@@ -12,15 +12,28 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 
 | skill | version |
 |---|---|
-| elab | 0.1.15 |
-| elab-trade | 0.3.12 |
-| elab-research | 0.4.9 |
+| elab | 0.1.16 |
+| elab-trade | 0.3.13 |
+| elab-research | 0.4.10 |
 | elab-diagnosis | 0.2.14 |
 | elab-benchmark | 0.2.7 |
 | elab-deconstruct | 0.2.7 |
-| elab-save | 0.1.3 |
-| elab-restore | 0.1.1 |
-| elab-report | 0.1.4 |
+| elab-save | 0.1.4 |
+| elab-restore | 0.1.2 |
+| elab-report | 0.1.5 |
+
+## 2026-07-13 · v6 测评整改（状态层 P0 + 一致性清账）
+
+v6 四路测评（公理7/8 回归 / 跨runtime降级 / 状态层端到端首测 / 全 repo 静态一致性）。公理7/8 四场景全 PASS 无整改；其余发现 1 P0 + 12 P1 + 8 P2 全修（结果私有 eval/results-v6）：
+
+- **elab-restore 0.1.2** — 🔴 P0：找存档只认时间戳开头文件（`[0-9]*.md`）、**排除 `report-*.md`**（字典序 `r`>数字，出过报告后"最新"永远是报告文件，实测复现）；呈现/接续补 `next_skill` 字段（原为 save 写了没人读的孤儿字段）；补 status resolved 收口引导 + 合规段（原 9 skill 唯一缺失）
+- **elab-report 0.1.5** — 🔴 P0：Step 1 读存档排除 `report-*.md`（否则二次出报告把旧报告当快照输入套娃合并）；`<date>` 指定 `date +%Y%m%d`；outputs frontmatter 补具体路径；worked example 三份示例存档加"⚠️ 虚构示例"声明行
+- **elab-save 0.1.4** — 补 `<标题slug>` 规则（中文保留，只替换空格和 `/`；防 `[a-z0-9-]` 把中文标题吞成连字符）；明示"每次存档新建文件绝不覆盖"；显式 `--slug` 同样规范化；修死引用（"EdgeLab skill 规范 §8"不存在 → `_shared/schema.md §三`）
+- **_shared/schema.md** — §一 注册 `report-<date>.md` 路径（标明"是产物不是存档"）+ 标题slug 规则；§二 补 status 生命周期（以最新快照为准，resolved 用新快照收口不回改）；§三 补 elab-trade 扩展标签小节（[想法 待验证]/[证伪]/[我的数据]/[推断]/[样本不足]，并规定 [AI暂定模式] 必须带日期）
+- **elab-trade 0.3.13** — references/diagnosis-mode.md §5.3 "6 公理"→"8 公理"（07-06 扩容漏改）+ 复盘归因补公理7（触发了没执行的笔单独挑）/公理8（波动率环境匹配）两维度；来源标签段改 schema §三 指针（原逐字复述违反 CONTRIBUTING §3）；初始化 mkdir 去花括号展开（非 POSIX，严格 sh 建出字面大括号目录）；立案 `<date>` 指定 `date +%Y-%m-%d`；playbook-mode.md `[AI暂定模式 待更多样本]` → 带日期格式
+- **elab-research 0.4.10** — 辩论模式降级须向用户说明（用户点名要辩论、静默给单轮证伪会误以为真吵过）；补缺失的章节号 §五（输出骨架，原四跳六）
+- **elab 0.1.16** — 跨 runtime 回退"同目录"→"套件根目录（各 elab-* 同级安装的父目录）"+ 声明同一父目录前提
+- **update.sh / install-autoupdate.sh / skill-template**（不占版本号）— update.sh "本次变更"改真增量（git log OLD_HEAD..HEAD，原为固定前 42 行）；install-autoupdate.sh 成功消息补 ~/.codex；模板 description 补 `$elab-<功能>`（Codex）触发示例
 
 ## 2026-07-11 · 跨 runtime 可移植（Claude Code / Codex / 第三方 Agent Skills 加载器）
 

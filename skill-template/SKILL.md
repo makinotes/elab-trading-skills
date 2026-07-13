@@ -1,8 +1,8 @@
 ---
 name: elab-<功能>                      # 目录名=调用名（各 runtime 通用），kebab-case
 description: |
-  <一句中文：这个 skill 干什么>。触发：/elab-<功能>、<中文触发词>
-  <one-line English: what it does>. Trigger: /elab-<功能>
+  <一句中文：这个 skill 干什么>。触发：/elab-<功能>（Claude Code）、$elab-<功能>（Codex）、<中文触发词>
+  <one-line English: what it does>. Trigger: /elab-<功能> (Claude Code), $elab-<功能> (Codex)
 invocation: user
 version: 0.1.0
 last_updated: YYYY-MM-DD                # 用 `date +%Y-%m-%d`，禁猜

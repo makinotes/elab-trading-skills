@@ -6,8 +6,8 @@ description: |
   EdgeLab · Restore the most recent research/decision snapshot saved by elab-save.
   Trigger: /elab-restore, "continue from last time", "where did we leave off"
 invocation: user
-version: 0.1.1
-last_updated: 2026-07-02
+version: 0.1.2
+last_updated: 2026-07-13
 visibility: public
 requires: ["~/.elab/sessions/ (elab-save 的存档)"]
 outputs: []
@@ -45,9 +45,10 @@ outputs: []
 `~/.elab/sessions/<slug>/`。目录不存在或为空 → 告诉用户「这个项目还没有存档，先用 `/elab-save` 存一份」。
 
 ### Step 2 找存档
-- 无参数：按文件名时间戳取最新一份
+**只认时间戳开头的存档文件**（`<YYYYMMDD-HHMMSS>-*.md`，即文件名匹配 `[0-9]*.md`）；**`report-*.md` 是 elab-report 的产物不是存档，一律排除**——不排除的话字典序里 `r` 排在数字后面，出过一次报告后"最新"永远是报告文件。
+- 无参数：按文件名时间戳排序取最新一份（如 `ls ~/.elab/sessions/<slug>/[0-9]*.md | sort | tail -1`）
 - `<序号>`：按 list 顺序（新→旧）取第 N 份
-- `list`：列出全部（序号 / 标题 / created / status）
+- `list`：列出全部存档（序号 / 标题 / created / status，不含 report-*.md）
 
 ### Step 3 呈现状态
 读出存档，结构化复述给用户：
@@ -57,13 +58,17 @@ outputs: []
 - 关键判断：…（保留 [本人判断]/[AI推测] 标签，别把 AI 推测说成既定事实）
 - 已排除：…
 - 待回填假设：…（提醒：哪些等数据/事件验证的，现在能回填吗）
-- 下一步：…
+- 下一步：…（存档 frontmatter 带 next_skill 时一并呈现："当时建议下一步走 <next_skill>"）
 ```
 
 ### Step 4 接续
-问用户：接着哪条往下？**待回填假设若已有结果，引导用 elab-save 以 `[结果回填 <date>]` 追加（不改旧快照，见不可改快照原则）。**
+问用户：接着哪条往下？存档 `next_skill` 有值时优先用它引导（"上次建议下一步走 <next_skill>，现在走吗？"）。**待回填假设若已有结果，引导用 elab-save 以 `[结果回填 <date>]` 追加（不改旧快照，见不可改快照原则）；事项已了结的，让新存档带 `status: resolved` 收口（status 以最新快照为准，旧快照不回改）。**
 
 ## 纪律
 
 - **不可改快照**：恢复出的旧判断不改写。情况变了 → 新建带新日期的存档追加，不回头篡改旧的（防后见之明偏差）
 - 呈现时严格保留来源标签，不把 `[AI推测]` 当 `[本人判断]` 复述
+
+## 合规
+
+只恢复并呈现用户已确认过的状态存档，不生成当下买卖方向建议（930）。呈现旧判断时保留原始日期——过去的判断不等于现在的建议。

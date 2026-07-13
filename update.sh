@@ -5,6 +5,7 @@
 set -euo pipefail
 cd "$(cd "$(dirname "$0")" && pwd)"
 
+OLD_HEAD="$(git rev-parse HEAD)"
 echo "== 1/3 拉取最新 =="
 if ! git pull --ff-only; then
   echo "❌ git pull 失败（多半本地有改动）。先 'git stash' 或 'git status' 看一下再重跑。"
@@ -12,7 +13,14 @@ if ! git pull --ff-only; then
 fi
 
 echo
-echo "== 2/3 本次变更（CHANGELOG 顶部）=="
+echo "== 2/3 本次拉到的更新 =="
+if [ "$OLD_HEAD" != "$(git rev-parse HEAD)" ]; then
+  git log --oneline "${OLD_HEAD}..HEAD"
+else
+  echo "(已是最新，无新提交)"
+fi
+echo
+echo "-- 当前版本表 + 最新条目（CHANGELOG 顶部）--"
 sed -n '1,42p' CHANGELOG.md 2>/dev/null || echo "(无 CHANGELOG)"
 
 echo

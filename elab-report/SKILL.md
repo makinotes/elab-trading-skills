@@ -6,11 +6,11 @@ description: |
   EdgeLab · Merge elab-save snapshots into a deliverable research/review report.
   Trigger: /elab-report, "package this up", "make me a report"
 invocation: user
-version: 0.1.4
-last_updated: 2026-07-02
+version: 0.1.5
+last_updated: 2026-07-13
 visibility: public
 requires: ["~/.elab/sessions/ (多份 elab-save 存档)"]
-outputs: ["投研复盘报告 md"]
+outputs: ["~/.elab/sessions/<slug>/report-<date>.md"]
 ---
 
 # elab-report：投研复盘报告
@@ -36,7 +36,7 @@ outputs: ["投研复盘报告 md"]
 ## 工作流程
 
 ### Step 1 收集
-读 `~/.elab/sessions/<slug>/*.md` 全部存档，按 created 时间排序。无存档 → 告诉用户先 `/elab-save`。
+读 `~/.elab/sessions/<slug>/` 下全部**存档**（只取时间戳开头的 `[0-9]*.md`；**排除 `report-*.md`**——上次生成的报告是产物不是存档，混进输入会把旧报告合并进新报告、越滚越大），按 created 时间排序。无存档 → 告诉用户先 `/elab-save`。
 
 ### Step 2 合并去重分类
 - 同一判断的多次更新：保留最新 + 标出演变（含 `[结果回填]`）
@@ -44,7 +44,7 @@ outputs: ["投研复盘报告 md"]
 - **保留来源标签**：报告里仍区分 `[本人判断]`/`[AI推测]`/`[结果回填]`
 
 ### Step 3 产出报告
-写到 `~/.elab/sessions/<slug>/report-<date>.md`：
+写到 `~/.elab/sessions/<slug>/report-<date>.md`（`<date>` 用 `date +%Y%m%d`，如 `report-20260630.md`）：
 
 ```markdown
 # <项目> 投研复盘报告 · <date>
@@ -90,6 +90,8 @@ outputs: ["投研复盘报告 md"]
 
 **存档 1（开仓记录）**`snapshot-0612.md`
 
+> ⚠️ 虚构示例，非真实账户记录（标的与所有金额均为演示用）
+
 ```
 项目：xyz-put-sell-jun
 时间：2026-06-12
@@ -102,6 +104,8 @@ IV 高位、标的基本面判断短期无下行催化，认为 premium 偏贵�
 
 **存档 2（证伪触发 / 平仓记录）**`snapshot-0619.md`
 
+> ⚠️ 虚构示例，非真实账户记录（标的与所有金额均为演示用）
+
 ```
 项目：xyz-put-sell-jun
 时间：2026-06-19
@@ -113,6 +117,8 @@ IV 高位、标的基本面判断短期无下行催化，认为 premium 偏贵�
 ```
 
 **存档 3（月度小结）**`snapshot-0630.md`
+
+> ⚠️ 虚构示例，非真实账户记录（标的与所有金额均为演示用）
 
 ```
 项目：xyz-put-sell-jun

@@ -6,8 +6,8 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.15
-last_updated: 2026-07-11
+version: 0.1.16
+last_updated: 2026-07-13
 visibility: public
 requires: []
 outputs: []
@@ -97,7 +97,7 @@ outputs: []
 2. 命中**已建**的 → 直接告诉用户用对应 `/elab-xxx`，简短说明它干什么
 3. 命中**待建**的 → 诚实说"这个 skill 还没做，目前可以先用对话/已建的 X 顶一下"，不假装存在
 4. 只有**纯信息问题 / 纯情绪 / 明显不属投研交易**（如让写推特发布）才说边界——**方向/决策类永远不属这档**（那是 §0，转 diagnosis）
-5. **跨 runtime 通用（路由动作怎么落地）**：你的 runtime 有 skill 调用机制就用它调对应 skill（Claude Code 斜杠命令/Skill tool、Codex `$` mention 或隐式匹配）；**没有 skill 机制（或目标 skill 没装）就直接读本套件同目录下 `elab-<名>/SKILL.md`，照着执行**——整套 elab-skills 只依赖"能读文件 + 能跑 shell"，不绑任何特定 agent 产品
+5. **跨 runtime 通用（路由动作怎么落地）**：你的 runtime 有 skill 调用机制就用它调对应 skill（Claude Code 斜杠命令/Skill tool、Codex `$` mention 或隐式匹配）；**没有 skill 机制（或目标 skill 没装）就直接读套件根目录（各 elab-* 同级安装的那个父目录）下的 `elab-<名>/SKILL.md`，照着执行**——前提是整套 skill 装在同一父目录（标准装法即如此，见 README §安装）。整套 elab-skills 只依赖"能读文件 + 能跑 shell"，不绑任何特定 agent 产品
 
 ## 纪律
 
