@@ -58,6 +58,11 @@ bash install-autoupdate.sh        # 默认每天 9:00；bash install-autoupdate.
 > 每次改动都记在 `CHANGELOG.md`（版本 + 一句话），pull 完扫一眼就知道变了什么。
 > ⚠️ 自动更新 = 主理人 push 后静默跟进；想先看变更再更就别开，用手动。
 
+> ⚠️ **本地改过 skill 文件的注意**：更新会覆盖你的改动——`update.sh`（cp 装法）同步时整目录覆盖，开了自动更新更是每天静默覆盖；软链装法 `git pull` 时直接冲突。想自定义，三选一：
+> ① 改进建议**提 PR**（见 `CONTRIBUTING.md`），合并后所有人受益；
+> ② **fork / 复制一份出去改**，代价是脱离更新通道，之后自己手动合并上游；
+> ③ **个人偏好写进你 agent 的全局配置**（Claude Code 的 `CLAUDE.md` / Codex 的 `AGENTS.md`）去覆盖行为，不动 skill 文件本身——这样既保留偏好又不挡更新（推荐）。
+
 ## Skill 清单
 
 **🔧 基础设施**
