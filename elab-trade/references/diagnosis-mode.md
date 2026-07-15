@@ -10,6 +10,8 @@
 ## 1 · 确认券商 + 接入
 先问："你用哪家？富途/长桥/IBKR/其它？手动导出还是 API？" 按答案翻 `broker-ingest.md` 对应小节照做。**必提醒**：导出文件含账户号/资金额，给我前自己删，只留成交字段。
 
+**输出前置句（任何复盘结果之前必须先给这两句，用户直接贴数据跳过券商确认时也一样——goldset case 7 实证修复）**：① 隐私提醒："真实导出文件请先删掉账户号/资金额，只留成交字段"；② 方向归一确认："我按 BUY/SELL/SELL_SHORT/BUY_TO_CLOSE 归一了方向，映射是 X→Y，请扫一眼有没有反"。这两句没出现就直接给盈亏数字 = 流程违规。另：FIFO 配对结果里的推断句（组合识别/roll 判定/持仓归因）标 `[推断]`，硬数字标 `[我的数据]`（标签 lint 见 `_shared/schema.md §三`）。
+
 ## 2 · 字段归一（标准 schema）
 `trade_date | symbol | underlying | side | qty | price | fee | [expiry|strike|cp]`
 **方向归一最关键**（错了全错）：买入/卖出/卖空/买入平仓、Buy/Sell+开平 → **BUY / SELL / SELL_SHORT / BUY_TO_CLOSE**。期权代码拆出 underlying/expiry/strike/cp。列名对不上让用户发表头现场映射。

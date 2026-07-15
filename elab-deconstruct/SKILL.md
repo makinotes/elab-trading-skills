@@ -6,8 +6,8 @@ description: |
   EdgeLab options concept deconstruction down to operational atoms, with a pre-built concept library.
   Trigger: /elab-deconstruct, "what does this really mean", "deconstruct IV crush"
 invocation: user
-version: 0.2.7
-last_updated: 2026-07-02
+version: 0.3.0
+last_updated: 2026-07-14
 visibility: public
 requires: []
 outputs: []
@@ -63,6 +63,7 @@ outputs: []
 
 **→ 你的判断**：<点破这是规则问题还是有标准答案；若是决策问题，结论你自己下>
 **→ 存哪**：概念笔记 → elab-trade 02_规律 ／ 冒出的交易想法 → playbook 想法区
+> ⚠️「→ 你的判断」和「→ 存哪」是概念卡的**必输出字段，不可省略**（goldset case 5 实证：跳过存哪提醒 = 沉淀链路断头）。存哪只提醒不硬存。
 
 ## 拆好的概念库（现成参考，用户问到直接取 + 按流程补细节）
 

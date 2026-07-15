@@ -6,8 +6,8 @@ description: |
   EdgeLab · Restore the most recent research/decision snapshot saved by elab-save.
   Trigger: /elab-restore, "continue from last time", "where did we leave off"
 invocation: user
-version: 0.1.2
-last_updated: 2026-07-13
+version: 0.2.0
+last_updated: 2026-07-14
 visibility: public
 requires: ["~/.elab/sessions/ (elab-save 的存档)"]
 outputs: []
@@ -42,7 +42,9 @@ outputs: []
 ## 工作流程
 
 ### Step 1 定位项目目录
-`~/.elab/sessions/<slug>/`。目录不存在或为空 → 告诉用户「这个项目还没有存档，先用 `/elab-save` 存一份」。
+`~/.elab/sessions/<slug>/`。
+
+**「接着上次」必须有全局回退（goldset case 8 实证修复）**：用户说「接着上次 / 续上 / 之前的判断」且未显式给 `--slug` 时，先查当前项目；**当前项目目录不存在或为空 → 不要就此打住，全局扫描 `~/.elab/sessions/*/[0-9]*.md`，按文件名时间戳取最新存档直接加载，并回显它属于哪个项目**（"上次的存档在项目「X」下，已拉出"）。换个目录打开会话是常态，**不得因 `basename $(pwd)` 变了就要求用户猜出上次的项目名**。只有全局也扫不到任何存档时，才说「还没有存档，先用 `/elab-save` 存一份」。
 
 ### Step 2 找存档
 **只认时间戳开头的存档文件**（`<YYYYMMDD-HHMMSS>-*.md`，即文件名匹配 `[0-9]*.md`）；**`report-*.md` 是 elab-report 的产物不是存档，一律排除**——不排除的话字典序里 `r` 排在数字后面，出过一次报告后"最新"永远是报告文件。

@@ -6,8 +6,8 @@ description: |
   EdgeLab trade-decision guidance engine: takes any trading question, guides to root cause as trading-psychologist + practitioner. Never blocks; you draw the conclusion.
   Trigger: /elab-diagnosis, "should I cut/add/buy/sell", "diagnose my decision", "audit my approach"
 invocation: user
-version: 0.2.14
-last_updated: 2026-07-06
+version: 0.3.0
+last_updated: 2026-07-14
 visibility: public
 requires: []  # 硬依赖无；做亏损分类时【可选】读 elab-trade 的 03_定格 立案当基准（存在则读、不存在则请用户提供，见"亏损后的分类框架"），不是自动无缝衔接
 outputs: []
@@ -61,6 +61,14 @@ outputs: []
 - **交易实战专家**：把根因接到可操作的方法——thesis / 风险预算(heat) / 证伪条件 / 仓位规则 / 客观数据。
 
 > 核心：**别穷举问题、别背答案**。任何问题先问"你真正卡在哪"，落到那几类根因上，引导就有抓手——这也是为什么无穷的问题能用一套引擎接住。
+
+**决策型首轮固定三问（goldset case 2 实证修复 · 不可跳）**：凡"该不该买/卖/加/割 X"类问题（含"期权贵不贵、买不买 call/put"），**首轮回复必须问齐这三件，三问没齐之前不展开外部研究、不进长篇分析**：
+1. 你的 thesis 是什么（为什么看多/看空这个标的）？
+2. 现在的定价/IV 处在什么位置、贵在哪（不知道 → 这是先要补的数据，可转 elab-research 查）？
+3. 这笔的最大亏损框死了没（框在多少）？
+三问齐了，消解漏斗才有料可走；用户答不上来，本身就是最有价值的诊断结果（"问题不在买不买，在你还没有 thesis/没框风险"）。
+
+**用户带着亏损或情绪词进来时（"亏麻了/被套/难受"）**：先按体检模式的「亏损后的分类框架」走——**第一步接住情绪（一句共情，点名情绪是什么），第二步区分决策质量 vs 结果质量（好决策坏结果 ≠ 错），再进漏斗**。跳过情绪直接甩框架 = 用户听不进任何后面的内容。
 
 ## 2 消解漏斗（逐层，每层停下来对话，不要一次跑完）
 
@@ -223,6 +231,7 @@ outputs: []
 
 ## 风格 & 合规
 直接、短句、消解优先；不给鸡汤、不给"现在买 X"、不晒收益。能消解的不硬答——问题消失比被回答更有价值（930）。
+**最终答复发送前逐句过标签 lint（聊天可见输出同标准，归因/意图类判断句必带 `[AI推测]`），硬检查规则见 `_shared/schema.md §三`。**
 
 ## 沉淀收口（诊断/体检完默认提醒一次 · 详 `_shared/capture-closing.md`）
 消解/体检出的东西别聊完就散，问用户存哪档（提醒不硬存）：

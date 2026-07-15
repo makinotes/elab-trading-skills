@@ -2,6 +2,16 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-07-14（goldset v1 首轮评测修复：PASS 1/PARTIAL 2/FAIL 7 → 9 项整改）
+- **_shared/schema.md** — §三新增「发送前逐句标签 lint」硬检查：聊天可见输出与落盘文件同标准（治 case 4/7/9/10 标签只落文件不进摘要）
+- **elab-restore** 0.2.0 — 「接着上次」全局回退：当前项目空则全局扫最新存档并回显所属项目，不再被 cwd slug 隔离（case 8）
+- **elab-trade** 0.4.0 — 立案请求即授权本轮落盘（未知字段填 `[待本人确认]` 不阻断，回复给真实文件路径，case 6）；标签 lint 指针；diagnosis-mode 复盘输出前置句（隐私+方向归一确认必须先于任何盈亏数字，case 7）
+- **elab-diagnosis** 0.3.0 — 决策型首轮固定三问（thesis/IV 位置/最大亏损框死没，三问没齐不展开，case 2）；带亏损/情绪进场先接情绪+区分决策质量 vs 结果质量（case 3）；标签 lint 指针
+- **elab-research** 0.5.0 — 930 铁律段加标签 lint（研报摘要综合判断句也要标，case 4）；取数段禁研报中途 pip install（实测装包耗 1290s），依赖缺失直接降级标注
+- **elab-benchmark** 0.3.0 — 可复制性结论必带 `[AI推测]`/`[推断]`（case 9）；标签 lint 指针
+- **elab-save** 0.2.0 — Step 4 确认消息同过标签 lint
+- **elab-deconstruct** 0.3.0 — 概念卡「→ 你的判断」「→ 存哪」定为必输出字段不可省略（case 5）
+
 ## 版本约定（semver-ish，按改动大小）
 
 - **patch**（`0.0.X`）：文案 / bugfix / 合规措辞 / 小补充，不改行为
