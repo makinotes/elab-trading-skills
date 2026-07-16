@@ -6,8 +6,8 @@ description: |
   EdgeLab benchmark analysis: five filters to find a copyable trading approach, spotting fake P&L.
   Trigger: /elab-benchmark, "who should I learn from", "can I copy this strategy"
 invocation: user
-version: 0.3.0
-last_updated: 2026-07-14
+version: 0.4.0
+last_updated: 2026-07-15
 visibility: public
 requires: []
 outputs: ["可复制要点清单 (→ elab-trade playbook)"]
@@ -59,6 +59,8 @@ outputs: ["可复制要点清单 (→ elab-trade playbook)"]
 ### Phase 3 结论
 - 五筛全过 → 给"**可复制要点清单**"（细颗粒度：进场条件/仓位/对冲/止盈/认错点，对齐 elab-trade playbook 条目框架），建议沉淀进 playbook
 - 卡在某筛 → 指出卡哪、为什么暂时别抄
+
+**样本量约束结论强度（硬规则）**：对标涉及的样本（他的或用户自己的）**n<10 时，禁止输出"你的/他的优势是 / 更可能是 / 应该改成"这类归因定论和硬规则**——`[样本不足]` 标签是**结论限速器**，不是贴完照说的免责声明（标了标签再下定论 = 违规，比不标更糟：披着审慎外衣的过拟合）。小样本下允许的输出形态只有一种：「**待验证假设** + 攒到多少样本再判 + **什么反例出现即推翻**」三件套，且假设句式用"一个值得攒样本验证的方向是…"，不用"优势是…"。
 
 **"够细"长这样**（这里用 BPS 举例说明颗粒度标准，**换成方向性/价差/对冲任何打法，细到这个程度才算看懂**）：
 > - **进场条件**：IV 分位 >60、距财报 >7 天、标的在自己看多的支撑位上方；**不满足全部不进**

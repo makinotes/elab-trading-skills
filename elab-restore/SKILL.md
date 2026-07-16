@@ -6,8 +6,8 @@ description: |
   EdgeLab · Restore the most recent research/decision snapshot saved by elab-save.
   Trigger: /elab-restore, "continue from last time", "where did we leave off"
 invocation: user
-version: 0.2.0
-last_updated: 2026-07-14
+version: 0.3.0
+last_updated: 2026-07-15
 visibility: public
 requires: ["~/.elab/sessions/ (elab-save 的存档)"]
 outputs: []
@@ -44,13 +44,15 @@ outputs: []
 ### Step 1 定位项目目录
 `~/.elab/sessions/<slug>/`。
 
-**「接着上次」必须有全局回退（goldset case 8 实证修复）**：用户说「接着上次 / 续上 / 之前的判断」且未显式给 `--slug` 时，先查当前项目；**当前项目目录不存在或为空 → 不要就此打住，全局扫描 `~/.elab/sessions/*/[0-9]*.md`，按文件名时间戳取最新存档直接加载，并回显它属于哪个项目**（"上次的存档在项目「X」下，已拉出"）。换个目录打开会话是常态，**不得因 `basename $(pwd)` 变了就要求用户猜出上次的项目名**。只有全局也扫不到任何存档时，才说「还没有存档，先用 `/elab-save` 存一份」。
+**「接着上次」必须有全局回退（goldset case 8 实证修复）**：用户说「接着上次 / 续上 / 之前的判断」且未显式给 `--slug` 时，先查当前项目；**当前项目目录不存在或为空 → 不要就此打住，全局扫描 `~/.elab/sessions/*/[0-9]*.md`，按文件名时间戳排序——候选唯一才直接加载并回显它属于哪个项目**（"上次的存档在项目「X」下，已拉出"）；**多个项目各有相近时间的最新档 = 歧义，走 Step 2 的歧义规则列候选让用户选，不得静默挑一个**。换个目录打开会话是常态，**不得因 `basename $(pwd)` 变了就要求用户猜出上次的项目名**。只有全局也扫不到任何存档时，才说「还没有存档，先用 `/elab-save` 存一份」。
 
 ### Step 2 找存档
 **只认时间戳开头的存档文件**（`<YYYYMMDD-HHMMSS>-*.md`，即文件名匹配 `[0-9]*.md`）；**`report-*.md` 是 elab-report 的产物不是存档，一律排除**——不排除的话字典序里 `r` 排在数字后面，出过一次报告后"最新"永远是报告文件。
-- 无参数：按文件名时间戳排序取最新一份（如 `ls ~/.elab/sessions/<slug>/[0-9]*.md | sort | tail -1`）
+- 无参数：按文件名时间戳排序取最新一份（如 `ls ~/.elab/sessions/<slug>/[0-9]*.md | sort | tail -1`——**仅当最新时间戳唯一时适用**；时间戳并列见下方歧义规则）
 - `<序号>`：按 list 顺序（新→旧）取第 N 份
 - `list`：列出全部存档（序号 / 标题 / created / status，不含 report-*.md）
+
+**「上次」歧义规则（多候选禁止静默选一）**：出现以下任一情况——最大时间戳对应**多份**存档、全局回退后**多个项目**各有相近时间的最新档、或用户措辞（"上次的"）无法唯一匹配某份标题/标的——**禁止用文件名排序、目录顺序或任何默认规则替用户挑**。必须列出全部候选（时间 / 项目 / 标题 / 状态 / 一句关键判断），请用户选。**只有候选唯一时才允许直接恢复**。恢复错档比多问一句贵得多——接错上下文的后续分析整段作废。
 
 ### Step 3 呈现状态
 读出存档，结构化复述给用户：

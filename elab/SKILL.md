@@ -6,8 +6,8 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.1.16
-last_updated: 2026-07-13
+version: 0.2.0
+last_updated: 2026-07-15
 visibility: public
 requires: []
 outputs: []
@@ -64,6 +64,7 @@ outputs: []
 | "这个投研/期权问题成不成立"、决策卡住 | `elab-diagnosis` | 免费 |
 | "谁真赚到、我能不能复制"找对标 | `elab-benchmark` | 免费 |
 | "IV/Delta 中性/对冲到底啥意思"拆期权概念 | `elab-deconstruct` | 免费 |
+| "我这算不算 X"（X=俚语/黑话/自造词，如"苦肉计""delta中性反脆弱轮动"）——转译口语类比 / 识破伪概念 | `elab-deconstruct`（§0.5 伪概念闸 + §0.6 俚语转译） | 免费 |
 
 > 内容创作 / 营销文案类（钩子/标题/传播/AI 味检测）不在 elab 内做；期权策略系统教学走 EdgeLab 课件，也不在 elab 内重做。
 
