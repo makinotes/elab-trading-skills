@@ -29,6 +29,7 @@ Thresholds: loaded from --config JSON; fallback to code constants + warnings on 
 
 import argparse
 import json
+import math
 import os
 import sys
 from datetime import date
@@ -48,7 +49,7 @@ try:
     _EV_MODEL_AVAILABLE = True
 except Exception as _ev_import_err:
     # Non-fatal: ev_breakeven_pop will be null, warning added per output
-    pass
+    print(f"NOTE: ev_model import failed: {_ev_import_err}", file=sys.stderr)
 
 
 # ---------------------------------------------------------------------------
@@ -70,6 +71,7 @@ FALLBACK_THRESHOLDS: Dict[str, Any] = {
     "min_sample_size": 20,
     "credit_width_min_ratio": 0.20,
     "otm_deep_ratio": 0.30,
+    "debit_width_min_ratio": 0.20,
 }
 
 
@@ -113,8 +115,8 @@ def _compute_ev_breakeven_pop(
 ) -> Optional[float]:
     """Return the pop (probability of profit) at which EV = 0.
 
-    Uses ev_model._compute_ev_core with a dummy win_rate (doesn't affect
-    breakeven_win_rate).  avg_loss_per_share must be negative.
+    Uses ev_model.compute_breakeven_pop (public API).
+    avg_loss_per_share must be negative.
 
     On failure, appends a warning and returns None.
     """
@@ -122,13 +124,8 @@ def _compute_ev_breakeven_pop(
         warnings.append("ev_model 不可用，ev_breakeven_pop 未计算")
         return None
     try:
-        core = _ev_model._compute_ev_core(
-            win_rate=0.5,           # dummy; breakeven_win_rate is independent of this
-            avg_win=avg_win_per_share,
-            avg_loss=avg_loss_per_share,
-            sample_size=None,
-        )
-        return round(core["breakeven_win_rate"], 4)
+        result = _ev_model.compute_breakeven_pop(avg_win_per_share, avg_loss_per_share)
+        return round(result, 4)
     except Exception as exc:
         warnings.append(f"ev_model 计算失败，ev_breakeven_pop 未计算: {exc}")
         return None
@@ -167,6 +164,16 @@ def _dte_weeks(dte: int) -> float:
     return round(dte / 7, 4)
 
 
+def _require_finite(cli_name: str, val: float) -> None:
+    """Exit 1 if val is NaN or infinite (item 5: guards all numeric CLI inputs)."""
+    if not math.isfinite(val):
+        print(
+            f"ERROR: --{cli_name} must be a finite number (got {val})",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
 def _output(data: Dict[str, Any]) -> None:
     """Write JSON to stdout (the only stdout output)."""
     print(json.dumps(data, ensure_ascii=False))
@@ -196,6 +203,13 @@ def _cmd_bull_put_spread(args: argparse.Namespace) -> None:
     dte: int = args.dte
     spot: Optional[float] = args.spot
     config_path: Optional[str] = args.config
+
+    # NaN/inf guard (item 5)
+    _require_finite("short-strike", short_strike)
+    _require_finite("long-strike", long_strike)
+    _require_finite("credit", credit)
+    if spot is not None:
+        _require_finite("spot", spot)
 
     # Validation
     if short_strike <= long_strike:
@@ -308,6 +322,13 @@ def _cmd_bear_put_spread(args: argparse.Namespace) -> None:
     spot: Optional[float] = args.spot
     config_path: Optional[str] = args.config
 
+    # NaN/inf guard (item 5)
+    _require_finite("long-strike", long_strike)
+    _require_finite("short-strike", short_strike)
+    _require_finite("debit", debit)
+    if spot is not None:
+        _require_finite("spot", spot)
+
     # Validation
     if long_strike <= short_strike:
         print(
@@ -329,10 +350,10 @@ def _cmd_bear_put_spread(args: argparse.Namespace) -> None:
         print("ERROR: --dte must be positive", file=sys.stderr)
         sys.exit(1)
 
-    # Thresholds
+    # Thresholds (item 2: use debit_width_min_ratio key)
     thresholds, thr_warnings = _load_thresholds(config_path)
-    credit_width_min_ratio: float = thresholds.get(
-        "credit_width_min_ratio", FALLBACK_THRESHOLDS["credit_width_min_ratio"]
+    debit_width_min_ratio: float = thresholds.get(
+        "debit_width_min_ratio", FALLBACK_THRESHOLDS["debit_width_min_ratio"]
     )
 
     # Core math
@@ -349,12 +370,12 @@ def _cmd_bear_put_spread(args: argparse.Namespace) -> None:
         warnings=warnings,
     )
 
-    # Debit-ratio check (analogous to credit_width for bear spread)
+    # Debit-ratio check (item 2: registry §4b warning text)
     debit_ratio = debit / width
-    if debit_ratio < credit_width_min_ratio:
+    if debit_ratio < debit_width_min_ratio:
         warnings.append(
-            f"收得太薄（debit 侧）：debit 仅占宽度 {debit_ratio:.0%}，"
-            f"低于 {credit_width_min_ratio:.0%} 阈值，保护效果有限"
+            f"保护范围太窄：debit 仅占宽度 {debit_ratio:.0%}，"
+            f"低于 {debit_width_min_ratio:.0%} 阈值，下行保护有限"
         )
 
     _output({
@@ -416,6 +437,13 @@ def _cmd_covered_call(args: argparse.Namespace) -> None:
     spot: Optional[float] = args.spot
     config_path: Optional[str] = args.config
 
+    # NaN/inf guard (item 5)
+    _require_finite("entry-price", entry_price)
+    _require_finite("call-strike", call_strike)
+    _require_finite("credit", credit)
+    if spot is not None:
+        _require_finite("spot", spot)
+
     # Validation
     if entry_price <= 0.0:
         print("ERROR: --entry-price must be positive", file=sys.stderr)
@@ -429,6 +457,14 @@ def _cmd_covered_call(args: argparse.Namespace) -> None:
     if credit >= entry_price:
         print(
             f"ERROR: --credit ({credit}) must be < --entry-price ({entry_price})",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    # Item 1: feasibility check — max_profit must be positive (call_strike + credit > entry_price)
+    if call_strike + credit <= entry_price:
+        print(
+            f"ERROR: call_strike ({call_strike}) + credit ({credit}) <= entry_price ({entry_price}); "
+            "max_profit would be zero or negative (ITM covered-call with insufficient premium)",
             file=sys.stderr,
         )
         sys.exit(1)
@@ -513,6 +549,12 @@ def _cmd_cash_secured_put(args: argparse.Namespace) -> None:
     dte: int = args.dte
     spot: Optional[float] = args.spot
     config_path: Optional[str] = args.config
+
+    # NaN/inf guard (item 5)
+    _require_finite("strike", strike)
+    _require_finite("credit", credit)
+    if spot is not None:
+        _require_finite("spot", spot)
 
     # Validation
     if strike <= 0.0:
@@ -599,6 +641,12 @@ def _cmd_long_put(args: argparse.Namespace) -> None:
     dte: int = args.dte
     spot: Optional[float] = args.spot
     config_path: Optional[str] = args.config
+
+    # NaN/inf guard (item 5)
+    _require_finite("strike", strike)
+    _require_finite("debit", debit)
+    if spot is not None:
+        _require_finite("spot", spot)
 
     # Validation
     if strike <= 0.0:

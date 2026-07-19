@@ -2,6 +2,10 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-07-19 · elab-model v0.1.1（4 路盲审全量整改）
+
+- **elab-model** 0.1.1 — 审计修复 2 CRITICAL + 6 HIGH + 12 MEDIUM：registry §三/backtest 协议黄金数字纠错（−0.55/−55、4.80）；kelly `--fraction` 生效（新增 `kelly_fractional`）；负 Kelly 归零 + 措辞去操作指引（930）；正 Kelly 强制肥尾警示；option-credit 改双字段 `ev_per_share`/`ev_per_contract`；ev_model 三子命令补 `units` + 接入 thresholds.json；covered-call ITM 可行性拦截；bear-put-spread 警示换 `debit_width_min_ratio` 键与"保护范围太窄"文案；NaN/inf 全入口防护；SKILL.md 补回测分发声明 + 2 条禁句型绕过口；goldset 追加 case 15（高 Kelly 肥尾生死题）+ 14b 对冲误用变体；测试 63 → 109 断言全绿
+
 ## 2026-07-19 · elab-model v0.1.0（策略数学层新 skill）
 
 - **elab-model** 0.1.0 — 新增 EV / 仓位 / 策略结构数学模型 skill：ev_model.py（21 项测试 PASS）+ strategy_models.py（42 项测试 PASS）+ thresholds.json 阈值配置 + backtest_protocol.md 回测协议 + references/model-registry.md 模型注册表；挂载路由进 elab / elab-trade / elab-diagnosis / elab-research / elab-deconstruct 五处；_shared/schema.md 加 4 个模型来源标签；goldset v1 追加 case 11-14（含 2 道 elab-model 生死题：case 12 多轮施压 / case 14 术语方向性）
