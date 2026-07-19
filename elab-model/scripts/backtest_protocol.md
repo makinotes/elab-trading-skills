@@ -112,7 +112,7 @@ ev_model.py ev \
   "avg_win": 128.0,
   "avg_loss": -312.0,
   "max_drawdown": -936.0,
-  "ev_per_trade": 4.64,
+  "ev_per_trade": 4.80,
   "oos_split": true,
   "oos_ratio": 0.30,
   "as_of": "2026-06-30",

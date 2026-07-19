@@ -16,6 +16,7 @@
 | `--avg-win` | float | per-trade 美元（正数） | 用户输入或 deals.xlsx FIFO 统计 |
 | `--avg-loss` | float | per-trade 美元（负数，如 -200） | 同上 |
 | `--sample-size` | int，可选 | 笔数 | FIFO 统计产出传入；缺省 = None（视为假设值） |
+| `--config` | 文件路径，可选 | — | 阈值 JSON，缺省同目录 `thresholds.json`；`min_sample_size` 由此供给 |
 
 **样本量规则**：`sample_size` 缺省或 None → warnings 追加"假设值，非统计"。`sample_size < 20` → warnings 追加"样本不足（N 笔），低于 20 笔阈值，结果仅供参考"（阈值来自 `thresholds.json` `min_sample_size`）。
 
@@ -85,15 +86,18 @@ EV=25.0，breakeven=0.40，Kelly=0.0833，quarter=0.0208。
 | `--payoff-ratio` | float > 0 | — | `avg_win / |avg_loss|`，用户提供 |
 | `--fraction` | float，可选 | — | 缺省 0.25（quarter Kelly） |
 | `--sample-size` | int，可选 | 笔数 | 同 §一 |
+| `--config` | 文件路径，可选 | — | 阈值 JSON，缺省同目录 `thresholds.json`；`min_sample_size` 由此供给 |
 
 ### 公式口径（明文）
 
 ```
 Kelly f* = (b × p − q) / b    # b=payoff_ratio，p=win_rate，q=1−win_rate
-fractional_kelly = f* × fraction
+kelly_quarter    = f* / 4                # 固定四分之一，不受 fraction 参数影响
+kelly_fractional = f* × fraction        # fraction 缺省 0.25
 ```
 
-若 `f* ≤ 0`（负 EV 或 Kelly 为负），输出 `kelly_full=0`（不建议开仓），warnings 追加"Kelly ≤ 0，当前假设下 EV 为负"。
+若 `f* ≤ 0`（负 EV 或 Kelly 为负），输出 `kelly_full=0`（不建议开仓），warnings 追加"Kelly 为负（EV 在当前假设下为负），此值无实操意义，已归零"。
+`f* > 0` 时，warnings 强制追加"Kelly 基于二元胜负分布假设，实盘肥尾下可能高估合理仓位，请结合 quarter Kelly 与极端情景使用"。
 
 ### 输出 JSON 骨架
 
@@ -107,9 +111,17 @@ fractional_kelly = f* × fraction
     "sample_size": null
   },
   "kelly_full": 0.0833,
-  "fractional_kelly": 0.0208,
-  "units": {"kelly_full": "fraction_of_capital", "fractional_kelly": "fraction_of_capital"},
-  "warnings": ["win_rate 来源为假设值，非交割单统计"],
+  "kelly_quarter": 0.0208,
+  "kelly_fractional": 0.0208,
+  "units": {
+    "kelly_full": "fraction_of_capital",
+    "kelly_quarter": "fraction_of_capital",
+    "kelly_fractional": "fraction_of_capital"
+  },
+  "warnings": [
+    "win_rate 来源为假设值，非交割单统计",
+    "Kelly 基于二元胜负分布假设，实盘肥尾下可能高估合理仓位，请结合 quarter Kelly 与极端情景使用"
+  ],
   "as_of": "2026-07-19"
 }
 ```
@@ -122,7 +134,13 @@ fractional_kelly = f* × fraction
 
 ### warnings 文案模板
 
-同 §一。
+| 触发条件 | 文案 |
+|---|---|
+| `sample_size` 缺省或 None | `"win_rate 来源为假设值，非交割单统计"` |
+| `sample_size < 20` | `"win_rate 样本仅 {N} 笔，低于 20 笔阈值，结果仅供参考"` |
+| 回测来源且 OOS=否 | `"win_rate 来源为回测（{N} 笔，无 OOS），存在过拟合风险"` |
+| `kelly_full <= 0` | `"Kelly 为负（EV 在当前假设下为负），此值无实操意义，已归零"` |
+| `kelly_full > 0`（强制，无论样本） | `"Kelly 基于二元胜负分布假设，实盘肥尾下可能高估合理仓位，请结合 quarter Kelly 与极端情景使用"` |
 
 ---
 
@@ -162,8 +180,8 @@ win_rate = pop
   },
   "avg_win_mapped": 0.85,
   "avg_loss_mapped": -4.15,
-  "ev_per_share": -2.5588,
-  "ev_per_contract": -255.88,
+  "ev_per_share": -0.5500,
+  "ev_per_contract": -55.00,
   "breakeven_win_rate": 0.83,
   "kelly_full": 0.0,
   "kelly_quarter": 0.0,
@@ -296,6 +314,8 @@ max_loss       = debit × 100                  # per-contract 美元（初始成
 breakeven      = long_strike − debit          # per-share
 ```
 
+**"保护范围太窄"警告**：`debit / width < debit_width_min_ratio`（默认 0.20，来自 `thresholds.json`）→ warnings 追加 `"保护范围太窄：debit 仅占宽度 {pct:.0%}，低于 {threshold:.0%} 阈值，下行保护有限"`。
+
 ### 4c. covered-call
 
 付出已有多头股份，卖出 call 收 premium，限制上行收益。
@@ -307,6 +327,8 @@ max_profit    = (call_strike − entry_price + credit) × 100  # per-contract
 max_loss      = (entry_price − credit) × 100                # per-contract（股价归零极端情况）
 breakeven     = entry_price − credit                        # per-share
 ```
+
+**可行性校验**：`call_strike + credit > entry_price` 必须成立（等价于 `max_profit > 0`），否则 exit 1（无效参数：卖出行权价低于持股成本加 credit，无上行获利空间）。
 
 > Covered Call 是"有 premium 的一次性止盈"，不是真分层对冲。代码注释写死。
 
@@ -345,5 +367,6 @@ breakeven     = strike − debit           # per-share
 | `min_sample_size` | 20 | 胜率样本量阈值，低于此值 warnings 强制提示 | §一、§二 |
 | `credit_width_min_ratio` | 0.20 | credit 与 spread 宽度比值下限；低于此值警告"收得太薄" | §四 bull/bear put |
 | `otm_deep_ratio` | 0.30 | option-credit 子命令：`credit/max_loss` 低于此值认定为 OTM 特征，触发 delta 近似偏高警告 | §三 |
+| `debit_width_min_ratio` | 0.20 | bear-put-spread：`debit/width` 低于此值触发"保护范围太窄"警告，保护成本过低则下行覆盖不足 | §四 bear-put-spread |
 
 `--config` 文件缺失或 JSON 解析失败时，脚本回退代码内 fallback 常量（与此表值相同），warnings 追加 `"使用内置默认阈值"`，不 crash、不静默。

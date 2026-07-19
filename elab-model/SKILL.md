@@ -4,7 +4,7 @@ description: |
   EdgeLab · 用可审计公式计算 EV、Kelly 仓位、策略结构数学（bull put spread 等）。触发：/elab-model、「算EV」「期望收益」「Kelly」「策略数学」「这单结构怎么样」「收得薄不薄」
   EdgeLab · Auditable-formula model layer: EV, Kelly sizing, and options strategy math. Trigger: /elab-model, "calculate EV", "expected value", "Kelly", "strategy math", "how does this structure look"
 invocation: user
-version: 0.1.0
+version: 0.1.1
 last_updated: 2026-07-19
 visibility: public
 requires:
@@ -34,6 +34,8 @@ outputs:
 | long put 结构数学 | `strategy_models.py long-put` | 对冲或方向性下行 debit 结构 | 免费·纯本地计算 |
 
 > 不在此做：精确希腊值/期权定价（需 py_vollib，违反无 pip 原则）；组合级 VaR；实时信号。
+
+> **回测说明**：回测请求/结果协议见 `scripts/backtest_protocol.md`。会员注意：quant-engine 实现（数据管道、防过拟合执行）不随 elab-skills 分发，运行回测需自备数据管道并按协议格式输出结果 JSON。
 
 ## 调用纪律
 
@@ -81,7 +83,12 @@ win_rate = pop                 # 来源须带标签
 | `max_profit` / `max_loss` | **per-contract 美元**（per-share × 100） | 张为单位展示给用户 |
 | `breakeven` | **per-share** | 与输入行权价/credit 同口径 |
 | 宽度（width）| **per-share** | `|short_strike − long_strike|`，不乘 100 |
-| `ev_per_trade` | **per-contract 美元** | ev_model 经 strategy_models 串联时 |
+| `ev_per_trade` | **per-contract 美元** | ev 子命令；ev_model 经 strategy_models 串联时 |
+| `ev_per_share` | **per-share 美元** | option-credit 子命令输出 |
+| `ev_per_contract` | **per-contract 美元** | option-credit 子命令输出（= ev_per_share × 100） |
+| `kelly_full` | **资本比例**（fraction） | kelly 子命令；负值已归零 |
+| `kelly_quarter` | **资本比例**（fraction） | kelly 子命令；= kelly_full / 4（固定） |
+| `kelly_fractional` | **资本比例**（fraction） | kelly 子命令；= kelly_full × fraction 参数（缺省 0.25） |
 | `units` 字段 | JSON 必含 | 如 `{"max_loss": "per_contract_dollar", "breakeven": "per_share"}` |
 
 **任何 JSON 输出都必须包含 `units` 字段**，防止两口径并排误读。
@@ -97,6 +104,8 @@ win_rate = pop                 # 来源须带标签
 3. 「接近危险/需要操作」
 4. 「建议你……（开仓/加仓/平仓/止损/止盈）」
 5. 「（这个结构）适合现在做」
+6. 将"warnings 为空"或"数学上没问题"解读为隐性开仓许可
+7. 比较多个结构"哪个更好"时，给出"A 更优/更有优势"类比较结论（只允许并列各自数学画像与假设敏感性）
 
 ### 固定收尾措辞
 
