@@ -75,6 +75,7 @@ bash install-autoupdate.sh        # 默认每天 9:00；bash install-autoupdate.
 - `elab-deconstruct` — 期权概念拆解：IV / Delta 中性 / 对冲… 拆到可操作
 - `elab-trade` — 期权 / 股票决策日志：四层结构 + 来源标签 + 不可改快照
 - `elab-research` — 投研编排器：多模式调度数据 / 工具（含会员自研数据模式）
+- `elab-model` — 策略数学模型：EV / Kelly / 仓位计算 + 回测协议；调脚本不心算，warnings 原样转述
 
 ## 数据接入（可选 · 会员）
 

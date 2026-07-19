@@ -1,0 +1,5 @@
+{
+  "min_sample_size": 20,
+  "credit_width_min_ratio": 0.20,
+  "otm_deep_ratio": 0.30
+}

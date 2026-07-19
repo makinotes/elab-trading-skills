@@ -6,8 +6,8 @@ description: |
   EdgeLab options concept deconstruction down to operational atoms, with a pre-built concept library.
   Trigger: /elab-deconstruct, "what does this really mean", "deconstruct IV crush"
 invocation: user
-version: 0.4.0
-last_updated: 2026-07-15
+version: 0.4.1
+last_updated: 2026-07-19
 visibility: public
 requires: []
 outputs: []
@@ -35,6 +35,7 @@ outputs: []
 3. **常见误用**：最常被和谁搞混？方向/成本各是什么
 4. **失效条件**：什么情况下这概念/策略不成立
 5. **收口**：说人话重述 + 易混对照表，建议存进 elab-trade 的 02_规律
+> 策略类概念（bull put spread / covered call 等）拆到"操作上怎么落"时，可调 `elab-model` strategy_models 用真实数字补充画像（引用 elab-model registry §四）——让"这结构长什么样"从公式变成具体数字。
 
 ## 输出骨架：概念卡
 

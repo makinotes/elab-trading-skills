@@ -6,7 +6,7 @@ description: |
   EdgeLab "my trading" system: decision tracking + statement diagnosis + playbook distillation, in one skill.
   Trigger: /elab-trade, /决策立案, /结果回填, /交割单诊断, /沉淀playbook
 invocation: user
-version: 0.5.1
+version: 0.5.2
 last_updated: 2026-07-19
 visibility: public
 requires: []
@@ -192,10 +192,10 @@ IV crush 如期，期权 extrinsic value 大幅缩水，目前 credit 已回收�
 ---
 
 # Mode B · 交割单诊断 → `references/diagnosis-mode.md`
-诊断已有持仓 / 复盘一批交割单。含：先确认券商（富途/长桥/IBKR，接入详见 `references/broker-ingest.md`）→ 字段归一 → **FIFO 配对算法** → 持仓诊断框架 → **交割单复盘方法论（思路/因素/结论）**。读那份分册执行。
+诊断已有持仓 / 复盘一批交割单。含：先确认券商（富途/长桥/IBKR，接入详见 `references/broker-ingest.md`）→ 字段归一 → **FIFO 配对算法** → **FIFO 统计完成后将 win_rate/avg_win/avg_loss/样本量喂 `elab-model` ev_model 算 EV/breakeven**（引用 elab-model registry §一，不复制公式）→ 持仓诊断框架 → **交割单复盘方法论（思路/因素/结论）**。读那份分册执行。
 
 # Mode C · playbook 沉淀 → `references/playbook-mode.md`
-把想法/规律/复盘炼成成型可复用 playbook。含：**`§〇 想法区`（raw 交易想法暂存 → 晋级漏斗）** → **一条规律怎么才算数（样本/逻辑/运气vs技巧/失效条件四关）** → 条目框架（每字段怎么填）→ 沉淀流程 → 回头用闭环。读那份分册执行。**"沉淀自己的交易想法"= 先落想法区，别等成型。**
+把想法/规律/复盘炼成成型可复用 playbook。含：**`§〇 想法区`（raw 交易想法暂存 → 晋级漏斗）** → **一条规律怎么才算数（样本/逻辑/运气vs技巧/失效条件四关）** → 条目框架（每字段怎么填）→ 沉淀流程 → 回头用闭环。读那份分册执行。**"沉淀自己的交易想法"= 先落想法区，别等成型。** 策略条目可用 `elab-model` strategy_models 算结构数学补充画像（引用 elab-model registry §四）。
 
 ---
 

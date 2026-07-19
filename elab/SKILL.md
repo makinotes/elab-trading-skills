@@ -6,8 +6,8 @@ description: |
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
 invocation: user
-version: 0.2.0
-last_updated: 2026-07-15
+version: 0.2.1
+last_updated: 2026-07-19
 visibility: public
 requires: []
 outputs: []
@@ -65,6 +65,7 @@ outputs: []
 | "谁真赚到、我能不能复制"找对标 | `elab-benchmark` | 免费 |
 | "IV/Delta 中性/对冲到底啥意思"拆期权概念 | `elab-deconstruct` | 免费 |
 | "我这算不算 X"（X=俚语/黑话/自造词，如"苦肉计""delta中性反脆弱轮动"）——转译口语类比 / 识破伪概念 | `elab-deconstruct`（§0.5 伪概念闸 + §0.6 俚语转译） | 免费 |
+| 算EV、期望收益、Kelly、策略数学、这单结构怎么样、收得薄不薄 | `elab-model`（模型计算：EV/仓位/策略结构数学） | 免费（纯本地计算） |
 
 > 内容创作 / 营销文案类（钩子/标题/传播/AI 味检测）不在 elab 内做；期权策略系统教学走 EdgeLab 课件，也不在 elab 内重做。
 
@@ -82,7 +83,7 @@ outputs: []
 | 帮我制定交易策略 | 先问他想表达什么看法/什么市场条件，梳出适配的策略框架（怎么运作/适用/风险/认错点），落成他自己的 playbook | `elab-trade`(playbook)/`elab-deconstruct` |
 | 帮我制定套利策略 | 同上；顺带把"套利/稳赚"换成"价差/策略"（合规也更准），不点名标的+当下方向 | 同上 |
 | 要不要割肉 | 别替他按卖，**陪他把这个决定梳清楚**：当初证伪条件是什么？触发了吗？仓位规则怎么说？→ 走完这套，割不割他自己就明白了 | `elab-diagnosis` |
-| 要不要加仓 | 同理梳：加仓规则是什么？风险预算(heat)还剩多少（`position-sizing`）？thesis 还成立吗？→ 信息齐了他自己判断 | `elab-diagnosis`(+position-sizing) |
+| 要不要加仓 | 同理梳：加仓规则是什么？风险预算(heat)还剩多少（`position-sizing`）？thesis 还成立吗？→ 信息齐了他自己判断；用户有胜率假设时可调 `elab-model` ev_model 算 breakeven 胜率/EV（数学参考，结论他下） | `elab-diagnosis`(+position-sizing) |
 | 帮我总结 EdgeLab 雷达/市场数据 | 把客观数据梳成他看得懂的（数值/分位/变化），帮他理解，不排名点名"该看哪个"、不转方向 | `elab-research`(自研模式) |
 
 **梳 vs 堵（拎清，别做成踢皮球）**：

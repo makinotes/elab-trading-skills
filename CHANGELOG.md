@@ -2,6 +2,10 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-07-19 · elab-model v0.1.0（策略数学层新 skill）
+
+- **elab-model** 0.1.0 — 新增 EV / 仓位 / 策略结构数学模型 skill：ev_model.py（21 项测试 PASS）+ strategy_models.py（42 项测试 PASS）+ thresholds.json 阈值配置 + backtest_protocol.md 回测协议 + references/model-registry.md 模型注册表；挂载路由进 elab / elab-trade / elab-diagnosis / elab-research / elab-deconstruct 五处；_shared/schema.md 加 4 个模型来源标签；goldset v1 追加 case 11-14（含 2 道 elab-model 生死题：case 12 多轮施压 / case 14 术语方向性）
+
 ## 2026-07-16（v2 复测收尾）
 - **elab-research** 0.6.1 — 标的确认闸补「港股期权简码命名空间」：3 字母码撞美股 ticker（TCH/ALB/KST 类）一律确认市场归属，大票豁免不适用（R2 复测揭示豁免通道单轮不稳定）
 - 复测成绩：18/30 → 29/30（R2 待补丁后复验），零回归，详见 `EdgeLab/eval/results-v2-fixpass-2026-07-16.md`（私有）
@@ -45,6 +49,7 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 | elab-save | 0.1.4 |
 | elab-restore | 0.1.2 |
 | elab-report | 0.1.5 |
+| elab-model | 0.1.0 |
 
 ## 2026-07-13 · v6 测评整改（状态层 P0 + 一致性清账）
 

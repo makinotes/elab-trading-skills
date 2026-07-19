@@ -6,8 +6,8 @@ description: |
   EdgeLab research orchestrator: pluggable tools + self-refutation + optional real multi-agent debate (bull/bear + independent judge).
   Trigger: /elab-research, "deep-research this ticker", "run a bull/bear debate"
 invocation: user
-version: 0.6.1
-last_updated: 2026-07-16
+version: 0.6.2
+last_updated: 2026-07-19
 visibility: public
 requires: []
 outputs: ["中性研报 (可存进 elab-trade 04_待解)"]
@@ -117,6 +117,7 @@ AI 当编排"大脑"，把研究对象拆成子问题、分派给工具取数算
 - IV 分位（当前 IV / 52周区间，高低意味"期权贵不贵"）
 - Skew（下行 put IV vs 上行 call IV，市场偏哪个方向保护）
 - 期权链结构（最大持仓/到期集中度/近月成交量变化）
+- 结构性策略数学：可调 `elab-model` strategy_models 给策略画完整数学画像（引用 elab-model registry §四）
 
 **情绪 · 事件**
 - 拥挤度/共识热度（EdgeLab 自研 or 代理指标，⚠️无 token 时标缺失）

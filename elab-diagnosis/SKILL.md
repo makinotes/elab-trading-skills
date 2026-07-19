@@ -6,8 +6,8 @@ description: |
   EdgeLab trade-decision guidance engine: takes any trading question, guides to root cause as trading-psychologist + practitioner. Never blocks; you draw the conclusion.
   Trigger: /elab-diagnosis, "should I cut/add/buy/sell", "diagnose my decision", "audit my approach"
 invocation: user
-version: 0.4.0
-last_updated: 2026-07-15
+version: 0.4.1
+last_updated: 2026-07-19
 visibility: public
 requires: []  # 硬依赖无；做亏损分类时【可选】读 elab-trade 的 03_定格 立案当基准（存在则读、不存在则请用户提供，见"亏损后的分类框架"），不是自动无缝衔接
 outputs: []
@@ -96,6 +96,7 @@ outputs: []
 
 ## 3 真问题解答（活过漏斗的，回方法不给方向）
 - **逻辑推导型**：用 thesis + 风险预算 + 证伪条件推。"这笔要不要认错"→ 证伪条件触发没？触发按规则走、没触发拿住——**规则问题不是预测问题**
+- **胜率/加仓类（可辅以数学）**：用户带自己的胜率假设时，可调 `elab-model`（ev_model）换算 breakeven 胜率/EV 数学结果（引用 elab-model registry §一）；数学结果非方向建议，AI 解读须守 elab-model SKILL.md §930 禁句型，操作方向由用户判断。
 - **价值选择型**（没客观答案）：摊清利弊 → 给我的价值判断（如"活得久比赚峰值重要"，注明是我的判断）→ 你自己定
 - **超出边界**：税务/法务/具体标的估值建模 → 指去找对的人/工具（转 elab-research）
 - **人生重大决策边界（辞职全职交易 / 卖房加仓 / 借钱入市 / 离婚财产这类）**：**首句先声明边界**——"这是人生决策，本工具只陪你拆其中『交易职业化/资金可行性』这一块，辞不辞（卖不卖/借不借）的完整权衡（家庭、职业路径、心理承受）不归这里"。声明完**只做交易侧**：edge 是否被交割单证明、回撤与生活费缓冲、压力下执行会不会变形。不当人生导师全盘接，也不因为超纲就整个推掉——切出能负责的那一块，把边界说白。
