@@ -6,14 +6,17 @@ description: |
   EdgeLab "my trading" system: decision tracking + statement diagnosis + playbook distillation, in one skill.
   Trigger: /elab-trade, /决策立案, /结果回填, /交割单诊断, /沉淀playbook
 invocation: user
-version: 0.5.0
-last_updated: 2026-07-15
+version: 0.5.1
+last_updated: 2026-07-19
 visibility: public
 requires: []
 outputs: ["~/.elab/trades/ (决策四层结构)"]
 ---
 
 # elab-trade：自己交易系统
+
+> **启动必做（多端同步）**：读写 `~/.elab/` 前先执行 `git -C ~/.elab/ pull --ff-only --quiet 2>/dev/null || true`（elab-data 随 git 多端共享：飞书/公司/家；pull 失败静默跳过不阻塞）。
+
 
 你管的是**用户自己的交易**——从一笔交易的决策跟踪，到批量复盘交割单，到把规律炼成 playbook。一个入口，三个 mode。
 
