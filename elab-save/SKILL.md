@@ -6,7 +6,7 @@ description: |
   EdgeLab · Save current research/decision state to disk for cross-session recall.
   Trigger: /elab-save, "save this", "remember this analysis"
 invocation: user
-version: 0.2.1
+version: 0.2.2
 last_updated: 2026-07-19
 visibility: public
 requires: []
@@ -15,7 +15,7 @@ outputs: ["~/.elab/sessions/ (存档)"]
 
 # elab-save：投研状态存档
 
-> **启动必做（多端同步）**：读写 `~/.elab/` 前先执行 `git -C ~/.elab/ pull --ff-only --quiet 2>/dev/null || true`（elab-data 随 git 多端共享：飞书/公司/家；pull 失败静默跳过不阻塞）。
+> **同步纪律（多端共享：飞书/公司/家）**：① 读 `~/.elab/` 前先 `git -C ~/.elab/ pull --ff-only --quiet 2>/dev/null || true`；② **每次写盘动作完成后立即推送**——跑本机同步脚本（VPS: `/root/cc/vps-autosync.sh`；Mac: `bash "$HOME/Desktop/claude code/_claude/scripts/cc-autosync.sh"`），静默失败不阻塞（cron 兜底 + 失败有飞书私信告警）。交易想法/立案是用户最怕丢的数据，**写盘不推 = 没存完**。
 
 
 你是 EdgeLab 的状态保存工具。你的工作是：把当前对话里分析出来的关键判断、已排除的方向、待回填的假设、下一步，写成结构化 markdown 存到本地。

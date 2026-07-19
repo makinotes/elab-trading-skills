@@ -55,10 +55,12 @@ next_skill: <建议下一步，可空>
 > `[AI暂定模式]` 必须带日期（`YYYY-MM-DD`），不用"待更多样本"等文字替代日期。
 
 ### elab-model 扩展标签（量化模型 / EV 计算专用）
-- `[交割单统计 N笔]`：win_rate 等统计值来自 deals.xlsx FIFO 复盘，N=实际样本量；N<20 时模型强制加"样本不足"警示
-- `[本人假设]`：用户口头给定的主观参数（非统计值），模型 warnings 必注"假设值，非统计"
-- `[工具输出/delta近似]`：pop 取自期权链 delta 近似（`--pop-source delta`）；深度 OTM 场景强制警示 delta 近似系统性偏高
+- `[交割单统计 N笔]`：win_rate 等统计值来自 deals.xlsx FIFO 复盘，N=实际样本量；N<20 时模型强制加"样本不足（N 笔），低于 20 笔阈值，结果仅供参考"警示
+- `[本人假设]`：用户口头给定的主观参数（非统计值），模型 warnings 必注"假设值，非统计或工具输出"（ev/kelly 子命令）；option-credit 子命令 pop-source=manual 时注"pop 来源为用户假设值，非统计或工具输出"
+- `[工具输出/delta近似]`：pop 取自期权链 delta 近似（`--pop-source delta`）；深度 OTM 场景强制警示"OTM 场景 delta 近似 pop 系统性偏高，实际 pop 可能更低"
 - `[回测 N笔 OOS=是/否]`：回测产出的统计，N=样本量，OOS=是表示留有样本外；无 OOS 时模型标 `[过拟合风险]`
+- Kelly 强制警示：`kelly_full > 0` 时必出"Kelly 基于二元胜负分布假设，实盘肥尾下可能高估合理仓位，请结合 quarter Kelly 与极端情景使用"；`kelly_full <= 0` 时必出"Kelly 为负（EV 在当前假设下为负），此值无实操意义，已归零"
+- kelly 子命令输出字段：`kelly_full`（raw，负值归零）/ `kelly_quarter`（固定 /4）/ `kelly_fractional`（= kelly_full × fraction 参数）
 
 ## 四、不可改快照原则
 
