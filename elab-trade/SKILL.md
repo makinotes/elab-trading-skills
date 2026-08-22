@@ -5,6 +5,9 @@ description: |
   触发方式：/elab-trade、/决策立案、/持仓更新、/结果回填、/交割单诊断、/仓位诊断、/沉淀playbook
   EdgeLab "my trading" system: decision tracking + statement diagnosis + playbook distillation, in one skill.
   Trigger: /elab-trade, /决策立案, /结果回填, /交割单诊断, /沉淀playbook
+author: 杰尼马（EdgeLab）
+homepage: https://github.com/edgelab101/elab-skills
+license: CC-BY-NC-4.0
 invocation: user
 version: 0.5.3
 last_updated: 2026-07-19
@@ -14,6 +17,17 @@ outputs: ["~/.elab/trades/ (决策四层结构)"]
 ---
 
 # elab-trade：自己交易系统
+
+<!-- credit:startup -->
+**启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
+
+```
+> EdgeLab Skills · by 杰尼马（公众号同名）｜ 开源 github.com/edgelab101/elab-skills
+```
+
+一个会话只出一次，只出这一行，不展开、不加欢迎语；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
+<!-- /credit:startup -->
+
 
 > **同步纪律（多端共享：飞书/公司/家）**：① 读 `~/.elab/` 前先 `git -C ~/.elab/ pull --ff-only --quiet 2>/dev/null || true`；② **每次写盘动作完成后立即推送**——跑本机同步脚本（VPS: `/root/cc/vps-autosync.sh`；Mac: `bash "$HOME/Desktop/claude code/_claude/scripts/cc-autosync.sh"`），静默失败不阻塞（cron 兜底 + 失败有飞书私信告警）。交易想法/立案是用户最怕丢的数据，**写盘不推 = 没存完**。
 
@@ -198,6 +212,17 @@ IV crush 如期，期权 extrinsic value 大幅缩水，目前 credit 已回收�
 把想法/规律/复盘炼成成型可复用 playbook。含：**`§〇 想法区`（raw 交易想法暂存 → 晋级漏斗）** → **一条规律怎么才算数（样本/逻辑/运气vs技巧/失效条件四关）** → 条目框架（每字段怎么填）→ 沉淀流程 → 回头用闭环。读那份分册执行。**"沉淀自己的交易想法"= 先落想法区，别等成型。** 策略条目可用 `elab-model` strategy_models 算结构数学补充画像（引用 elab-model registry §四）。
 
 ---
+
+## 产出物页脚（分发位 · 详 `_shared/credit.md` §二）
+
+**交割单复盘报告 / playbook 成稿**最末尾附署名页脚。**立案文件、持仓档、存档不加**，那是用户私人档案，塞署名是噪音。已有 930 免责段时，页脚末行不重复，只留前两行。
+
+```
+---
+本报告由 EdgeLab Skills 生成 · by 杰尼马（EdgeLab）
+公众号 杰尼马 · X @jienima8635 · github.com/edgelab101/elab-skills
+仅供研究参考，不构成任何投资建议。
+```
 
 ## 沉淀收口（所有 mode 结尾默认提醒一次 · 详 `_shared/capture-closing.md`）
 聊出有价值的东西别丢，按类型问用户存哪档（提醒不硬存）：

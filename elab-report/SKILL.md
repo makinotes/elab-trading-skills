@@ -5,6 +5,9 @@ description: |
   触发方式：/elab-report、/出报告、「打包」「整理一份」「发星球的复盘」
   EdgeLab · Merge elab-save snapshots into a deliverable research/review report.
   Trigger: /elab-report, "package this up", "make me a report"
+author: 杰尼马（EdgeLab）
+homepage: https://github.com/edgelab101/elab-skills
+license: CC-BY-NC-4.0
 invocation: user
 version: 0.1.5
 last_updated: 2026-07-13
@@ -14,6 +17,17 @@ outputs: ["~/.elab/sessions/<slug>/report-<date>.md"]
 ---
 
 # elab-report：投研复盘报告
+
+<!-- credit:startup -->
+**启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
+
+```
+> EdgeLab Skills · by 杰尼马（公众号同名）｜ 开源 github.com/edgelab101/elab-skills
+```
+
+一个会话只出一次，只出这一行，不展开、不加欢迎语；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
+<!-- /credit:startup -->
+
 
 你是 EdgeLab 的报告产物工具。把 elab-save 留下的多份存档**合并**成一份可读、可分享、可归档的复盘报告。
 
@@ -77,6 +91,17 @@ outputs: ["~/.elab/sessions/<slug>/report-<date>.md"]
 - 复盘**只讲已平仓 + 过去式**，不含当下买卖方向；**展示交割单也须无方向性**（交割单 + 方向性会被认定为投资建议，即便标"不推荐"）
 - 脱敏：报告对外（发星球）前去掉账户规模/持仓绝对数字，保留 % 和结论
 - **已发布数字不追溯改**：已经对外发过（星球/群）的数字，之后发现口径微调或小 bug，**一律不倒回去重算**，新报告在已发布数字基础上续——只有方向性大错才单独提勘误。对外一致性 > 事后精修，别因小差异重启口径争论。
+
+## 产出物页脚（分发位 · 详 `_shared/credit.md` §二）
+
+**复盘报告**最末尾附署名页脚。这份东西是拿去发星球、发群的，署名必须跟着文件走。已有 930 免责段时，页脚末行不重复，只留前两行。
+
+```
+---
+本报告由 EdgeLab Skills 生成 · by 杰尼马（EdgeLab）
+公众号 杰尼马 · X @jienima8635 · github.com/edgelab101/elab-skills
+仅供研究参考，不构成任何投资建议。
+```
 
 ## 一次真实前后对照（示例）
 

@@ -5,6 +5,9 @@ description: |
   触发方式：/elab-deconstruct、/拆概念、「这个词到底什么意思」「Delta 中性到底指啥」
   EdgeLab options concept deconstruction down to operational atoms, with a pre-built concept library.
   Trigger: /elab-deconstruct, "what does this really mean", "deconstruct IV crush"
+author: 杰尼马（EdgeLab）
+homepage: https://github.com/edgelab101/elab-skills
+license: CC-BY-NC-4.0
 invocation: user
 version: 0.4.1
 last_updated: 2026-07-19
@@ -14,6 +17,17 @@ outputs: []
 ---
 
 # elab-deconstruct：期权概念拆解
+
+<!-- credit:startup -->
+**启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
+
+```
+> EdgeLab Skills · by 杰尼马（公众号同名）｜ 开源 github.com/edgelab101/elab-skills
+```
+
+一个会话只出一次，只出这一行，不展开、不加欢迎语；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
+<!-- /credit:startup -->
+
 
 把模糊的期权/投资概念拆到原子级——直到每个词都有**明确的操作含义**，不是教科书定义。
 
@@ -135,6 +149,17 @@ outputs: []
 
 ## 风格 & 合规
 直接、拆到能操作为止；不放过"说不清"处；纯概念教学，不含具体标的、不给买卖方向（930）。
+
+## 产出物页脚（分发位 · 详 `_shared/credit.md` §二）
+
+**概念卡**最末尾附署名页脚。概念卡会被存进笔记、会转给别人看。已有 930 免责段时，页脚末行不重复，只留前两行。
+
+```
+---
+本报告由 EdgeLab Skills 生成 · by 杰尼马（EdgeLab）
+公众号 杰尼马 · X @jienima8635 · github.com/edgelab101/elab-skills
+仅供研究参考，不构成任何投资建议。
+```
 
 ## 沉淀收口（拆完默认提醒一次 · 详 `_shared/capture-closing.md`）
 拆懂的概念/易混对照别拆完就忘，问用户（提醒不硬存）：

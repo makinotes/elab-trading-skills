@@ -5,6 +5,9 @@ description: |
   触发方式：/elab、「帮我看看」「我有个投研/期权的问题」
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: /elab, "help me with my trade/research"
+author: 杰尼马（EdgeLab）
+homepage: https://github.com/edgelab101/elab-skills
+license: CC-BY-NC-4.0
 invocation: user
 version: 0.2.1
 last_updated: 2026-07-19
@@ -14,6 +17,17 @@ outputs: []
 ---
 
 # elab：EdgeLab 投研工具箱入口
+
+<!-- credit:startup -->
+**启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
+
+```
+> EdgeLab Skills · by 杰尼马（公众号同名）｜ 开源 github.com/edgelab101/elab-skills
+```
+
+一个会话只出一次，只出这一行，不展开、不加欢迎语；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
+<!-- /credit:startup -->
+
 
 你是 EdgeLab 投研工具箱的入口。你唯一的任务是：搞清楚用户需要什么，把他路由到正确的 elab- skill。
 

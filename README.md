@@ -1,5 +1,7 @@
 # EdgeLab Skills
 
+> **by 杰尼马（EdgeLab）** · 公众号 杰尼马 · X [@jienima8635](https://x.com/jienima8635)
+
 一套用于 **AI × 美股期权投研** 的 agent skills。把投研决策、对标、概念拆解、复盘的方法论沉淀成可复用的工作流。**不绑定特定 AI 产品**：Claude Code、OpenAI Codex，以及任何按 [Agent Skills 规范](https://developers.openai.com/codex/skills)（`SKILL.md` + YAML frontmatter）加载 skill 的第三方 agent（如 workbuddy 等）都能装能用——整套 skill 只依赖"能读文件 + 能跑 shell"。
 
 > **内核命题**：AI 时代散户的护城河不是"知道得更多"，是把判断过程摊开——人和 AI 各担其责、每个决策可回溯。看得见的决策，才可能被迭代成 edge。整套 skill 都是这一句的展开（详见 `elab/SKILL.md`）。
@@ -8,35 +10,47 @@
 
 ## 安装
 
-把 skill 目录放进你所用 agent 的 skills 目录即可。先 clone：
+### 一键装（推荐）
 
 ```bash
 git clone https://github.com/edgelab101/elab-skills.git
+cd elab-skills
+bash install.sh
 ```
 
-**Claude Code**（个人 skills 目录 `~/.claude/skills/`）：
+脚本自动识别你机器上装了哪些 agent，把 `elab*` 和 `_shared` 装进各自的 skills 目录。四个 runtime 实测支持：
+
+| Agent | 个人 skills 目录 |
+|---|---|
+| Claude Code | `~/.claude/skills/` |
+| OpenAI Codex | `~/.codex/skills/` |
+| CodeBuddy | `~/.codebuddy/skills/` |
+| WorkBuddy | `~/.workbuddy/skills/` |
+
+其他用法：
 
 ```bash
-mkdir -p ~/.claude/skills/
-cp -R elab-skills/elab* elab-skills/_shared ~/.claude/skills/   # _shared 是通用规范，别漏
+bash install.sh --list          # 只看识别到哪些 agent，不动文件
+bash install.sh --link          # 软链模式：以后 git pull 就自动更新，不用重装
+bash install.sh claude codex    # 只装指定的
 ```
 
-**OpenAI Codex**（个人 `~/.codex/skills/`，项目级用 `.codex/skills/`）：
+### 手动装
+
+不想跑脚本，或者用的 agent 不在上面这张表里：把 `elab*` 和 `_shared` 拷进它的 skills 目录就行。
 
 ```bash
-mkdir -p ~/.codex/skills/
-cp -R elab-skills/elab* elab-skills/_shared ~/.codex/skills/
+mkdir -p ~/你的agent/skills/
+cp -R elab-skills/elab* elab-skills/_shared ~/你的agent/skills/   # _shared 是通用规范，别漏
 ```
 
-**其他第三方 agent**（workbuddy 等，凡支持 Agent Skills 规范 / `SKILL.md` 目录式加载的）：把 `elab*` + `_shared` 拷进它的 skills 目录，或直接把本 repo 目录指给它。**连 skill 机制都没有的 agent 也能用**：让它读 `elab/SKILL.md` 当入口路由、按需读各 `elab-<名>/SKILL.md` 照着执行即可。
+整套 skill 只依赖「能读文件 + 能跑 shell」，不绑定特定 AI 产品。**连 skill 机制都没有的 agent 也能用**：让它读 `elab/SKILL.md` 当入口路由，按需读各 `elab-<名>/SKILL.md` 照着执行。
 
-> 想免每次 cp，可改用软链（`git pull` 后自动生效），以 Claude Code 为例：
-> ```bash
-> cd elab-skills
-> for d in elab elab-* _shared; do ln -sfn "$(pwd)/$d" ~/.claude/skills/$d; done
-> ```
+### 怎么触发
 
-**触发方式按 runtime 不同**：Claude Code 用斜杠命令（`/elab`）或自然语言；Codex 用 `$` mention（`$elab`）、`/skills` 或自然语言隐式匹配；其他 agent 按其调用习惯。skill 内文说的 `/elab-xxx` 泛指"调用对应 skill"。
+按 runtime 不同：Claude Code 用斜杠命令 `/elab` 或直接说人话；Codex 用 `$elab` mention、`/skills`，或自然语言隐式匹配；CodeBuddy / WorkBuddy 按其调用习惯。skill 内文写的 `/elab-xxx` 泛指「调用对应 skill」。
+
+拿不准用哪个就敲 `/elab`，它是入口，会把你路由到对的那个。
 
 ## 更新
 
@@ -46,7 +60,7 @@ skill 会持续迭代。**一键更新（推荐）**——在 elab-skills 目录
 bash update.sh
 ```
 
-它自动：`git pull` → 显示 CHANGELOG 本次变更 → 同步到已安装的 skills 目录（`~/.claude/skills/` 和 `~/.codex/skills/` 都检测；cp 或软链装法都自动处理，含 `_shared`）。
+它自动：`git pull` → 显示 CHANGELOG 本次变更 → 同步到已安装的 skills 目录（Claude Code / Codex / CodeBuddy / WorkBuddy 四个都检测；cp 或软链装法都自动处理，含 `_shared`）。
 
 **自动更新（可选，一次性设置）**——跑一次，之后每天自动跟进最新版：
 
@@ -54,14 +68,14 @@ bash update.sh
 bash install-autoupdate.sh        # 默认每天 9:00；bash install-autoupdate.sh 21 改 21:00
 ```
 
-> 手动等价：`git pull` 后，cp 装的重跑上面的 `cp -R` 行，软链装的即自动生效。
+> 手动等价：`git pull` 后，cp 装的重跑一次 `bash install.sh`，软链装的即自动生效。
 > 每次改动都记在 `CHANGELOG.md`（版本 + 一句话），pull 完扫一眼就知道变了什么。
 > ⚠️ 自动更新 = 主理人 push 后静默跟进；想先看变更再更就别开，用手动。
 
 > ⚠️ **本地改过 skill 文件的注意**：更新会覆盖你的改动——`update.sh`（cp 装法）同步时整目录覆盖，开了自动更新更是每天静默覆盖；软链装法 `git pull` 时直接冲突。想自定义，三选一：
 > ① 改进建议**提 PR**（见 `CONTRIBUTING.md`），合并后所有人受益；
 > ② **fork / 复制一份出去改**，代价是脱离更新通道，之后自己手动合并上游；
-> ③ **个人偏好写进你 agent 的全局配置**（Claude Code 的 `CLAUDE.md` / Codex 的 `AGENTS.md`）去覆盖行为，不动 skill 文件本身——这样既保留偏好又不挡更新（推荐）。
+> ③ **个人偏好写进你 agent 的全局配置**（Claude Code 的 `CLAUDE.md` / Codex 的 `AGENTS.md` / CodeBuddy 与 WorkBuddy 的对应全局规则文件）去覆盖行为，不动 skill 文件本身——这样既保留偏好又不挡更新（推荐）。
 
 ## Skill 清单
 
@@ -84,6 +98,16 @@ bash install-autoupdate.sh        # 默认每天 9:00；bash install-autoupdate.
 ## 合规
 
 这些 skill 用于**投资者教育与方法论**，不构成投资建议、不荐股、不喊单、不承诺收益。所有决策由使用者自行作出。
+
+## 作者
+
+**杰尼马**（EdgeLab）。专注美港股与期权研究，持续记录方法、工具与实盘。
+
+- 公众号：**杰尼马**
+- X：[@jienima8635](https://x.com/jienima8635)
+- GitHub：[edgelab101](https://github.com/edgelab101)
+
+用得上就点个 star，有问题开 issue。
 
 ## License
 

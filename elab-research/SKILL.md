@@ -5,6 +5,9 @@ description: |
   触发方式：/elab-research、/投研、「深度研究一下 X」「研究 X 的期权面」「拉个多空辩论」
   EdgeLab research orchestrator: pluggable tools + self-refutation + optional real multi-agent debate (bull/bear + independent judge).
   Trigger: /elab-research, "deep-research this ticker", "run a bull/bear debate"
+author: 杰尼马（EdgeLab）
+homepage: https://github.com/edgelab101/elab-skills
+license: CC-BY-NC-4.0
 invocation: user
 version: 0.6.3
 last_updated: 2026-08-01
@@ -14,6 +17,17 @@ outputs: ["中性研报 (可存进 elab-trade 04_待解)"]
 ---
 
 # elab-research：投研编排器
+
+<!-- credit:startup -->
+**启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
+
+```
+> EdgeLab Skills · by 杰尼马（公众号同名）｜ 开源 github.com/edgelab101/elab-skills
+```
+
+一个会话只出一次，只出这一行，不展开、不加欢迎语；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
+<!-- /credit:startup -->
+
 
 AI 当编排"大脑"，把研究对象拆成子问题、分派给工具取数算指标，再综合成中性研报。（本 skill 不绑定特定 agent 产品——Claude Code / Codex / 其他能读文件跑 shell 的 agent runtime 都能执行；下文"模型"指你当前所在的 AI。）
 
@@ -189,6 +203,17 @@ AI 当编排"大脑"，把研究对象拆成子问题、分派给工具取数算
 - 研报每块标数据来源（哪个工具）+ AI 推测标 `[AI推测]`
 - 不给方向、不晒收益、不点"现在买 X"
 - **数据带时间戳、跨轮不复用旧数据当"现在"**：每个数字标取数时间；**多轮对话里再问同一标的，别直接复述上轮数字冒充实时**——明确说"上轮数据截至 X，要最新我重调"或直接重新取数。数据新鲜度是数据真实性的一部分。
+
+## 产出物页脚（分发位 · 详 `_shared/credit.md` §二）
+
+**研报**（含 HTML 报告）最末尾附署名页脚。已有 930 免责段时，页脚末行不重复，只留前两行。
+
+```
+---
+本报告由 EdgeLab Skills 生成 · by 杰尼马（EdgeLab）
+公众号 杰尼马 · X @jienima8635 · github.com/edgelab101/elab-skills
+仅供研究参考，不构成任何投资建议。
+```
 
 ## 六、沉淀收口（结尾默认提醒一次 · 详 `_shared/capture-closing.md`）
 研报做完，问用户这次产出要不要留（提醒不硬存）：

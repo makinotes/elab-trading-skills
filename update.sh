@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # EdgeLab skills 一键更新：拉最新 + 同步到已安装的 skills 目录
-# 支持 Claude Code (~/.claude/skills) 和 Codex (~/.codex/skills)，检测到哪个 runtime 就同步哪个
+# 支持 Claude Code / Codex / CodeBuddy / WorkBuddy，检测到哪个 runtime 就同步哪个
 # 用法：在 elab-skills 目录里跑  bash update.sh
 set -euo pipefail
 cd "$(cd "$(dirname "$0")" && pwd)"
@@ -26,8 +26,9 @@ sed -n '1,42p' CHANGELOG.md 2>/dev/null || echo "(无 CHANGELOG)"
 echo
 echo "== 3/3 同步到已安装的 skills 目录 =="
 SYNCED=0
-for DEST in "$HOME/.claude/skills" "$HOME/.codex/skills"; do
-  # 只同步"该 runtime 存在（有 ~/.claude 或 ~/.codex）或此处已装过 elab"的目录，不硬造
+for DEST in "$HOME/.claude/skills" "$HOME/.codex/skills" \
+            "$HOME/.codebuddy/skills" "$HOME/.workbuddy/skills"; do
+  # 只同步"该 runtime 存在或此处已装过 elab"的目录，不硬造
   RUNTIME_DIR="$(dirname "$DEST")"
   [ -d "$RUNTIME_DIR" ] || [ -e "$DEST/elab" ] || continue
   mkdir -p "$DEST"
@@ -47,7 +48,7 @@ for DEST in "$HOME/.claude/skills" "$HOME/.codex/skills"; do
   SYNCED=1
 done
 if [ "$SYNCED" = 0 ]; then
-  echo "⚠️ 未发现 ~/.claude 或 ~/.codex，跳过同步。手动把 elab* + _shared 拷进你 agent 的 skills 目录（见 README §安装）。"
+  echo "⚠️ 未发现任何支持的 runtime，跳过同步。手动把 elab* + _shared 拷进你 agent 的 skills 目录（见 README §安装）。"
 fi
 
 echo
