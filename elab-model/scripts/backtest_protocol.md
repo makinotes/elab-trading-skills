@@ -2,7 +2,7 @@
 
 > 版本：v1.0.0 · 2026-07-19
 > 仅定协议，不含实现。实现归 quant-engine（Codex 领地）；elab-model 侧规定请求/结果格式，两边照协议对话。
-> 设计 SSOT：`docs/plans/2026-07-19-elab-model-design.md` §4 + §5
+> 设计 SSOT：`docs/plans/2026-07-19-elab-model-design.md` §4 + §5（私有仓 `edgelab101/elab-skills-internal`）
 
 ---
 
@@ -235,7 +235,7 @@ ev_model.py ev \
 
 **验收 = 协议双签，不绑实现跑通进度。**
 
-elab 侧（elab 侧）和 quant-engine 侧（Codex 执行）分别在此文件末尾追加确认行：
+elab 侧和 quant-engine 侧（Codex 执行）分别在此文件末尾追加确认行：
 
 ```
 elab 侧：已读协议 §1–§5，接受字段定义与三闸要求。— [日期]
