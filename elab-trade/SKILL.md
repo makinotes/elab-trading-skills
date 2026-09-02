@@ -1,19 +1,20 @@
 ---
 name: elab-trade
 description: |
-  EdgeLab 自己交易系统。一个入口管你自己交易的全部：决策跟踪（立案/持仓/回填/画像）、交割单诊断（券商接入/FIFO/复盘方法论）、playbook 沉淀（炼规律成成型打法）。四层结构 + 来源标签 + 不可改快照。数据你自己的，不含主理人数据，中性不给方向。
-  触发方式：/elab-trade、/决策立案、/持仓更新、/结果回填、/交割单诊断、/仓位诊断、/沉淀playbook
+  EdgeLab 自己交易系统。一个入口管用户自己的决策跟踪、持仓/订单/成交读取、交割单诊断和 playbook 沉淀。支持通过共享连接层只读接入富途、长桥、IBKR，或导入券商文件。四层结构 + 来源标签 + 不可改快照，中性不给方向。
+  触发方式：/elab-trade、/决策立案、/持仓更新、/结果回填、/交割单诊断、/查看持仓/订单/成交、/沉淀playbook
   EdgeLab "my trading" system: decision tracking + statement diagnosis + playbook distillation, in one skill.
   Trigger: /elab-trade, /决策立案, /结果回填, /交割单诊断, /沉淀playbook
-author: 杰尼马（EdgeLab）
-homepage: https://github.com/edgelab101/elab-skills
 license: CC-BY-NC-4.0
-invocation: user
-version: 0.5.3
-last_updated: 2026-07-19
-visibility: public
-requires: []
-outputs: ["~/.elab/trades/ (决策四层结构)"]
+metadata:
+  author: "杰尼马（EdgeLab）"
+  homepage: "https://github.com/edgelab101/elab-skills"
+  invocation: "user"
+  version: "0.6.0"
+  last_updated: "2026-09-02"
+  visibility: "public"
+  requires: '["_shared/broker-connectors.md（连接券商时）"]'
+  outputs: '["~/.elab/trades/ (决策四层结构)"]'
 ---
 
 # elab-trade：自己交易系统
@@ -40,16 +41,27 @@ outputs: ["~/.elab/trades/ (决策四层结构)"]
 1. 框架是 EdgeLab 的，**数据是用户自己的**，不含主理人任何持仓/盈亏
 2. **不替用户做决定、不给买卖方向**（930）：只记录、诊断、揭示风险、给方法层建议。持仓中只分析不推加减仓
 
-> 自包含：本 SKILL.md + `references/` 四个分册（broker-ingest / diagnosis-mode / playbook-mode / position-sizing）即可执行。
+> 本 SKILL.md + `references/` 四个分册可完成文件导入与复盘；直连券商数据时还要读取 `_shared/broker-connectors.md`。
 
 ## Mode 路由（先判断用户要哪个）
 
 | 用户意图 | Mode | 在哪 |
 |---|---|---|
 | 记/跟踪一笔交易的决策（开仓前立案、持仓更新、平仓回填） | **A 决策跟踪** | 本文下方 |
-| 诊断已有持仓 / 复盘一批交割单（券商导出的成交） | **B 交割单诊断** | `references/diagnosis-mode.md` |
+| 查看或诊断已有持仓、订单、成交；复盘券商直连或导出的成交 | **B 券商数据 / 交割单诊断** | `_shared/broker-connectors.md` + `references/broker-ingest.md` + `references/diagnosis-mode.md` |
 | 把攒下的规律炼成成型可复用 playbook | **C playbook 沉淀** | `references/playbook-mode.md` |
 | 模糊 | 问一句："你是要记一笔新交易、复盘历史成交、还是炼 playbook？" |
+
+## 共享券商连接入口（v0.6.0 只读）
+
+用户提到富途、长桥、IBKR，或要求读取自己的持仓/订单/成交时，先读 `_shared/broker-connectors.md`：
+
+- 用户指定 provider → 本轮使用指定项；说“以后默认”才在最小查询通过后保存偏好。
+- 已直连 → 从官方 MCP/CLI/OpenD 读取并按共享字段契约归一；必须区分订单（order）和成交（fill）。
+- 未直连或用户给文件 → 走 `references/broker-ingest.md` 的手动导出/文件导入。
+- 多账户默认只显示别名或尾号；不把完整账户号、Token、密码写入 `~/.elab/` 或报告。
+- 本版本禁止下单、改单、撤单、DCA 和生成待提交交易指令；“查看订单”是读取，不是执行授权。用户追问当下买卖方向仍交 `elab-diagnosis` 梳理。
+- 用户要求未支持的账户直连时，明确列出本版支持富途、长桥、IBKR；说明公开社区博主研究不等于账户接入，再提供用户授权导出的 CSV/Excel 只读导入路径。
 
 ## 共享：来源标签系统（强制 · 930 护栏）
 
@@ -205,8 +217,8 @@ IV crush 如期，期权 extrinsic value 大幅缩水，目前 credit 已回收�
 
 ---
 
-# Mode B · 交割单诊断 → `references/diagnosis-mode.md`
-诊断已有持仓 / 复盘一批交割单。含：先确认券商（富途/长桥/IBKR，接入详见 `references/broker-ingest.md`）→ 字段归一 → **FIFO 配对算法** → **FIFO 统计完成后将 win_rate/avg_win/avg_loss/样本量喂 `elab-model` ev_model 算 EV/breakeven**（引用 elab-model registry §一，不复制公式）→ 持仓诊断框架 → **交割单复盘方法论（思路/因素/结论）**。读那份分册执行。
+# Mode B · 券商数据 / 交割单诊断 → `_shared/broker-connectors.md` + `references/diagnosis-mode.md`
+查看当前持仓、未完成订单、历史订单或成交时，优先使用用户指定且已验证的只读连接；需要批量/离线复盘或连接不可用时用 `references/broker-ingest.md` 导入文件。字段归一后再走 **FIFO 配对算法** → **FIFO 统计完成后将 win_rate/avg_win/avg_loss/样本量喂 `elab-model` ev_model 算 EV/breakeven**（引用 elab-model registry §一，不复制公式）→ 持仓诊断框架 → **交割单复盘方法论（思路/因素/结论）**。
 
 # Mode C · playbook 沉淀 → `references/playbook-mode.md`
 把想法/规律/复盘炼成成型可复用 playbook。含：**`§〇 想法区`（raw 交易想法暂存 → 晋级漏斗）** → **一条规律怎么才算数（样本/逻辑/运气vs技巧/失效条件四关）** → 条目框架（每字段怎么填）→ 沉淀流程 → 回头用闭环。读那份分册执行。**"沉淀自己的交易想法"= 先落想法区，别等成型。** 策略条目可用 `elab-model` strategy_models 算结构数学补充画像（引用 elab-model registry §四）。

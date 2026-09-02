@@ -2,6 +2,15 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-02 · EdgeLab Skills 0.4.0 券商只读连接层
+
+- **套件版本** 0.4.0 — 新增 `_shared/SUITE_VERSION`；正式发布后以 `v0.4.0` tag 固化，上一已知稳定回退基线为 `a1bae7b`
+- **elab** 0.4.0 — 新增“连接/指定/默认/比较富途、长桥、IBKR 数据”路由，不新增会抢触发的顶层 Skill；按研究数据与账户数据续接 `elab-research` / `elab-trade`
+- **elab-research** 0.7.0 — 支持消费已验证券商连接的资讯、行情与期权数据；增加 provider 优先级、禁止静默混源、来源时间/实时性标注；frontmatter 自定义字段收进标准 `metadata`
+- **elab-trade** 0.6.0 — 支持只读查询账户、持仓、订单、成交，并保留文件导入回退；明确区分 order/fill，禁止交易写操作；frontmatter 自定义字段收进标准 `metadata`
+- **共享连接器** — 新增富途 OpenD、长桥 CLI/MCP、IBKR 官方 MCP 的安装与最小只读验收指引，以及不保存凭证的本地默认 provider 工具
+- **更新/回退** — `update.sh --to vX.Y.Z` 强制读取远端同名发布 tag、可安装无 `SUITE_VERSION` 的旧版且不改变 Git 工作树；安装/升级/回退都会先清理整套受管命名空间，避免残留新版 Skill 造成混装，并输出套件版本
+
 ## 2026-09-02 · elab-futu-research 1.3.3 行为修复
 
 - **触发与对齐** — 自然语言“先告诉我下一步/先别执行”也会加载 skill 并完成启动对齐；数字 UID 明确默认富途；未明确时间范围不得抓取，通用“开始/继续”不算时间确认
@@ -57,9 +66,10 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 
 | skill | version |
 |---|---|
-| elab | 0.3.0 |
-| elab-trade | 0.5.3 |
-| elab-research | 0.6.3 |
+| **EdgeLab Skills suite** | **0.4.0** |
+| elab | 0.4.0 |
+| elab-trade | 0.6.0 |
+| elab-research | 0.7.0 |
 | elab-diagnosis | 0.4.1 |
 | elab-benchmark | 0.4.0 |
 | elab-deconstruct | 0.4.1 |

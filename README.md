@@ -8,6 +8,8 @@
 
 > 这些 skill **公开免费**，谁都能装。其中 `elab-research` 的「自研数据」模式（雷达 / 恐慌指数）需要 EdgeLab 会员 token 才能读取——没有 token 会**优雅降级**到公开工具（OpenBB 等），其余功能照常用。
 
+当前套件版本：**0.4.0**（安装后也可查看 `_shared/SUITE_VERSION`）。
+
 ## 安装
 
 ### 一键装（推荐）
@@ -52,12 +54,15 @@ cp -R elab-skills/elab* elab-skills/_shared ~/你的agent/skills/   # _shared �
 
 拿不准用哪个：Codex 输入 `$elab`，Claude Code 输入 `/elab`；主入口会把你路由到对应 skill。
 
+你也可以直接说：“我要用富途数据”“以后默认用长桥”“用 IBKR 查看我的历史成交”。`elab` 会先检查连接并给出当前 runtime 的安装/授权方法；验证通过后，公开市场、资讯和期权数据交给 `elab-research`，账户、持仓、订单与成交交给 `elab-trade`。连接器说明见 [`_shared/broker-connectors.md`](_shared/broker-connectors.md)。
+
 ## 更新
 
 skill 会持续迭代。**一键更新（推荐）**——在 elab-skills 目录里跑：
 
 ```bash
 bash update.sh
+bash update.sh --to v0.4.0   # 安装/回退到已发布版本；不改变当前 Git 工作树
 ```
 
 它自动：`git pull` → 显示 CHANGELOG 本次变更 → 同步到已安装的 skills 目录（Claude Code / Codex / CodeBuddy / WorkBuddy 四个都检测；cp 或软链装法都自动处理，含 `_shared`）。
@@ -70,6 +75,7 @@ bash install-autoupdate.sh        # 默认每天 9:00；bash install-autoupdate.
 
 > 手动等价：`git pull` 后，cp 装的重跑一次 `bash install.sh`，软链装的即自动生效。
 > 每次改动都记在 `CHANGELOG.md`（版本 + 一句话），pull 完扫一眼就知道变了什么。
+> 正式版本使用 `vX.Y.Z` Git tag；`--to` 只接受已发布 tag，方便错误版本快速回退。
 > ⚠️ 自动更新 = 主理人 push 后静默跟进；想先看变更再更就别开，用手动。
 
 > ⚠️ **本地改过 skill 文件的注意**：更新会覆盖你的改动——`update.sh`（cp 装法）同步时整目录覆盖，开了自动更新更是每天静默覆盖；软链装法 `git pull` 时直接冲突。想自定义，三选一：
@@ -81,6 +87,7 @@ bash install-autoupdate.sh        # 默认每天 9:00；bash install-autoupdate.
 
 **🔧 基础设施**
 - `elab` — 主入口路由，按意图分发到下面的 skill
+- `_shared/broker-connectors.md` — 富途、长桥、IBKR 的共享连接引导、provider 选择和只读安全契约；不是额外顶层 Skill
 - `elab-save` / `elab-restore` / `elab-report` — 投研状态三件套：存档 / 接续 / 合并成复盘报告
 
 **📊 投研 / 决策**
@@ -94,7 +101,13 @@ bash install-autoupdate.sh        # 默认每天 9:00；bash install-autoupdate.
 
 `elab-futu-research` 使用 Python 3.9+ 标准库，无需 API key，不登录账户，也不读取浏览器 Cookie。运行前必须明确选择时间范围；公开接口、限流和平台可见性决定归档边界。虚构样例见 [报告](docs/elab-futu-research/sample-report.md) 与 [概览卡](docs/elab-futu-research/sample-card.png)。
 
-## 数据接入（可选 · 会员）
+## 券商数据接入（可选）
+
+v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MCP、IBKR 官方 MCP。默认只读，可用于资讯、行情、期权、账户、持仓、订单和成交；不会因为一句“我要用某家数据”就自动安装软件、扩大 OAuth 权限或执行交易。
+
+连接偏好只保存 provider 名称到 `~/.elab/broker-connectors.json`，不保存账户、密码、Token 或 App Secret。每次真实取数仍现场验证连接、权限、时间戳和实时/延迟状态。
+
+## EdgeLab 会员数据（可选）
 
 `elab-research` 的自研模式可接入 EdgeLab 雷达 / 恐慌指数数据。接入方式：把会员 token 存到 `~/.elab/token`，skill 会自动带上。没有 token 时不影响其他功能。
 

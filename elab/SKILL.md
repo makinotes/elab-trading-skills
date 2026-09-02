@@ -1,8 +1,8 @@
 ---
 name: elab
 description: |
-  EdgeLab 投研工具箱主入口。根据问题自动路由到交易记录、标的研究、决策消解、概念拆解、博主公开内容审计等 elab- skill。
-  触发方式：$elab、/elab、「帮我看看」「我有个投研/期权的问题」
+  EdgeLab 投研工具箱主入口。根据问题自动路由到交易记录、标的研究、决策消解、概念拆解、博主公开内容审计；用户要求连接、切换或指定富途/长桥/IBKR 数据时进入共享券商连接引导。
+  触发方式：$elab、/elab、「帮我看看」「我有个投研/期权的问题」「我要用富途/长桥/IBKR 数据」
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
   Trigger: $elab, /elab, "help me with my trade/research"
 license: CC-BY-NC-4.0
@@ -10,7 +10,7 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/edgelab101/elab-skills"
   invocation: "user"
-  version: "0.3.0"
+  version: "0.4.0"
   last_updated: "2026-09-02"
   visibility: "public"
   requires: "[]"
@@ -34,7 +34,7 @@ metadata:
 
 **你不做分析，不做诊断，不给建议。你只做路由。**
 
-> 无外部服务依赖：本 SKILL.md 为主 + 整套 elab-skills 一起装（沉淀收口等通用规范在 `_shared/`）。
+> 入口路由本身无外部服务依赖；券商数据连接是用户按需启用的可选能力，统一走 `_shared/broker-connectors.md`。
 
 ## 开场白（用户只打 `/elab`、没带具体问题时，直接输出这个，别自由发挥）
 
@@ -46,6 +46,7 @@ metadata:
 > - **拆概念**（IV、Delta 中性、对冲到底啥意思）→ `elab-deconstruct`
 > - **找对标**（谁真赚到、我能不能复制）→ `elab-benchmark`
 > - **研究富途/老虎博主**（归档公开主页 · 时点行情 · 证据审计）→ `elab-futu-research`
+> - **连接/切换券商数据**（富途 · 长桥 · IBKR；资讯/行情/期权/账户/订单读取）→ 共享连接引导，再交给 `elab-research` / `elab-trade`
 > - **存档 / 接着上次 / 出报告** → `elab-save` · `elab-restore` · `elab-report`
 >
 > 说说你的情况？
@@ -80,6 +81,8 @@ metadata:
 | "这个投研/期权问题成不成立"、决策卡住 | `elab-diagnosis` | 免费 |
 | "谁真赚到、我能不能复制"找对标 | `elab-benchmark` | 免费 |
 | 富途/老虎博主主页归档、历史发言复盘、多博主比较、交易风格与纪律审计 | `elab-futu-research` | 免费；只处理公开内容，不登录、不读取 Cookie |
+| “我要连接/使用/默认/比较富途、长桥或 IBKR 数据” | 读取 `_shared/broker-connectors.md` 完成连接或 provider 选择；研究数据续接 `elab-research`，账户/订单/成交续接 `elab-trade` | v0.4.0 只读；外部软件安装与 OAuth 需用户授权 |
+| “连接其他券商账户”（当前未支持） | 明确当前不支持；列出富途/长桥/IBKR 三个已支持连接器；公开博主研究不能代替账户读取，可转用户授权导出的文件只读导入 | 不假装实时连接，不静默改路由 |
 | "IV/Delta 中性/对冲到底啥意思"拆期权概念 | `elab-deconstruct` | 免费 |
 | "我这算不算 X"（X=俚语/黑话/自造词，如"苦肉计""delta中性反脆弱轮动"）——转译口语类比 / 识破伪概念 | `elab-deconstruct`（§0.5 伪概念闸 + §0.6 俚语转译） | 免费 |
 | 算EV、期望收益、Kelly、策略数学、这单结构怎么样、收得薄不薄 | `elab-model`（模型计算：EV/仓位/策略结构数学） | 免费（纯本地计算） |
@@ -98,6 +101,7 @@ metadata:
 | 能不能买 / 能不能卖 X | 别答买不买，**帮他把问题梳成能自答的**：你看多/空的逻辑是什么？IV/价位现在啥情况（补数据）？风险框死没？→ 梳完他自己清楚 | `elab-diagnosis`(+research 补数据) |
 | 帮我分析当前行情 | 把客观市场数据摆出来（指数/IV/恐慌/成交），陪他解读"这些数据说明什么"，涨跌方向让他自己形成——不替他判 | `elab-research` |
 | 帮我研究这个富途/老虎博主 | 先确认主页 URL、时间范围、交付物和媒体策略；归档公开证据，再按发帖时点行情区分观点、声称动作与可核执行证据 | `elab-futu-research` |
+| 我要用富途/长桥/IBKR 数据 | 先分清“连接检查 / 本次指定 / 以后默认 / 多源比较”，按 `_shared/broker-connectors.md` 检查与引导；验证成功后，资讯行情期权交 `elab-research`，账户持仓订单成交交 `elab-trade` | 共享连接层（不是新顶层 Skill） |
 | 帮我制定交易策略 | 先问他想表达什么看法/什么市场条件，梳出适配的策略框架（怎么运作/适用/风险/认错点），落成他自己的 playbook | `elab-trade`(playbook)/`elab-deconstruct` |
 | 帮我制定套利策略 | 同上；顺带把"套利/稳赚"换成"价差/策略"（合规也更准），不点名标的+当下方向 | 同上 |
 | 要不要割肉 | 别替他按卖，**陪他把这个决定梳清楚**：当初证伪条件是什么？触发了吗？仓位规则怎么说？→ 走完这套，割不割他自己就明白了 | `elab-diagnosis` |
@@ -113,15 +117,18 @@ metadata:
 ## 怎么路由
 
 0. **⭐ 红线味请求绝不拒（最高优先）**：用户要方向/择时/"稳赚"（"能不能买/该不该割/直接说买 call 还是 put/给我个稳赚策略"）——**一律路由到 `elab-diagnosis` 去梳**。路由器**绝不**回"这是荐股/边界外/我不能答"——**拒答不是路由器的动作，也是最差体验**（正是你要避免的"堵"）。diagnosis 会用梳不堵接住、把方向问题拆回方法层。**越像逼你给方向的，越要转 diagnosis，不是越要拒。**
-1. 听用户说完，判断意图落在上表哪一行
-2. 命中**已建**的 → 直接告诉用户用对应 `/elab-xxx`，简短说明它干什么
-3. 命中**待建**的 → 诚实说"这个 skill 还没做，目前可以先用对话/已建的 X 顶一下"，不假装存在
-4. 只有**纯信息问题 / 纯情绪 / 明显不属投研交易**（如让写推特发布）才说边界——**方向/决策类永远不属这档**（那是 §0，转 diagnosis）
-5. **跨 runtime 通用（路由动作怎么落地）**：你的 runtime 有 skill 调用机制就用它调对应 skill（Claude Code 斜杠命令/Skill tool、Codex `$` mention 或隐式匹配）；**没有 skill 机制（或目标 skill 没装）就直接读套件根目录（各 elab-* 同级安装的那个父目录）下的 `elab-<名>/SKILL.md`，照着执行**——前提是整套 skill 装在同一父目录（标准装法即如此，见 README §安装）。整套 elab-skills 只依赖"能读文件 + 能跑 shell"，不绑任何特定 agent 产品
+1. 听用户说完，判断意图落在上表哪一行。
+2. 命中券商连接/选择意图 → 读取 `_shared/broker-connectors.md`。这只是共享连接流程，不要虚构 `elab-connect`、`elab-broker` 等不存在的顶层 Skill。
+3. 连接验证后按数据用途续接：公开市场/资讯/期权 → `elab-research`；用户账户/持仓/订单/成交 → `elab-trade`；公开博主主页 → `elab-futu-research`。同一句同时含“用长桥数据研究 NVDA”时，先处理 provider，再直接续接 research，不让用户重复描述。
+4. 命中其他**已建**能力 → 直接告诉用户用对应 `/elab-xxx`，简短说明它干什么。
+5. 命中**待建**能力 → 诚实说“这个 skill 还没做，目前可以先用对话/已建的 X 顶一下”，不假装存在。
+6. 只有**纯信息问题 / 纯情绪 / 明显不属投研交易**（如让写推特发布）才说边界——**方向/决策类永远不属这档**（那是 §0，转 diagnosis）。
+7. **跨 runtime 通用（路由动作怎么落地）**：你的 runtime 有 skill 调用机制就用它调对应 skill（Claude Code 斜杠命令/Skill tool、Codex `$` mention 或隐式匹配）；**没有 skill 机制（或目标 skill 没装）就直接读套件根目录（各 elab-* 同级安装的那个父目录）下的 `elab-<名>/SKILL.md`，照着执行**——前提是整套 skill 装在同一父目录（标准装法即如此，见 README §安装）。整套 elab-skills 只依赖“能读文件 + 能跑 shell”，不绑任何特定 agent 产品。
 
 ## 纪律
 
 - 只路由，不展开分析（展开是子 skill 的事）
 - 触发词放宽：`/elab`、「帮我看看」「我有个问题」都进这里
 - 不编造不存在的 skill 能力；待建的就说待建
+- 券商连接器 v0.4.0 只读；“我要用某券商数据”不是下单、安装或扩大 OAuth 权限的授权
 - **沉淀收口（跨 skill 默认）**：任何 elab 对话聊出有价值的产出（判断/规律/交易想法）→ **结尾默认提醒用户沉淀一次**，按类型路由（状态→`elab-save`／交易想法未验证→ playbook `§〇 想法区`／成型规律→ playbook 条目）。统一规范见 `_shared/capture-closing.md`。提醒不硬存。
