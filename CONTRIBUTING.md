@@ -40,6 +40,11 @@ outputs: []                    # 产出路径/格式，见 §4
 - `private`：含真实持仓/账户/私有管道 → 只进私有 repo。
 - 判定：把这 skill 原样给陌生人看，会不会泄露账户/持仓/私有系统？会 → private。
 
+### 5.1 评测资产分仓
+- 公开 `elab-skills` 只放安装和使用所需的 skill、脚本、参考文档、虚构样例，以及不包含评测题/答案的普通确定性单测。
+- Goldset、评测题、标准答案、rubric、judge prompt、transcript、评分结果和审计报告只进私有 `edgelab101/elab-skills-internal`，不得提交到公开仓。
+- 公开仓的变更说明只描述产品行为和用户可见修复，不公开 case 编号、判分细则或内部验收分数。
+
 ## 6. 加一个外部工具 / 数据源
 走 `elab-research/references/tool-registry.md` §二：**玩具筛 5 关**（能本地跑/维护活跃/license 可商用/实盘机构真在用/数据质量满足场景）→ 过筛写登记条目 → 标接口衔接 + 合规。
 
@@ -51,6 +56,7 @@ outputs: []                    # 产出路径/格式，见 §4
 - [ ] 自包含（或明确声明依赖 `_shared/schema.md` / tool-registry）
 - [ ] 路由：在 `elab/SKILL.md` 路由表加一行
 - [ ] 脱敏扫描（public repo）：无 IP/token/路径/key/持仓数字
+- [ ] 分仓检查：无 Goldset/rubric/judge prompt/transcript/评分或审计资产
 - [ ] 合规段在位（无荐股措辞）
 - [ ] version + last_updated 填了（按 `CHANGELOG.md` 的 patch/minor/major 约定 bump）
 - [ ] **`CHANGELOG.md` 加一条**（PR 必带：改了哪个 skill、新版本、一句话改了啥）

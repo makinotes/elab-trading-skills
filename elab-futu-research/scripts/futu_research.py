@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
-VERSION = "1.3.2"
+VERSION = "1.3.3"
 SCHEMA_VERSION = "1.0"
 LIST_URL = "https://q.futunn.com/nnq/personal-list"
 REPORT_FOOTER = (
@@ -50,7 +50,7 @@ DETAIL_URL = "https://q.futunn.com/v2/api/feed/detail"
 YAHOO_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 EASTMONEY_URL = "https://push2his.eastmoney.com/api/qt/stock/kline/get"
 USER_AGENT = (
-    "elab-futu-research/1.3.2 "
+    "elab-futu-research/1.3.3 "
     "(public-research-tool; +https://github.com/edgelab101/elab-skills/tree/main/elab-futu-research)"
 )
 # Tiger Brokerage (laohu8.com) requires a browser User-Agent to avoid HTTP 403.

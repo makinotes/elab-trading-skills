@@ -1,14 +1,14 @@
 ---
 name: elab-futu-research
 description: |
-  归档并审计富途（q.futunn.com）或老虎社区（laohu8.com）公开博主主页：保存动态、专栏（仅富途）、原始证据和公开媒体（仅富途），结合发帖时点行情分析交易风格、纪律与历史观点。用户提供主页 URL，或要求抓取、归档、复盘、比较富途/老虎博主时使用。
-  Archive and audit public Futu or Tiger blogger profiles with time-frozen market context and evidence-bounded research.
+  归档并审计富途（q.futunn.com）或老虎社区（laohu8.com）公开博主主页。用户给出主页 URL 或数字 UID，或要求先说明下一步、抓取、归档、复盘、比较富途/老虎博主时使用；即使用户说“先别执行”，也先加载本 skill 完成范围确认。数字 UID 默认富途；任何抓取前必须让用户明确选择时间范围。保存动态、专栏（仅富途）、原始证据和公开媒体（仅富途），结合发帖时点行情做证据有界研究。其他平台不适用。
+  Archive and audit public Futu or Tiger profiles from a profile URL or numeric UID. Invoke for planning-only requests too; a numeric UID defaults to Futu, and capture requires an explicit time window.
 license: CC-BY-NC-4.0
 metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/edgelab101/elab-skills"
   invocation: "user"
-  version: "1.3.2"
+  version: "1.3.3"
   last_updated: "2026-09-02"
   visibility: "public"
   requires: "[]"
@@ -27,9 +27,15 @@ metadata:
 一个会话只出一次，只出这一行；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
 <!-- /credit:startup -->
 
-Turn one or more public profile URLs — Futu (q.futunn.com) or Tiger (laohu8.com) — into a resumable archive and an evidence-bounded research report. Make the default experience one-shot: accept the URL, choose safe defaults, run the workflow, and return the report plus audit status.
+Turn one or more public profile URLs — Futu (q.futunn.com) or Tiger (laohu8.com) — into a resumable archive and an evidence-bounded research report. Start with alignment, including when the user only asks what happens next or says not to execute yet. After alignment is complete, run the confirmed workflow in one shot and return the report plus audit status.
 
-Version: `1.3.2` · Last updated: `2026-09-02`
+Version: `1.3.3` · Last updated: `2026-09-02`
+
+## Invocation invariants (P0)
+
+- A request to explain the next step, plan the archive, or prepare without executing is still an invocation of this skill. Load it and perform startup alignment; do not answer with a generic “say start when ready”.
+- Treat a numeric-only UID as a Futu target. A full `laohu8.com` URL is required for Tiger; do not claim the platform is ambiguous for a numeric UID.
+- A target is not sufficient authorization to capture. If the user has not explicitly chosen a time window, ask for the missing startup items in one consolidated message. “开始”, “继续”, or a similar generic confirmation does not select a time window.
 
 ## Startup alignment (required)
 
@@ -58,13 +64,14 @@ Then proceed with the workflow.
 
 ## Default behavior
 
-- Require only a profile URL or numeric UID. The dispatcher routes by domain: a full `laohu8.com` URL → Tiger; a numeric UID or `q.futunn.com` URL → Futu.
+- Accept a profile URL or numeric UID as the research target. The dispatcher routes by domain: a full `laohu8.com` URL → Tiger; a numeric UID or `q.futunn.com` URL → Futu. Do not begin capture until the user has also explicitly selected a time window.
 - The CLI captures all visible content when no date flag is supplied, but the skill must never use that behavior silently: obtain the user's explicit time-window choice first, and require explicit confirmation before a full-history run.
 - Capture all expected streams per platform:
   - Futu: dynamics/all (`type=301`) and columns (`type=302`)
   - Tiger: dynamics only (no columns concept)
-- Preserve original posts and reposts. Exclude reposts from ability scoring by default, but keep them searchable.
-- Download public post media in three modes: `all` (default), `none` (skip), `evidence` (only posts matching built-in order/fill/position evidence keywords — recommended for order-screenshot bloggers). `--skip-media` is retained as an alias for `--media none`. For Tiger profiles, `--media` is treated as `none` regardless of the flag; media download is not yet supported.
+- Futu: preserve original posts and detected reposts; exclude detected reposts from ability scoring by default while keeping them searchable.
+- Tiger: repost detection is not implemented. `is_repost=False` means “not detected”, not proof that a post is original. Do not claim Tiger reposts were identified, preserved as reposts, or excluded from scoring.
+- Download public Futu post media in three modes: `all` (default), `none` (skip), `evidence` (only posts matching built-in order/fill/position evidence keywords — recommended for order-screenshot bloggers). `--skip-media` is retained as an alias for `--media none`. Tiger media download is not supported and `--media` is treated as `none`; if the user requests Tiger media, disclose the limitation and ask whether to continue without media. Do not propose a separate scraper or capability extension unless the user separately asks to build one.
 - Write to `./futu-research-output/` unless the user names another directory.
 - Resume safely from cached pages/details/media. Never delete raw evidence; rebuild derived files atomically.
 - Use conservative request rates. Stop and report interface drift, login, CAPTCHA, or access denial; do not bypass access controls.
@@ -113,7 +120,7 @@ For multiple bloggers, repeat `--profile`. Optional `--since YYYY-MM-DD` and `--
 
 **Platform routing**: the dispatcher identifies the platform by URL domain. Pass a full `laohu8.com` URL to target Tiger. Numeric-only UIDs are routed to Futu because both platforms use numeric UIDs and they cannot be distinguished without a domain.
 
-**Tiger current limits**: media download is not supported (`--media` has no effect); no column stream; repost detection is not yet implemented (posts are marked `is_repost=False`).
+**Tiger current limits**: disclose all three limits whenever they affect the requested deliverable: media download is not supported (`--media` has no effect), there is no column stream, and repost detection is not implemented. Tiger posts are currently marked `is_repost=False`, which means “not detected” rather than verified original content. Do not describe Tiger reposts as preserved, filtered, or excluded from scoring.
 
 Run the environment and endpoint check first when the interface may have changed:
 

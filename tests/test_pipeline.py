@@ -377,7 +377,7 @@ class PipelineTest(unittest.TestCase):
     # ------ F5: version ------
     def test_version_string(self):
         """VERSION constant must match the elab-skills integration release."""
-        self.assertEqual(FR.VERSION, "1.3.2")
+        self.assertEqual(FR.VERSION, "1.3.3")
 
     # ------ F1: OSError in main exits 2 cleanly ------
     def test_output_file_path_exits_cleanly(self):

@@ -2,3 +2,16 @@
 *.local.json
 .env
 __pycache__/
+
+# Private evaluation assets belong in edgelab101/elab-skills-internal.
+/eval/
+/evaluations/
+/goldset/
+/goldsets/
+/transcripts/
+/case-metadata/
+/run_manifest.json
+/results.json
+/audit.md
+**/goldset*.md
+**/rubric*.md

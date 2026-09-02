@@ -2,6 +2,12 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-02 · elab-futu-research 1.3.3 行为修复
+
+- **触发与对齐** — 自然语言“先告诉我下一步/先别执行”也会加载 skill 并完成启动对齐；数字 UID 明确默认富途；未明确时间范围不得抓取，通用“开始/继续”不算时间确认
+- **平台边界** — 拆开富途与老虎的转发语义；老虎 `is_repost=False` 只表示未检测，禁止声称已识别、保留或过滤转发；用户要求老虎媒体时必须披露无媒体、无专栏、无转发检测，并先确认是否接受降级交付
+- **公开边界** — Goldset、rubric、transcript、评分与审计材料只保存在私有 `elab-skills-internal`；公开仓仅保留产品实现、使用文档、虚构样例和普通确定性单测
+
 ## 2026-09-02 · elab-futu-research 并入主仓
 
 - **elab-futu-research** 1.3.2 — 从公开仓 `edgelab101/elab-futu-research@b26a567` 导入完整 skill、纯标准库脚本、公开合成测试和虚构样例；统一 homepage、报告署名链接、Codex UI 元数据与 EdgeLab 启动回显；修正文档中“无日期默认全量”与“必须明确时间范围”的表述冲突
@@ -61,7 +67,7 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 | elab-restore | 0.3.2 |
 | elab-report | 0.1.5 |
 | elab-model | 0.1.1 |
-| elab-futu-research | 1.3.2 |
+| elab-futu-research | 1.3.3 |
 
 ## 2026-07-13 · v6 测评整改（状态层 P0 + 一致性清账）
 

@@ -5,8 +5,8 @@
 # unknown-volume capture.
 interface:
   display_name: "EdgeLab 富途/老虎博主研究"
-  short_description: "归档富途和老虎博主内容，并结合时点行情生成可审查研究"
-  default_prompt: "使用 $elab-futu-research 归档我提供的富途或老虎博主主页，结合发言时点行情分析交易风格、纪律和可迁移规则，并完成证据链审计。"
+  short_description: "用主页URL或数字UID归档富途/老虎博主，抓取前确认时间范围"
+  default_prompt: "使用 $elab-futu-research 处理我提供的富途/老虎主页 URL 或数字 UID；即使我只问下一步或说先别执行，也先完成范围确认，并在任何抓取前要求我明确选择时间范围。"
   brand_color: "#FF8A00"
 
 policy:
