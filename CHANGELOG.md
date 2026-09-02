@@ -2,6 +2,13 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-02 · elab-futu-research 并入主仓
+
+- **elab-futu-research** 1.3.2 — 从公开仓 `edgelab101/elab-futu-research@b26a567` 导入完整 skill、纯标准库脚本、公开合成测试和虚构样例；统一 homepage、报告署名链接、Codex UI 元数据与 EdgeLab 启动回显；修正文档中“无日期默认全量”与“必须明确时间范围”的表述冲突
+- **elab** 0.3.0 — 主入口新增富途/老虎博主研究路由，覆盖主页归档、历史发言复盘、多博主比较、交易风格与证据审计
+- **安装与更新** — 现有 `elab*` 自动发现机制会把新 skill 纳入 `install.sh`、`update.sh` 和软链自动更新；今后只需维护、安装和更新 `edgelab101/elab-skills`
+- **验证资产** — 新增 `tests/test_pipeline.py`、纯虚构 fixture 及 `docs/elab-futu-research/` 样例，不包含真实 UID、帖子、持仓、Cookie 或 token
+
 ## 2026-07-19 · elab-model v0.1.1（4 路盲审全量整改）
 
 - **elab-model** 0.1.1 — 审计修复 2 CRITICAL + 6 HIGH + 12 MEDIUM：registry §三/backtest 协议黄金数字纠错（−0.55/−55、4.80）；kelly `--fraction` 生效（新增 `kelly_fractional`）；负 Kelly 归零 + 措辞去操作指引（930）；正 Kelly 强制肥尾警示；option-credit 改双字段 `ev_per_share`/`ev_per_contract`；ev_model 三子命令补 `units` + 接入 thresholds.json；covered-call ITM 可行性拦截；bear-put-spread 警示换 `debit_width_min_ratio` 键与"保护范围太窄"文案；NaN/inf 全入口防护；SKILL.md 补回测分发声明 + 2 条禁句型绕过口；goldset 追加 case 15（高 Kelly 肥尾生死题）+ 14b 对冲误用变体；测试 63 → 109 断言全绿
@@ -44,16 +51,17 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 
 | skill | version |
 |---|---|
-| elab | 0.1.16 |
-| elab-trade | 0.3.13 |
-| elab-research | 0.4.10 |
-| elab-diagnosis | 0.2.14 |
-| elab-benchmark | 0.2.7 |
-| elab-deconstruct | 0.2.7 |
-| elab-save | 0.1.4 |
-| elab-restore | 0.1.2 |
+| elab | 0.3.0 |
+| elab-trade | 0.5.3 |
+| elab-research | 0.6.3 |
+| elab-diagnosis | 0.4.1 |
+| elab-benchmark | 0.4.0 |
+| elab-deconstruct | 0.4.1 |
+| elab-save | 0.2.2 |
+| elab-restore | 0.3.2 |
 | elab-report | 0.1.5 |
-| elab-model | 0.1.0 |
+| elab-model | 0.1.1 |
+| elab-futu-research | 1.3.2 |
 
 ## 2026-07-13 · v6 测评整改（状态层 P0 + 一致性清账）
 

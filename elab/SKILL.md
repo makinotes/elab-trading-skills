@@ -1,19 +1,20 @@
 ---
 name: elab
 description: |
-  EdgeLab 投研工具箱主入口。根据你的问题自动路由到最合适的 elab- skill。
-  触发方式：/elab、「帮我看看」「我有个投研/期权的问题」
+  EdgeLab 投研工具箱主入口。根据问题自动路由到交易记录、标的研究、决策消解、概念拆解、博主公开内容审计等 elab- skill。
+  触发方式：$elab、/elab、「帮我看看」「我有个投研/期权的问题」
   EdgeLab research toolkit entry point. Routes to the right elab- skill.
-  Trigger: /elab, "help me with my trade/research"
-author: 杰尼马（EdgeLab）
-homepage: https://github.com/edgelab101/elab-skills
+  Trigger: $elab, /elab, "help me with my trade/research"
 license: CC-BY-NC-4.0
-invocation: user
-version: 0.2.1
-last_updated: 2026-07-19
-visibility: public
-requires: []
-outputs: []
+metadata:
+  author: "杰尼马（EdgeLab）"
+  homepage: "https://github.com/edgelab101/elab-skills"
+  invocation: "user"
+  version: "0.3.0"
+  last_updated: "2026-09-02"
+  visibility: "public"
+  requires: "[]"
+  outputs: "[]"
 ---
 
 # elab：EdgeLab 投研工具箱入口
@@ -44,6 +45,7 @@ outputs: []
 > - **决策卡住**（该不该割/加、能不能买）→ `elab-diagnosis`（陪你把决定梳清楚，结论你自己下）
 > - **拆概念**（IV、Delta 中性、对冲到底啥意思）→ `elab-deconstruct`
 > - **找对标**（谁真赚到、我能不能复制）→ `elab-benchmark`
+> - **研究富途/老虎博主**（归档公开主页 · 时点行情 · 证据审计）→ `elab-futu-research`
 > - **存档 / 接着上次 / 出报告** → `elab-save` · `elab-restore` · `elab-report`
 >
 > 说说你的情况？
@@ -77,6 +79,7 @@ outputs: []
 | 出复盘报告 | `elab-report` | 免费 |
 | "这个投研/期权问题成不成立"、决策卡住 | `elab-diagnosis` | 免费 |
 | "谁真赚到、我能不能复制"找对标 | `elab-benchmark` | 免费 |
+| 富途/老虎博主主页归档、历史发言复盘、多博主比较、交易风格与纪律审计 | `elab-futu-research` | 免费；只处理公开内容，不登录、不读取 Cookie |
 | "IV/Delta 中性/对冲到底啥意思"拆期权概念 | `elab-deconstruct` | 免费 |
 | "我这算不算 X"（X=俚语/黑话/自造词，如"苦肉计""delta中性反脆弱轮动"）——转译口语类比 / 识破伪概念 | `elab-deconstruct`（§0.5 伪概念闸 + §0.6 俚语转译） | 免费 |
 | 算EV、期望收益、Kelly、策略数学、这单结构怎么样、收得薄不薄 | `elab-model`（模型计算：EV/仓位/策略结构数学） | 免费（纯本地计算） |
@@ -94,6 +97,7 @@ outputs: []
 | 帮我复盘交易 | 陪他把已平仓这笔拆开：当时 thesis 成立吗、按规则走了吗、属哪类结果（好决策坏结果/系统错…）→ 梳出可改进的模式 | `elab-trade`(Mode B) |
 | 能不能买 / 能不能卖 X | 别答买不买，**帮他把问题梳成能自答的**：你看多/空的逻辑是什么？IV/价位现在啥情况（补数据）？风险框死没？→ 梳完他自己清楚 | `elab-diagnosis`(+research 补数据) |
 | 帮我分析当前行情 | 把客观市场数据摆出来（指数/IV/恐慌/成交），陪他解读"这些数据说明什么"，涨跌方向让他自己形成——不替他判 | `elab-research` |
+| 帮我研究这个富途/老虎博主 | 先确认主页 URL、时间范围、交付物和媒体策略；归档公开证据，再按发帖时点行情区分观点、声称动作与可核执行证据 | `elab-futu-research` |
 | 帮我制定交易策略 | 先问他想表达什么看法/什么市场条件，梳出适配的策略框架（怎么运作/适用/风险/认错点），落成他自己的 playbook | `elab-trade`(playbook)/`elab-deconstruct` |
 | 帮我制定套利策略 | 同上；顺带把"套利/稳赚"换成"价差/策略"（合规也更准），不点名标的+当下方向 | 同上 |
 | 要不要割肉 | 别替他按卖，**陪他把这个决定梳清楚**：当初证伪条件是什么？触发了吗？仓位规则怎么说？→ 走完这套，割不割他自己就明白了 | `elab-diagnosis` |

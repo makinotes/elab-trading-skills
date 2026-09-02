@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { background:#070c17; }
+  #card {
+    width:1200px; height:900px; position:relative;
+    background:
+      radial-gradient(1100px 520px at 18% -8%, rgba(47,107,255,.16), transparent 60%),
+      radial-gradient(900px 480px at 108% 118%, rgba(47,107,255,.10), transparent 55%),
+      linear-gradient(160deg,#0a1122 0%,#070c17 60%,#060a14 100%);
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    color:#e7ecf5; padding:60px 64px 52px; overflow:hidden;
+  }
+  #card::before{ content:""; position:absolute; inset:0;
+    background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:48px 48px; mask-image:linear-gradient(180deg,transparent,#000 25%,#000 75%,transparent); }
+  .head{ position:relative; display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:8px; }
+  .kicker{ font-size:15px; letter-spacing:.32em; color:#5f7699; font-weight:600; margin-bottom:14px; }
+  h1{ font-size:46px; font-weight:800; letter-spacing:.01em; line-height:1.1; }
+  h1 .n{ color:#4d86ff; }
+  .sub{ font-size:16px; color:#8ea0bd; margin-top:14px; line-height:1.5; max-width:760px; }
+  .ellogo{ width:70px; height:70px; border-radius:16px; flex:0 0 auto;
+    background:linear-gradient(145deg,#0e1b34,#0a1222); border:1px solid rgba(77,134,255,.35);
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:30px;
+    color:#fff; letter-spacing:-2px; box-shadow:0 8px 30px rgba(47,107,255,.18); }
+  .ellogo .l{ color:#3f7bff; }
+  .grid{ position:relative; display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-top:38px; }
+  .b{ background:linear-gradient(158deg,rgba(23,34,58,.9),rgba(13,20,36,.82));
+    border:1px solid rgba(120,150,205,.16); border-radius:16px; padding:22px 22px 20px; position:relative;
+    min-height:212px; display:flex; flex-direction:column; }
+  .b::after{ content:""; position:absolute; left:22px; top:0; width:34px; height:3px; border-radius:0 0 3px 3px; background:#3f7bff; }
+  .bn{ font-size:21px; font-weight:800; color:#f2f5fb; margin-bottom:4px; }
+  .tag{ font-size:12.5px; color:#6fa0ff; font-weight:600; letter-spacing:.02em; margin-bottom:13px; }
+  .desc{ font-size:14.5px; line-height:1.62; color:#b9c6dc; flex:1; }
+  .chip{ display:inline-block; margin-top:14px; font-size:12px; font-weight:600; padding:5px 11px; border-radius:20px;
+    background:rgba(47,107,255,.12); color:#8fb4ff; border:1px solid rgba(77,134,255,.22); align-self:flex-start; }
+  .chip.warn{ background:rgba(255,176,60,.09); color:#e3ae63; border-color:rgba(255,176,60,.2); }
+  .foot{ position:relative; display:flex; align-items:center; justify-content:space-between; margin-top:34px;
+    padding-top:22px; border-top:1px solid rgba(120,150,205,.14); font-size:13.5px; color:#7386a4; }
+  .foot .r{ color:#9fb0cc; }
+  .foot b{ color:#4d86ff; }
+</style>
+</head>
+<body>
+<div id="card">
+  <div class="head">
+    <div>
+      <div class="kicker">EDGELAB · SAMPLE OUTPUT（虚构演示）</div>
+      <h1>工具产出样例 · <span class="n">六个</span>虚构博主</h1>
+      <div class="sub">以下博主、数据均为虚构演示，仅展示工具产出结构：主页链接 → 全量归档 → 四级证据分级 + 时点冻结检验 → 能力矩阵。不构成任何评价或投资建议。</div>
+    </div>
+    <div class="ellogo">E<span class="l">L</span></div>
+  </div>
+
+  <div class="grid">
+    <div class="b"><div class="bn">虚构研究员甲</div><div class="tag">深度价值 · 能源/资源</div><div class="desc">被低估行业为主，现金流建模较完整，给出估值锚与认错记录。<b>（虚构演示数据）</b></div><span class="chip">可学：现金流分析法</span></div>
+    <div class="b"><div class="bn">虚构研究员乙</div><div class="tag">双向 · 事件驱动</div><div class="desc">做空论据结构清晰，单笔设定退出位并执行；样例中后期停更。<b>（虚构演示数据）</b></div><span class="chip">可学：论据前置</span></div>
+    <div class="b"><div class="bn">虚构研究员丙</div><div class="tag">衍生品 · 量化筛选</div><div class="desc">筛选有量化规则，赚亏均公开，样例里交易记录最完整。<b>（虚构演示数据）</b></div><span class="chip">可学：记录完整</span></div>
+    <div class="b"><div class="bn">虚构研究员丁</div><div class="tag">主题 · NAV 框架</div><div class="desc">对重仓标的有量化拆解；样例中途转型、披露性质变化。<b>（虚构演示数据）</b></div><span class="chip warn">留意：动机变化</span></div>
+    <div class="b"><div class="bn">虚构研究员戊</div><div class="tag">单标的集中持仓</div><div class="desc">叙事驱动为主，量化触发与公开账单较少，作为集中持仓样本。<b>（虚构演示数据）</b></div><span class="chip warn">观察：集中持仓</span></div>
+    <div class="b"><div class="bn">虚构研究员己</div><div class="tag">正股 → 期权</div><div class="desc">内容以截图为主，样例未抓图片，文字层信息有限暂难评估。<b>（虚构演示数据）</b></div><span class="chip warn">数据：待补图片</span></div>
+  </div>
+
+  <div class="foot">
+    <div>样例说明：以上博主与数据均为虚构，仅演示工具产出结构（能力矩阵/证据分级/共性归纳）</div>
+    <div class="r">工具开源 · <b>elab-futu-research</b> by 杰尼马（EdgeLab）</div>
+  </div>
+</div>
+</body>
+</html>

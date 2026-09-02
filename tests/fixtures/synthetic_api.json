@@ -1,0 +1,241 @@
+{
+  "fixture_notice": "All names, identifiers, post text, securities, and prices in this file are fictional.",
+  "uid": "00000000000000000000",
+  "list_pages": {
+    "301:first": {
+      "result": 0,
+      "feed": [
+        {
+          "feed_comm": {
+            "feed_id": "SYNTH-POST-001",
+            "timestamp": 1746748800
+          }
+        },
+        {
+          "feed_comm": {
+            "feed_id": "SYNTH-REPOST-001",
+            "timestamp": 1746835200
+          }
+        }
+      ],
+      "has_more": 1,
+      "more_mark": "SYNTH-CURSOR-1",
+      "sequence": "SYNTH-SEQUENCE-1"
+    },
+    "301:next": {
+      "result": 0,
+      "feed": [
+        {
+          "feed_comm": {
+            "feed_id": "SYNTH-POST-002",
+            "timestamp": 1746662400
+          }
+        }
+      ],
+      "has_more": 0,
+      "more_mark": "",
+      "sequence": "SYNTH-SEQUENCE-2"
+    },
+    "302:first": {
+      "result": 0,
+      "feed": [
+        {
+          "feed_comm": {
+            "feed_id": "SYNTH-COLUMN-001",
+            "timestamp": 1746576000
+          }
+        }
+      ],
+      "has_more": 0,
+      "more_mark": "",
+      "sequence": "SYNTH-SEQUENCE-3"
+    }
+  },
+  "details": {
+    "SYNTH-POST-001": {
+      "code": 0,
+      "data": {
+        "data": {
+          "feedCommon": {
+            "feedId": "SYNTH-POST-001",
+            "timestamp": 1746748800,
+            "feedType": 3,
+            "dynamicDescription": {
+              "stringSc": "发表了"
+            }
+          },
+          "feedTitle": "虚构公司 Alpha 的交易计划",
+          "authorInfo": {
+            "userId": "00000000000000000000",
+            "nickName": "虚构研究员甲"
+          },
+          "moduleData": [
+            {
+              "data": {
+                "text": "我今天买入虚构公司 Alpha。如果跌破计划线就止损，仓位不超过试验账户的一成。",
+                "stockCode": "ALPH",
+                "market": "US",
+                "stockName": "Synthetic Alpha"
+              }
+            }
+          ],
+          "topicItems": [
+            {
+              "topicName": "虚构案例"
+            }
+          ],
+          "count": {
+            "browse": 42,
+            "comment": 2,
+            "share": 1
+          },
+          "like": {
+            "likeEmotionInfo": [
+              {
+                "emoticonNum": 3
+              }
+            ]
+          }
+        }
+      }
+    },
+    "SYNTH-POST-002": {
+      "code": 0,
+      "data": {
+        "data": {
+          "feedCommon": {
+            "feedId": "SYNTH-POST-002",
+            "timestamp": 1746662400,
+            "feedType": 5,
+            "dynamicDescription": {
+              "stringSc": "发表了"
+            }
+          },
+          "feedTitle": "",
+          "authorInfo": {
+            "userId": "00000000000000000000",
+            "nickName": "虚构研究员甲"
+          },
+          "moduleData": [
+            {
+              "data": {
+                "text": "虚构公司 Beta 的估值仍然偏高，暂时只观察。",
+                "stockCode": "BETA",
+                "market": "US",
+                "stockName": "Synthetic Beta"
+              }
+            }
+          ],
+          "count": {
+            "browse": 18,
+            "comment": 0,
+            "share": 0
+          }
+        }
+      }
+    },
+    "SYNTH-COLUMN-001": {
+      "code": 0,
+      "data": {
+        "data": {
+          "feedCommon": {
+            "feedId": "SYNTH-COLUMN-001",
+            "timestamp": 1746576000,
+            "feedType": 4,
+            "dynamicDescription": {
+              "stringSc": "发表了专栏"
+            }
+          },
+          "feedTitle": "如何区分观点与交易证据",
+          "authorInfo": {
+            "userId": "00000000000000000000",
+            "nickName": "虚构研究员甲"
+          },
+          "moduleData": [
+            {
+              "data": {
+                "text": "专栏示例：提到股票不等于持有股票。分析时要保留原文、时间和反例。"
+              }
+            }
+          ],
+          "count": {
+            "browse": 80,
+            "comment": 4,
+            "share": 2
+          }
+        }
+      }
+    },
+    "SYNTH-REPOST-001": {
+      "code": 0,
+      "data": {
+        "data": {
+          "feedCommon": {
+            "feedId": "SYNTH-REPOST-001",
+            "timestamp": 1746835200,
+            "feedType": 3,
+            "dynamicDescription": {
+              "stringSc": "分享了",
+              "stringEn": "shared"
+            }
+          },
+          "feedTitle": "",
+          "authorInfo": {
+            "userId": "00000000000000000000",
+            "nickName": "虚构研究员甲"
+          },
+          "feedModel": {
+            "original": {
+              "richTextItems": [
+                {
+                  "type": 0,
+                  "text": "虚构官方帖：2026年上半年复盘总结"
+                }
+              ],
+              "pictureItems": [],
+              "url": "https://q.futunn.com/feed/SYNTH-ORIG-999",
+              "scheme": "futunn://nncircle/feed/SYNTH-ORIG-999",
+              "originalType": 0
+            }
+          },
+          "moduleData": [
+            {
+              "type": 0,
+              "data": [
+                {
+                  "type": 0,
+                  "attrs": {},
+                  "text": "虚构评论：看了一下，有参考价值。"
+                }
+              ]
+            },
+            {
+              "type": 2,
+              "data": {
+                "type": 0,
+                "url": "https://q.futunn.com/feed/SYNTH-ORIG-999",
+                "scheme": "futunn://nncircle/feed/SYNTH-ORIG-999",
+                "origin": {
+                  "richTextItems": [
+                    {
+                      "type": 0,
+                      "text": "虚构官方帖：2026年上半年复盘总结"
+                    }
+                  ],
+                  "pictureItems": [],
+                  "url": "https://q.futunn.com/feed/SYNTH-ORIG-999",
+                  "originalType": 0
+                }
+              }
+            }
+          ],
+          "count": {
+            "browse": 55,
+            "comment": 0,
+            "share": 0
+          }
+        }
+      }
+    }
+  }
+}

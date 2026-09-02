@@ -1,0 +1,13 @@
+# IMPORTANT: before starting any capture, complete all five items in
+# SKILL.md §Startup alignment — in particular, time range is a required
+# explicit choice (no silent default to full history), and a volume probe
+# (doctor --profile <url>) is mandatory before any full-history or
+# unknown-volume capture.
+interface:
+  display_name: "EdgeLab 富途/老虎博主研究"
+  short_description: "归档富途和老虎博主内容，并结合时点行情生成可审查研究"
+  default_prompt: "使用 $elab-futu-research 归档我提供的富途或老虎博主主页，结合发言时点行情分析交易风格、纪律和可迁移规则，并完成证据链审计。"
+  brand_color: "#FF8A00"
+
+policy:
+  allow_implicit_invocation: true

@@ -2,7 +2,7 @@
 
 > **by 杰尼马（EdgeLab）** · 公众号 杰尼马 · X [@jienima8635](https://x.com/jienima8635)
 
-一套用于 **AI × 美股期权投研** 的 agent skills。把投研决策、对标、概念拆解、复盘的方法论沉淀成可复用的工作流。**不绑定特定 AI 产品**：Claude Code、OpenAI Codex，以及任何按 [Agent Skills 规范](https://developers.openai.com/codex/skills)（`SKILL.md` + YAML frontmatter）加载 skill 的第三方 agent（如 workbuddy 等）都能装能用——整套 skill 只依赖"能读文件 + 能跑 shell"。
+一套用于 **AI × 美股期权投研** 的 agent skills。把投研决策、对标、概念拆解、复盘和公开博主研究的方法论沉淀成可复用工作流。**不绑定特定 AI 产品**：Claude Code、OpenAI Codex，以及任何按 [Agent Skills 规范](https://developers.openai.com/codex/skills)（`SKILL.md` + YAML frontmatter）加载 skill 的第三方 agent（如 workbuddy 等）都能装能用——整套 skill 只依赖"能读文件 + 能跑 shell"。
 
 > **内核命题**：AI 时代散户的护城河不是"知道得更多"，是把判断过程摊开——人和 AI 各担其责、每个决策可回溯。看得见的决策，才可能被迭代成 edge。整套 skill 都是这一句的展开（详见 `elab/SKILL.md`）。
 
@@ -18,7 +18,7 @@ cd elab-skills
 bash install.sh
 ```
 
-脚本自动识别你机器上装了哪些 agent，把 `elab*` 和 `_shared` 装进各自的 skills 目录。四个 runtime 实测支持：
+脚本自动识别你机器上装了哪些 agent，把 11 个 `elab*` skill 和 `_shared` 装进各自的 skills 目录。`elab-futu-research` 已内置，不再需要单独安装另一个仓库。四个 runtime 实测支持：
 
 | Agent | 个人 skills 目录 |
 |---|---|
@@ -50,7 +50,7 @@ cp -R elab-skills/elab* elab-skills/_shared ~/你的agent/skills/   # _shared �
 
 按 runtime 不同：Claude Code 用斜杠命令 `/elab` 或直接说人话；Codex 用 `$elab` mention、`/skills`，或自然语言隐式匹配；CodeBuddy / WorkBuddy 按其调用习惯。skill 内文写的 `/elab-xxx` 泛指「调用对应 skill」。
 
-拿不准用哪个就敲 `/elab`，它是入口，会把你路由到对的那个。
+拿不准用哪个：Codex 输入 `$elab`，Claude Code 输入 `/elab`；主入口会把你路由到对应 skill。
 
 ## 更新
 
@@ -90,6 +90,9 @@ bash install-autoupdate.sh        # 默认每天 9:00；bash install-autoupdate.
 - `elab-trade` — 期权 / 股票决策日志：四层结构 + 来源标签 + 不可改快照
 - `elab-research` — 投研编排器：多模式调度数据 / 工具（含会员自研数据模式）
 - `elab-model` — 策略数学模型：EV / Kelly / 仓位计算 + 回测协议；调脚本不心算，warnings 原样转述
+- `elab-futu-research` — 富途/老虎公开博主研究：完整归档、时点行情、证据分级、多博主比较与对抗审计
+
+`elab-futu-research` 使用 Python 3.9+ 标准库，无需 API key，不登录账户，也不读取浏览器 Cookie。运行前必须明确选择时间范围；公开接口、限流和平台可见性决定归档边界。虚构样例见 [报告](docs/elab-futu-research/sample-report.md) 与 [概览卡](docs/elab-futu-research/sample-card.png)。
 
 ## 数据接入（可选 · 会员）
 
