@@ -1,7 +1,7 @@
 interface:
   display_name: "EdgeLab 投研工具箱"
-  short_description: "路由到交易复盘、标的研究、概念拆解与博主公开内容审计"
-  default_prompt: "使用 $elab 帮我判断当前问题应该调用哪个 EdgeLab skill，并直接按对应流程继续。"
+  short_description: "路由投研交易任务，并引导连接富途、长桥或 IBKR 数据"
+  default_prompt: "使用 $elab 路由我的投研交易问题；如果我指定富途、长桥或 IBKR，先检查连接并按只读方式续接研究或交易复盘。"
   brand_color: "#FF8A00"
 
 policy:

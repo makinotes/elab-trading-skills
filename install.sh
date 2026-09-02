@@ -13,6 +13,7 @@ set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
 cd "$REPO"
+SUITE_VERSION="$(tr -d '[:space:]' < "$REPO/_shared/SUITE_VERSION")"
 
 # runtime key | 显示名 | 配置目录 | skills 目录
 RUNTIMES=(
@@ -48,6 +49,7 @@ if [ "${#UNITS[@]}" -eq 0 ]; then
 fi
 
 echo "EdgeLab Skills · by 杰尼马（EdgeLab）"
+echo "套件版本：$SUITE_VERSION"
 echo "源目录：$REPO"
 echo "待装 ${#UNITS[@]} 项：${UNITS[*]}"
 echo
@@ -77,8 +79,13 @@ for row in "${RUNTIMES[@]}"; do
   fi
 
   mkdir -p "$dest"
+  # Rebuild the suite namespace so a removed skill cannot survive as a stale,
+  # mixed-version installation. EdgeLab owns elab / elab-* / _shared here.
+  for installed in "$dest"/elab "$dest"/elab-* "$dest"/_shared; do
+    [ -e "$installed" ] || [ -L "$installed" ] || continue
+    rm -rf "${installed:?}"
+  done
   for d in "${UNITS[@]}"; do
-    rm -rf "${dest:?}/$d"
     if [ "$MODE" = link ]; then
       ln -sfn "$REPO/$d" "$dest/$d"
     else
@@ -100,7 +107,7 @@ fi
 
 [ "$LIST_ONLY" = 1 ] && exit 0
 
-echo "🎉 已装到 $INSTALLED 个 runtime。"
+echo "🎉 EdgeLab Skills $SUITE_VERSION 已装到 $INSTALLED 个 runtime。"
 if [ "$MODE" = link ]; then
   echo "   软链模式：以后在本目录 git pull，所有 runtime 自动跟着更新。"
   echo "   ⚠️ 别把本目录挪走或删掉，软链会断。"

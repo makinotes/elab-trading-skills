@@ -60,3 +60,11 @@ outputs: []                    # 产出路径/格式，见 §4
 - [ ] 合规段在位（无荐股措辞）
 - [ ] version + last_updated 填了（按 `CHANGELOG.md` 的 patch/minor/major 约定 bump）
 - [ ] **`CHANGELOG.md` 加一条**（PR 必带：改了哪个 skill、新版本、一句话改了啥）
+
+## 9. 版本、评测与发布门禁
+
+- `_shared/SUITE_VERSION` 是整套发行版本；每个 Skill 的 frontmatter `version` 是组件版本。新增跨 Skill 能力时两者都要按 semver-ish 规则更新。
+- 所有正式发布使用不可变的 `vX.Y.Z` Git tag。发版记录必须能定位源 commit 和上一已知稳定 tag/commit；不要发布无版本改动。
+- 上线前必须完成静态审查、普通确定性测试、隔离行为评测、跨 Skill/问题路由回归，以及 Claude Code、Codex、CodeBuddy、WorkBuddy 的安装与兼容验收。任何 hard gate 失败都先修复，再重跑完整要求集。
+- 具体评测题、标准答案、判分细则、transcript、结果和审计证据只保存在私有 `elab-skills-internal`；公共 PR 只写用户可见行为和普通验证，不泄漏评测资产。
+- 合并并打 tag 后才算正式上线。需要回退时使用 `bash update.sh --to vX.Y.Z` 安装上一稳定发布，不重写历史 tag。

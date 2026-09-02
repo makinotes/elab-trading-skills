@@ -1,15 +1,15 @@
 # 券商数据接入参考（富途 / 长桥 / IBKR）
 
-> `elab-trade` Mode B（交割单诊断）的券商接入分册。先确认用户用哪家券商，再翻到对应小节。每家给：**接入流程 / 接口 / 提醒用户的坑 / 导出字段**。
+> `elab-trade` Mode B 的离线文件导入与批量历史回退分册。先确认用户用哪家券商，再翻到对应小节。富途/长桥/IBKR 的实时只读连接、安装、provider 选择和安全边界统一见 `_shared/broker-connectors.md`；不要在这里维护第二套连接说明。
 > ⚠️ 接口名、菜单路径、字段名会随券商版本变——本册标的是"方法和该找什么"，具体名称**以券商当前界面/官方文档为准**，对不上让用户截图导出列名给你，现场映射。
 
 ---
 
 ## 通用：本 skill 最终要的标准 schema
 
-不管哪家，归一成这张表（每行一笔成交）：
+不管哪家，归一成这张表（每行一笔**成交 fill**，不是订单 order）：
 
-`trade_date | symbol | underlying | side(BUY/SELL/SELL_SHORT/BUY_TO_CLOSE) | qty | price | fee | [expiry | strike | cp]`
+`provider | account_alias | fill_id | order_id | trade_date | symbol | underlying | side(BUY/SELL/SELL_SHORT/BUY_TO_CLOSE) | open_close | qty | price | fee | currency | [expiry | strike | cp | multiplier]`
 
 期权：`qty`=张数（1 张=100 股），多 `expiry/strike/cp`。
 
@@ -21,10 +21,10 @@
 
 ### 接入流程
 - **手动（推荐起步）**：富途牛牛 **PC 客户端** → 交易 → 历史成交 / 交割单 → 选时间段 → 导出 Excel/CSV。移动端能查、导出用 PC 顺手
-- **程序化**：装并运行 **FutuOpenD**（本地网关程序，要常驻）→ Python `pip install futu-api` → 连本地 OpenD → 用 `OpenSecTradeContext.history_deal_list_query()` 拉历史成交（官方文档确认的方法名；接口随版本变以官方文档为准）
+- **程序化**：按 `_shared/broker-connectors.md` 连接富途官方 Futu Agent Skills + OpenD，优先调用官方读取能力拉历史成交；具体脚本/接口以已安装官方 Skill 与当前 `--help` 为准
 
 ### 接口
-- SDK：`futu-api`（Python）；前提：富途账户**开通 OpenAPI 权限** + OpenD 在跑 + 已登录
+- 官方 Skill / SDK：前提是账户已完成 OpenAPI 权限流程、OpenD 在跑且用户已登录；EdgeLab 连接器只读
 - 不想搞 API 就纯手动导出，足够复盘用
 
 ### 提醒用户
@@ -41,14 +41,13 @@
 
 ### 接入流程
 - **手动**：App / 网页 → 我的 → 订单 / 交割单 → 导出
-- **程序化**：长桥 **OpenAPI** → Python。⚠️ **PyPI 上 `longbridge`（Longbridge 品牌）和 `longport`（LongPort 品牌，长桥海外实体）两包并存、都在维护，不是改名废弃**——按你账户所属品牌/文档选；`pip install longbridge`，import `from longbridge.openapi import TradeContext` → 拉历史成交（`history_executions` / `today_executions` 一类，名以官方文档为准）
+- **程序化**：按 `_shared/broker-connectors.md` 使用长桥官方 `longbridge` CLI（机器输出加 `--format json`）或 hosted MCP，通过 OAuth 读取历史订单/成交
 
 ### 接口
-- SDK：`longbridge`（Python，也有其它语言；`longport` 是同集团另一品牌的并存包，非废弃）；前提：开发者后台申请 **App Key / App Secret / Access Token**
-- Access Token **有定期失效**（官方约 90 天），过期 API 会失败但不一定有明确报错，先怀疑 token 过期，重新生成
+- 首选官方 CLI / MCP + OAuth；Python SDK 是高级自定义集成，不等于 CLI，也不是普通用户的默认安装路径
 
 ### 提醒用户
-- 要先在长桥开发者后台申请 API 凭据（比富途多一步）
+- OAuth 过期、撤销或权限不足时重新登录/授权；不要让用户把 token 粘进对话
 - 方向字段可能是英文 Buy/Sell + 开平标识，**注意区分开仓/平仓**，否则 FIFO 配错
 - 同样：导出删账户号/资金额
 
@@ -61,16 +60,16 @@
 
 ### 接入流程
 - **Flex Query（推荐，最省事）**：Client Portal（旧称 Account Management）→ Performance & Reports → **Flex Queries** → 新建一个 **Trades** flex query（勾选要的字段）→ 运行生成 CSV/XML。可手动下，也可用 **Flex Web Service**（拿一个 token 程序化拉），不用开着 TWS
-- **API**：TWS 或 IB Gateway 运行 + Python `ib_async`（`ib_insync` 原作者 2024 去世、已停维护，社区继任分叉 `ib_async`，组织 `ib-api-reloaded`，`pip install ib_async`）或官方 `ibapi` → 拉 executions/fills
+- **官方 MCP（普通用户首选）**：按 `_shared/broker-connectors.md` 通过 IBKR OAuth 读取历史交易、持仓、期权链和风险；不需要为这条路径常驻 TWS/IB Gateway
+- **高级 API**：需要实时流式或自定义批处理时才考虑官方 Web API / TWS API；另做工程评估，不把社区封装当默认依赖
 
 ### 接口
-- 首选 **Flex Query**（报告式，稳定、不用挂 TWS）
-- 实时/程序化才用 TWS API + `ib_async`（ib_insync 继任），需 TWS/Gateway 常驻 + 开 API
+- 对话式账户读取首选官方 MCP；批量、确定性的历史报表首选 **Flex Query**（不用挂 TWS）
 
 ### 提醒用户
 - Flex Query 第一次要配置好"要哪些字段"（日期/symbol/买卖/数量/价格/佣金/conid）
 - IBKR 字段最全也最杂；期权 symbol 用 OCC 格式，注意解析
-- 多币种/多账户的话先筛账户
+- 多币种/多账户先让用户选账户，展示时默认使用别名/尾号；订单与成交必须分开
 
 ### 字段映射
 TradeDate/DateTime→`trade_date`，Symbol/UnderlyingSymbol→`symbol`/`underlying`，Buy/Sell + Open/Close→`side`，Quantity→`qty`，TradePrice→`price`，IBCommission→`fee`，Expiry/Strike/Put-Call→期权三件

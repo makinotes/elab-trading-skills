@@ -9,16 +9,16 @@
 
 | 需求 | 默认用 | 补充 |
 |---|---|---|
-| 行情/历史/期权链 | **yfinance**（免费，无 key） | OpenBB（一站式）/ 长桥 CLI（有账户时更准更快）|
+| 行情/历史/期权链 | 用户指定且已验证的富途/长桥/IBKR；否则 **yfinance**（免费，无 key） | OpenBB（一站式）/ stooq（日级兜底）|
 | 实时报价/财报日历 | **finnhub**（免费 tier，有 key） | yfinance 兜底 |
 | EOD 历史/指数 | **stooq**（免费无 key，稳） | yfinance |
 | 财报原文 10-K/Q | **edgartools** | — |
 | 期权 IV/希腊字母 | **py_vollib** | py_vollib_vectorized（批量）|
 | EdgeLab 雷达/恐慌 | 自研 API（会员 token，见"自研"节） | — |
 
-> 有长桥账户 → 行情优先长桥 CLI（数据更干净、港股/美股都覆盖）；没有 → yfinance/stooq 免费兜底。缺 key 的（finnhub）就降级到免费源，别卡住。
+> provider 选择、连接、最小验收、字段与安全边界见 `_shared/broker-connectors.md`。用户明确指定某券商时优先级最高；没有指定或连接不可用才按规则使用 yfinance/stooq 等免费源，并明确披露降级。
 
-> **🔑 凭据纪律（硬规则）**：finnhub/长桥/富途等的 API key、App Secret、Access Token **一律从环境变量或本地文件读**（如 `os.getenv(...)` / `~/.finnhub_key`），**禁硬编码进 skill/脚本**；**禁把 key 值写进研报、存档、日志或任何输出**（防泄漏）。skill 里只出现"读 key"的动作，永远不出现 key 的值。
+> **🔑 凭据纪律（硬规则）**：优先使用官方 OAuth、OpenD 或 CLI 原生凭据存储。确实使用 API key/App Secret/Access Token 的工具只能从环境变量或专用本地凭据存储读取，**禁硬编码进 skill/脚本，禁写入 `~/.elab/`、研报、存档、日志或任何输出**。
 
 ## 一、登记表（每个工具：装/调 + 输入输出 + 状态）
 
@@ -29,8 +29,9 @@
 - **stooq**（`pandas-datareader` 或直接 CSV URL，无 key）🟢 —— 免费 EOD 历史 + 指数，稳，yfinance 抽风时兜底
 
 ### 券商 / 自己数据（需自己账户凭据）
-- **futu-api**（富途，需 FutuOpenD 常驻）🟢 —— 接富途行情 / 会员自己持仓 / 历史成交（`history_deal_list_query`）
-- **长桥 CLI / longbridge**（长桥 OpenAPI，需 API 凭据）🟢 —— **有长桥账户默认优先**：行情/持仓/历史成交，港美股都覆盖、数据干净。`pip install longbridge`，`from longbridge.openapi import QuoteContext, TradeContext`（可包成 CLI 用）。⚠️ PyPI 上 `longbridge` 和 `longport`（LongPort 品牌）**两包并存、都在维护，非改名废弃**，按账户品牌选
+- **富途官方 Futu Agent Skills + OpenD** 🟢 —— 资讯/公告/研报、行情/K 线、期权链/Greeks、账户/持仓/订单/成交；需 OpenD、SDK 和账户权限。EdgeLab v0.4.0 只调用读取能力，不调用官方 Skill 中的交易脚本。安装与验收见 `_shared/broker-connectors.md`。
+- **长桥官方 `longbridge` CLI / hosted MCP** 🟢 —— 资讯、行情、基本面、期权、账户、持仓、订单、成交；CLI 是独立的 `longbridge-terminal`，不是 `pip install longbridge` SDK。机器读取加 `--format json`；只读 OAuth 权限与安装见 `_shared/broker-connectors.md`。
+- **IBKR 官方 MCP** 🟢 —— 账户、现金、保证金、持仓、盈亏、历史交易、期权链与风险暴露。公开连接器生成的交易 Instructions 仍需在 IBKR 平台确认，但 EdgeLab v0.4.0 不生成 Instructions，只读取；批量历史可用 Flex Query 文件。见 `_shared/broker-connectors.md`。
 
 ### 财报 / SEC
 - **edgartools**（`pip install edgartools`）🟢 —— 拉解析 10-K/10-Q/8-K。输入 ticker，输出财报文本/财务数据 → 喂你自己的财报分析 prompt
@@ -80,5 +81,5 @@
 skill 是静态指令，"更新"靠流程：
 - **触发**：① 遇到新工具即时评估 ② 定期（如每季）派一个调研 agent 扫"近期靠谱的开源投研/期权工具"
 - **评估**：用 §二 Step 1 四关筛（上次调研已把 LLM trade agent 全筛进 🔴）
-- **落地**：过筛的按 §二 Step 2-4 加进表，改主 SKILL 的 `version` + `last_updated`
+- **落地**：过筛的按 §二 Step 2-4 加进表；券商类同时更新 `_shared/broker-connectors.md`，并改相关主 Skill 的 `version` + `last_updated`
 - 调研 agent prompt 可复用"查开源 trade/投研工具 + 真能用 vs 玩具分级"那套
