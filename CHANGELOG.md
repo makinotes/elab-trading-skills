@@ -2,6 +2,13 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-03 · EdgeLab Skills 0.4.1 公开仓隐私门禁
+
+- **套件版本** 0.4.1 — 新增仓内 privacy gate、GitHub CI 与确定性单测；提交只报告问题文件名，不回显命中的私密内容
+- **公开边界** — 阻断个人数据目录、飞书暂存/水位、真实聊天导出结构、定位符变量与私人机器路径进入公开仓；产品代码、公开文档、虚构样例和普通单测边界不变
+- **私有状态同步** — `elab-save` 0.2.3、`elab-restore` 0.3.3、`elab-trade` 0.6.1 移除主理人机器绝对路径；仅调用用户已明确配置的 PRIVATE 同步链路，禁止把 `~/.elab` 数据写进 PUBLIC 产品仓
+- **回退基线** — 上一已知稳定版本为 `v0.4.0`（提交 `b4be02f`）
+
 ## 2026-09-02 · EdgeLab Skills 0.4.0 券商只读连接层
 
 - **套件版本** 0.4.0 — 新增 `_shared/SUITE_VERSION`；正式发布后以 `v0.4.0` tag 固化，上一已知稳定回退基线为 `a1bae7b`

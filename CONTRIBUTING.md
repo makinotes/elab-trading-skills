@@ -52,6 +52,7 @@ outputs: []                    # 产出路径/格式，见 §4
 每个 skill 的"风格 & 合规"段写死领域红线。本套 = 930：不给买卖方向、不晒收益、不点"现在买 X"；市场数据只做客观呈现不做方向研判。合规当作 skill 的一等约束，不是事后补。
 
 ## 8. 提交前自检
+- [ ] `python3 scripts/privacy_gate.py` 通过（只报告文件名，不回显命中的私密内容）
 - [ ] frontmatter 8 字段齐（含 requires/outputs）
 - [ ] 自包含（或明确声明依赖 `_shared/schema.md` / tool-registry）
 - [ ] 路由：在 `elab/SKILL.md` 路由表加一行

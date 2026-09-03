@@ -1,0 +1,22 @@
+name: Privacy gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  privacy-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Reject private material
+        run: python3 scripts/privacy_gate.py
+      - name: Test privacy gate
+        run: python3 -m unittest tests.test_privacy_gate

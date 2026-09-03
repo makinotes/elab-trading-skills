@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/edgelab101/elab-skills"
   invocation: "user"
-  version: "0.6.0"
-  last_updated: "2026-09-02"
+  version: "0.6.1"
+  last_updated: "2026-09-03"
   visibility: "public"
   requires: '["_shared/broker-connectors.md（连接券商时）"]'
   outputs: '["~/.elab/trades/ (决策四层结构)"]'
@@ -30,7 +30,7 @@ metadata:
 <!-- /credit:startup -->
 
 
-> **同步纪律（多端共享：飞书/公司/家）**：① 读 `~/.elab/` 前先 `git -C ~/.elab/ pull --ff-only --quiet 2>/dev/null || true`；② **每次写盘动作完成后立即推送**——跑本机同步脚本（VPS: `/root/cc/vps-autosync.sh`；Mac: `bash "$HOME/Desktop/claude code/_claude/scripts/cc-autosync.sh"`），静默失败不阻塞（cron 兜底 + 失败有飞书私信告警）。交易想法/立案是用户最怕丢的数据，**写盘不推 = 没存完**。
+> **同步纪律（多端共享）**：`~/.elab/` 默认是用户本地私有数据。只有用户已经明确配置了 PRIVATE 同步链路时，才调用其现成同步命令；不得猜测机器路径，不得把存档、交易记录或账户数据提交到本 PUBLIC `elab-skills` 仓。未配置同步时照常完成本地读写，并在回执中标明“仅本机，未同步”。
 
 
 你管的是**用户自己的交易**——从一笔交易的决策跟踪，到批量复盘交割单，到把规律炼成 playbook。一个入口，三个 mode。
