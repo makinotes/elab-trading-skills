@@ -8,7 +8,7 @@
 
 > 这些 skill **公开免费**，谁都能装。其中 `elab-research` 的「自研数据」模式（雷达 / 恐慌指数）需要 EdgeLab 会员 token 才能读取——没有 token 会**优雅降级**到公开工具（OpenBB 等），其余功能照常用。
 
-当前套件版本：**0.4.1**（安装后也可查看 `_shared/SUITE_VERSION`）。
+当前套件版本：**0.4.2**（安装后也可查看 `_shared/SUITE_VERSION`）。
 
 ## 安装
 
@@ -62,7 +62,7 @@ skill 会持续迭代。**一键更新（推荐）**——在 elab-skills 目录
 
 ```bash
 bash update.sh
-bash update.sh --to v0.4.1   # 安装/回退到已发布版本；不改变当前 Git 工作树
+bash update.sh --to v0.4.2   # 安装/回退到已发布版本；不改变当前 Git 工作树
 ```
 
 它自动：`git pull` → 显示 CHANGELOG 本次变更 → 同步到已安装的 skills 目录（Claude Code / Codex / CodeBuddy / WorkBuddy 四个都检测；cp 或软链装法都自动处理，含 `_shared`）。

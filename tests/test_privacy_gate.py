@@ -65,6 +65,16 @@ class PrivacyGateTest(unittest.TestCase):
         self.assertIn("notes.md", result.stdout)
         self.assertNotIn(secret_value, result.stdout)
 
+    def test_policy_fixture_does_not_whitelist_embedded_locator(self) -> None:
+        locator = "oc_" + "x" * 24
+        path = self.root / "tests" / "test_privacy_gate.py"
+        path.parent.mkdir(parents=True)
+        path.write_text(f"embedded = {locator}\n")
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("tests/test_privacy_gate.py", result.stdout)
+        self.assertNotIn(locator, result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

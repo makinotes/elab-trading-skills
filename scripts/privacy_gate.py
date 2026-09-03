@@ -32,6 +32,15 @@ RULE_FIXTURES = {
     Path("scripts/privacy_gate.py"),
     Path("tests/test_privacy_gate.py"),
 }
+RULE_LITERALS = {
+    b"MYSELF_FEISHU_DOC_TOKEN",
+    b"MYSELF_FEISHU_SELF_CHAT_ID",
+    b"last_successful_pull",
+    b"selfchat_last_pull",
+    b"feishu_inbox",
+    b"/Users/makino/",
+    b"/root/cc/",
+}
 BLOCKED_CONTENT = re.compile(
     rb"MYSELF_FEISHU_(?:DOC_TOKEN|SELF_CHAT_ID)"
     rb"|(?:^|[^A-Za-z0-9])oc_[A-Za-z0-9_-]{20,}"
@@ -87,6 +96,14 @@ def path_reason(path: Path) -> str | None:
     return None
 
 
+def scrub_rule_literals(path: Path, data: bytes) -> bytes:
+    if path not in RULE_FIXTURES:
+        return data
+    for literal in RULE_LITERALS:
+        data = data.replace(literal, b"")
+    return data
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--staged", action="store_true")
@@ -99,10 +116,11 @@ def main() -> int:
             findings.append((path, reason))
             continue
         data = read_candidate(path, args.staged)
-        if path not in RULE_FIXTURES and BLOCKED_CONTENT.search(data):
+        scan_data = scrub_rule_literals(path, data)
+        if BLOCKED_CONTENT.search(scan_data):
             findings.append((path, "private locator, watermark, or machine path"))
             continue
-        text = data.decode("utf-8", errors="ignore")
+        text = scan_data.decode("utf-8", errors="ignore")
         if path not in RULE_FIXTURES and all(
             marker in text for marker in ('"message_id"', '"create_time"', '"content"')
         ):
