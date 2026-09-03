@@ -8,7 +8,7 @@
 
 > 这些 skill **公开免费**，谁都能装。其中 `elab-research` 的「自研数据」模式（雷达 / 恐慌指数）需要 EdgeLab 会员 token 才能读取——没有 token 会**优雅降级**到公开工具（OpenBB 等），其余功能照常用。
 
-当前套件版本：**0.4.0**（安装后也可查看 `_shared/SUITE_VERSION`）。
+当前套件版本：**0.4.1**（安装后也可查看 `_shared/SUITE_VERSION`）。
 
 ## 安装
 
@@ -62,7 +62,7 @@ skill 会持续迭代。**一键更新（推荐）**——在 elab-skills 目录
 
 ```bash
 bash update.sh
-bash update.sh --to v0.4.0   # 安装/回退到已发布版本；不改变当前 Git 工作树
+bash update.sh --to v0.4.1   # 安装/回退到已发布版本；不改变当前 Git 工作树
 ```
 
 它自动：`git pull` → 显示 CHANGELOG 本次变更 → 同步到已安装的 skills 目录（Claude Code / Codex / CodeBuddy / WorkBuddy 四个都检测；cp 或软链装法都自动处理，含 `_shared`）。
@@ -114,6 +114,8 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 ## 合规
 
 这些 skill 用于**投资者教育与方法论**，不构成投资建议、不荐股、不喊单、不承诺收益。所有决策由使用者自行作出。
+
+本仓库是公开产品仓，只接收安装所需的 skill、脚本、文档、虚构样例与普通单测。个人对话、账户数据、真实持仓、飞书暂存及内部评测资产不得进入本仓库；提交前运行 `python3 scripts/privacy_gate.py`，GitHub CI 也会执行同一检查。
 
 ## 作者
 
