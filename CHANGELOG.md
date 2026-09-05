@@ -2,6 +2,13 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-05 · EdgeLab Skills 0.4.3 功能导航与目录说明
+
+- **首页导航** — 安装步骤之前展示 11 个 Skill 的用途与使用场景，区分研究、决策梳理、交易复盘和存档三件套
+- **目录说明** — 每个 Skill 新增面向仓库读者的 README，说明输入、产出、示例和能力边界；品牌署名不代替功能介绍
+- **范围** — 更新展示文档与套件补丁版本，同步普通单测中的两个版本断言；各 Skill 的执行指令、触发描述、路由及产品脚本未变，独立 Skill 版本保持不变
+- **版本对齐** — 当前版本表与现有 Skill 元信息对齐；回退基线为套件 `0.4.2`（提交 `5c32f66`）
+
 ## 2026-09-03 · EdgeLab Skills 0.4.2 隐私门禁加固
 
 - **套件版本** 0.4.2 — 策略源码与策略单测不再整文件豁免；只移除门禁必须声明的规则字面量，随后仍扫描真实定位符和敏感结构
@@ -79,15 +86,15 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 
 | skill | version |
 |---|---|
-| **EdgeLab Skills suite** | **0.4.0** |
+| **EdgeLab Skills suite** | **0.4.3** |
 | elab | 0.4.0 |
-| elab-trade | 0.6.0 |
+| elab-trade | 0.6.1 |
 | elab-research | 0.7.0 |
 | elab-diagnosis | 0.4.1 |
 | elab-benchmark | 0.4.0 |
 | elab-deconstruct | 0.4.1 |
-| elab-save | 0.2.2 |
-| elab-restore | 0.3.2 |
+| elab-save | 0.2.3 |
+| elab-restore | 0.3.3 |
 | elab-report | 0.1.5 |
 | elab-model | 0.1.1 |
 | elab-futu-research | 1.3.3 |
