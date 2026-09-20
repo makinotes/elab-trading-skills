@@ -4,6 +4,8 @@
 
 中文（下方） ｜ [**English**](#english)
 
+[![version](https://img.shields.io/github/v/release/edgelab101/elab-skills?label=version&color=2f6f4f)](https://github.com/edgelab101/elab-skills/releases)[![license](https://img.shields.io/badge/license-CC%20BY--NC%204.0-informational)](LICENSE)
+
 用于**股票与期权研究、交易决策梳理和复盘记录**的 11 个 Agent Skills：研究标的与板块、拆解概念、计算策略风险收益、审阅公开博主证据，并保存、接续和整理你的研究过程。
 
 提供通用 `SKILL.md` 指令与 Claude Code、Codex、CodeBuddy、WorkBuddy 的安装路径。具体可用的数据、工具和执行方式取决于宿主能力、已安装依赖及用户授权；支持安装不等于所有宿主的行为效果相同。
@@ -12,7 +14,7 @@
 
 > 这些 skill **公开免费**，谁都能装。其中 `elab-research` 的「自研数据」模式（雷达 / 恐慌指数）需要 EdgeLab 会员 token 才能读取——没有 token 会**优雅降级**到公开工具（OpenBB 等），其余功能照常用。
 
-当前套件版本：**0.6.0**（安装后也可查看 `_shared/SUITE_VERSION`）。本版新增跨 Skill 的交易一致性契约与研究方法扩展；上一稳定版本为 **0.4.3**。
+当前版本见上方徽章，或安装后查看 `_shared/SUITE_VERSION`；每版改了什么见 [CHANGELOG](CHANGELOG.md) 与 [Releases](https://github.com/edgelab101/elab-skills/releases)。
 
 ## 每个 Skill 是做什么的？
 
@@ -159,7 +161,7 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 
 These skills are free for anyone to install. One optional mode in `elab-research` reads EdgeLab's own data (a fear index and crowding radar) and needs a member token; without it that mode degrades gracefully to public tools and everything else works unchanged.
 
-Current suite version: **0.6.0**.
+For the current version see the badge above or `_shared/SUITE_VERSION` after install; per-release changes are in [CHANGELOG](CHANGELOG.md) and [Releases](https://github.com/edgelab101/elab-skills/releases).
 
 ### The 11 skills
 

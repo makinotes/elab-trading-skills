@@ -2,6 +2,14 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-20 · EdgeLab Skills 0.6.2 修正 README 版本漂移
+
+- **缺陷** — 套件版本号被硬编码进 README 正文（中英文各一处）。0.6.1 只 bump 了 frontmatter、`SUITE_VERSION`、单测与 CHANGELOG，两处正文均未同步，对外显示的版本停在 0.6.0。
+- **修法** — 正文不再写版本号，改为顶部自动更新的 release 徽章 + 指向 `_shared/SUITE_VERSION` / CHANGELOG / Releases 的指针。易变事实只留一个来源。
+- **守卫** — 新增 `tests/test_readme_consistency.py`：README 出现硬编码套件版本即失败，并检查英文段锚点与全部相对链接、图片可解析。已用植入式负向用例验证该测试确实会失败。
+- **范围** — 仅 README 与测试；各 Skill 的指令、路由、脚本与版本号均未改动。
+- **回退基线** — 上一已知稳定版本为 `v0.6.1`
+
 ## 2026-09-20 · EdgeLab Skills 0.6.1 许可证口径校正
 
 - **启动回显行** — 「开源」改为「源码公开」。CC BY-NC 4.0 含非商业条款，不属于 OSI 定义的开源许可证，原措辞不准确。源码公开、免费使用、可改可分享的事实未变，限制只针对商业转售。
@@ -108,7 +116,7 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 
 | skill | version |
 |---|---|
-| **EdgeLab Skills suite** | **0.6.1** |
+| **EdgeLab Skills suite** | **0.6.2** |
 | elab | 0.6.1 |
 | elab-trade | 0.7.1 |
 | elab-research | 0.8.2 |
