@@ -138,6 +138,10 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 - GitHub：[edgelab101](https://github.com/edgelab101)
 - 飞书：[添加联系人](https://www.feishu.cn/invitation/page/add_contact/?token=5d4qe0e8-1811-42d5-80e3-89f8bf4017b7&unique_id=2Kjla8sxnu-QcdiaY7tT0g==)
 
+**微信**（扫码加我，备注 `elab`）：
+
+<img src="docs/contact/wechat-qr.jpg" alt="微信二维码" width="220">
+
 用得上就点个 star，有问题开 issue。
 
 ## License
