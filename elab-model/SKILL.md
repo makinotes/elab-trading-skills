@@ -7,8 +7,8 @@ author: 杰尼马（EdgeLab）
 homepage: https://github.com/edgelab101/elab-skills
 license: CC-BY-NC-4.0
 invocation: user
-version: 0.1.1
-last_updated: 2026-07-19
+version: 0.1.2
+last_updated: 2026-09-20
 visibility: public
 requires:
   - "scripts/ev_model.py 与 scripts/strategy_models.py 必须同处 scripts/ 目录（跨脚本 import 依赖，strategy_models 通过 sys.path.insert + import ev_model 串联，不用 subprocess）"
@@ -23,7 +23,7 @@ outputs:
 **启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
 
 ```
-> EdgeLab Skills · by 杰尼马（公众号同名）｜ 开源 github.com/edgelab101/elab-skills
+> EdgeLab Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
 ```
 
 一个会话只出一次，只出这一行，不展开、不加欢迎语；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。

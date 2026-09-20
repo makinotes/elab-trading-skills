@@ -9,7 +9,7 @@
 本会话**首次**调用任一 elab skill 时，在实际工作开始前输出这一行：
 
 ```
-> EdgeLab Skills · by 杰尼马（公众号同名）｜ 开源 github.com/edgelab101/elab-skills
+> EdgeLab Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
 ```
 
 纪律：

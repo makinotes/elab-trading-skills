@@ -2,6 +2,13 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-20 · EdgeLab Skills 0.6.1 许可证口径校正
+
+- **启动回显行** — 「开源」改为「源码公开」。CC BY-NC 4.0 含非商业条款，不属于 OSI 定义的开源许可证，原措辞不准确。源码公开、免费使用、可改可分享的事实未变，限制只针对商业转售。
+- **README** — 中英文许可证段补充主动说明，明确 source-available 与 OSI open source 的区别。
+- **范围** — 仅措辞与版本号；各 Skill 的执行指令、路由、脚本与行为均未改动。
+- **回退基线** — 上一已知稳定版本为 `v0.6.0`（提交 `49c9e16`）
+
 ## 2026-09-20 · EdgeLab Skills 0.6.0 交易一致性
 
 - **elab-diagnosis** 0.5.0 — 第 4 条公理明确交易一致性；区分执行偏离、有依据的修订和资料不足，避免把一致性理解为拒绝适应变化。
@@ -101,18 +108,18 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 
 | skill | version |
 |---|---|
-| **EdgeLab Skills suite** | **0.6.0** |
-| elab | 0.6.0 |
-| elab-trade | 0.7.0 |
-| elab-research | 0.8.1 |
-| elab-diagnosis | 0.5.0 |
-| elab-benchmark | 0.4.0 |
-| elab-deconstruct | 0.4.1 |
-| elab-save | 0.2.3 |
-| elab-restore | 0.3.3 |
-| elab-report | 0.1.5 |
-| elab-model | 0.1.1 |
-| elab-futu-research | 1.3.3 |
+| **EdgeLab Skills suite** | **0.6.1** |
+| elab | 0.6.1 |
+| elab-trade | 0.7.1 |
+| elab-research | 0.8.2 |
+| elab-diagnosis | 0.5.1 |
+| elab-benchmark | 0.4.1 |
+| elab-deconstruct | 0.4.2 |
+| elab-save | 0.2.4 |
+| elab-restore | 0.3.4 |
+| elab-report | 0.1.6 |
+| elab-model | 0.1.2 |
+| elab-futu-research | 1.3.4 |
 
 ## 2026-07-13 · v6 测评整改（状态层 P0 + 一致性清账）
 

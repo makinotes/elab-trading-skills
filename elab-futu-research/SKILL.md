@@ -8,8 +8,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/edgelab101/elab-skills"
   invocation: "user"
-  version: "1.3.3"
-  last_updated: "2026-09-02"
+  version: "1.3.4"
+  last_updated: "2026-09-20"
   visibility: "public"
   requires: "[]"
   outputs: "可续跑公开内容归档；证据有界的博主研究报告；多博主能力矩阵与规则卡"
@@ -21,7 +21,7 @@ metadata:
 **启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
 
 ```
-> EdgeLab Skills · by 杰尼马（公众号同名）｜ 开源 github.com/edgelab101/elab-skills
+> EdgeLab Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
 ```
 
 一个会话只出一次，只出这一行；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
