@@ -25,7 +25,7 @@ outputs: []                    # 产出路径/格式，见 §4
 - 双语 description（跨语言传播）。`version` + `last_updated` 改动必更。
 
 ## 3. 正文骨架（自包含）
-- 第一行原则：`> 自包含：拿到这一个 SKILL.md 即可执行`。开源 skill 不依赖服务器/其他文件。
+- 第一行原则：`> 自包含：拿到这一个 SKILL.md 即可执行`。公开发布的 skill 不依赖服务器/其他文件。
 - 结构：核心定位（1-2 句）→ 流程/动作 → worked example → 风格 & 合规段。
 - **接状态系统 / 用来源标签的，引用 `_shared/schema.md`，不自己复述路径和标签定义。**
 - **用外部工具的，引用 `elab-research/references/tool-registry.md` 的条目，不另起平行描述。**

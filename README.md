@@ -4,7 +4,7 @@
 
 中文（下方） ｜ [**English**](#english)
 
-[![version](https://img.shields.io/github/v/release/edgelab101/elab-skills?label=version&color=2f6f4f)](https://github.com/edgelab101/elab-skills/releases)[![license](https://img.shields.io/badge/license-CC%20BY--NC%204.0-informational)](LICENSE)
+[![license](https://img.shields.io/badge/license-CC%20BY--NC%204.0-informational)](LICENSE)
 
 用于**股票与期权研究、交易决策梳理和复盘记录**的 11 个 Agent Skills：研究标的与板块、拆解概念、计算策略风险收益、审阅公开博主证据，并保存、接续和整理你的研究过程。
 
@@ -12,9 +12,19 @@
 
 > **内核命题**：AI 时代散户的护城河不是"知道得更多"，是把判断过程摊开——人和 AI 各担其责、每个决策可回溯。看得见的决策，才可能被迭代成 edge。整套 skill 都是这一句的展开（详见 `elab/SKILL.md`）。
 
-> 这些 skill **公开免费**，谁都能装。其中 `elab-research` 的「自研数据」模式（雷达 / 恐慌指数）需要 EdgeLab 会员 token 才能读取——没有 token 会**优雅降级**到公开工具（OpenBB 等），其余功能照常用。
+> 这些 skill **源码公开、非商业使用免费**。其中 `elab-research` 的「自研数据」模式（雷达 / 恐慌指数）需要 EdgeLab 会员 token 才能读取。没有 token 时可尝试公开数据路径；能否取到数据取决于已安装工具和数据源可用性。
 
-当前版本见上方徽章，或安装后查看 `_shared/SUITE_VERSION`；每版改了什么见 [CHANGELOG](CHANGELOG.md) 与 [Releases](https://github.com/edgelab101/elab-skills/releases)。
+当前版本以 [`_shared/SUITE_VERSION`](_shared/SUITE_VERSION) 为准；每版改了什么见 [CHANGELOG](CHANGELOG.md)，可回退版本见 [Tags](https://github.com/edgelab101/elab-skills/tags)。
+
+**语言范围**：本页提供中英文介绍；大多数 `SKILL.md` 执行说明和各 Skill 的 README 仍以中文为主。英文提问可以尝试，但英文工作流尚未完成系统行为验收。
+
+## 首次试用（无需会员 token）
+
+按下方[安装说明](#安装)装好后，用 Codex 输入 `$elab-deconstruct`、Claude Code 输入 `/elab-deconstruct`，接着提问：
+
+> Delta 中性是不是等于没有风险？请用虚构例子解释净 Delta、Gamma 和 Vega 的区别，不查询实时行情。
+
+这个例子只需要概念拆解，不需要券商账户或 EdgeLab 会员数据。核对回答是否说明净 Delta 接近零仍有其他风险，并把例子标为虚构。
 
 ## 每个 Skill 是做什么的？
 
@@ -52,6 +62,8 @@ bash install.sh
 
 脚本按本机目录识别安装目标，把 11 个 `elab*` skill 和 `_shared` 装进对应 skills 目录。`elab-futu-research` 已内置，不再需要单独安装另一个仓库。支持以下四种安装路径；这张表说明安装位置，不代表四个宿主均已完成行为实测：
 
+安装和更新会重建已有的 `elab`、`elab-*` 和 `_shared`。脚本会先检查每个目标的 `_shared` 是否属于 EdgeLab；无法确认时会停止，不覆盖该目录。若你自行修改过已安装的文件，先备份改动。
+
 | Agent | 个人 skills 目录 |
 |---|---|
 | Claude Code | `~/.claude/skills/` |
@@ -69,7 +81,7 @@ bash install.sh claude codex    # 只装指定的
 
 ### 手动装
 
-不想跑脚本，或者用的 agent 不在上面这张表里：把 `elab*` 和 `_shared` 拷进它的 skills 目录就行。
+不想跑脚本，或者用的 agent 不在上面这张表里：确认目标目录没有需要保留的同名文件后，把 `elab*` 和 `_shared` 拷进它的 skills 目录。
 
 ```bash
 mkdir -p ~/你的agent/skills/
@@ -92,7 +104,7 @@ skill 会持续迭代。**一键更新（推荐）**——在 elab-skills 目录
 
 ```bash
 bash update.sh
-bash update.sh --to v0.4.2   # 安装/回退到已发布版本；不改变当前 Git 工作树
+bash update.sh --to vX.Y.Z   # 将 vX.Y.Z 换成 Tags 中实际存在的版本；不改变当前 Git 工作树
 ```
 
 它自动：`git pull` → 显示 CHANGELOG 本次变更 → 同步到已安装的 skills 目录（Claude Code / Codex / CodeBuddy / WorkBuddy 四个都检测；cp 或软链装法都自动处理，含 `_shared`）。
@@ -155,13 +167,15 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 
 ## English
 
-**EdgeLab Skills** — 11 Agent Skills for equity and options research, trade journaling, and review. Written as portable `SKILL.md` instructions, so they run on any agent that can read files and run shell commands.
+**EdgeLab Skills** — 11 Agent Skills for equity and options research, trade journaling, and review. They use portable `SKILL.md` instructions that agents can read; available behavior depends on the host and its tools.
 
 > **Core premise**: in the AI era a retail investor's moat is not knowing more — it is making the reasoning visible. Human and AI each own their part, and every decision can be traced back. A decision you can see is a decision you can iterate into an edge.
 
-These skills are free for anyone to install. One optional mode in `elab-research` reads EdgeLab's own data (a fear index and crowding radar) and needs a member token; without it that mode degrades gracefully to public tools and everything else works unchanged.
+The source is public and noncommercial use is free. One optional mode in `elab-research` reads EdgeLab's own data (a fear index and crowding radar) and needs a member token. Without a token, public data paths may be available depending on installed tools and source availability.
 
-For the current version see the badge above or `_shared/SUITE_VERSION` after install; per-release changes are in [CHANGELOG](CHANGELOG.md) and [Releases](https://github.com/edgelab101/elab-skills/releases).
+The current version is in [`_shared/SUITE_VERSION`](_shared/SUITE_VERSION); see [CHANGELOG](CHANGELOG.md) for changes and [Tags](https://github.com/edgelab101/elab-skills/tags) for versions you can roll back to.
+
+**Language status:** This page has an English overview. Most `SKILL.md` instructions and individual skill guides are still written in Chinese. You can try English prompts, but the English workflows have not completed comprehensive behavioral validation.
 
 ### The 11 skills
 
@@ -187,18 +201,20 @@ bash install.sh --list   # show detected runtimes only, change nothing
 bash install.sh --link   # symlink mode: `git pull` is all you need to update
 ```
 
-Installs into `~/.claude/skills/`, `~/.codex/skills/`, `~/.codebuddy/skills/` or `~/.workbuddy/skills/`. For any other agent, copy `elab*` and `_shared` into its skills directory — `_shared` is required. Supporting an install path is not a claim that every host behaves identically; available data and tools depend on the host, installed dependencies and your own authorisation.
+Installs into `~/.claude/skills/`, `~/.codex/skills/`, `~/.codebuddy/skills/` or `~/.workbuddy/skills/`. Installation and updates replace existing `elab`, `elab-*` and `_shared` entries; the scripts stop if they cannot identify an existing `_shared` as EdgeLab's. Back up local edits first. For any other agent, copy `elab*` and `_shared` into its skills directory — `_shared` is required. Supporting an install path is not a claim that every host behaves identically; available data and tools depend on the host, installed dependencies and your own authorisation.
 
 Trigger with `/elab` (Claude Code), `$elab` (Codex), or just describe what you need.
+
+For a first try without a broker account or member token, invoke `/elab-deconstruct` in Claude Code or `$elab-deconstruct` in Codex, then ask: “Does delta-neutral mean risk-free? Use a hypothetical example to explain net delta, gamma and vega. Do not look up live market data.” Check that the answer names risks beyond net delta and labels the example as hypothetical.
 
 ### Boundaries
 
 These skills are for **investor education and method** — no recommendations, no signals, no stock picks, no promised returns. Every decision is yours. Broker connectors (Futu, Longbridge, IBKR) are read-only and never installed or authorised without your explicit action. `elab-futu-research` works only on public pages: it does not log in, read cookies, or collect private messages.
 
-Licensed **CC BY-NC 4.0** — the source is fully public; use, modify and share freely. Commercial use (reselling, bundling into a paid product, course or service) is not permitted. The non-commercial clause means this is *source-available* rather than OSI-approved open source — no difference for personal use, the restriction only targets commercial resale.
+Licensed **CC BY-NC 4.0** — noncommercial use, sharing and adaptation are permitted with attribution. The restriction covers uses primarily intended for commercial advantage or monetary compensation; it is broader than resale. This project is *source-available*, not OSI-approved open source. See the [license](LICENSE) and [Creative Commons summary](https://creativecommons.org/licenses/by-nc/4.0/).
 
 ## License
 
-**CC BY-NC 4.0**（署名-非商业性使用）——源码完全公开，可自由使用、修改、分享，但**禁止商业用途**（不得转卖、打包进付费产品/课程/服务）。详见 [LICENSE](LICENSE)。
+**CC BY-NC 4.0**（署名-非商业性使用）——源码公开，允许在遵守署名等许可条件下进行非商业使用、修改和分享。限制包括但不限于转卖或打包进付费产品；具体范围以 [LICENSE](LICENSE) 和 [Creative Commons 许可说明](https://creativecommons.org/licenses/by-nc/4.0/)为准。
 
-> 说明：非商业条款使 CC BY-NC **不属于 OSI 定义的「开源许可证」**，严格讲这套 skill 是「源码公开」而非 OSI 开源。对个人使用者没有任何区别——装、改、分享都不受限；限制只针对商业转售。
+> 说明：非商业条款使 CC BY-NC **不属于 OSI 定义的「开源许可证」**。对外请称这套 skill「源码公开、非商业使用免费」，不要把限制简化为「仅禁止商业转售」。

@@ -1,9 +1,10 @@
-name: Privacy gate
+name: Public release checks
 
 on:
   pull_request:
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -20,3 +21,5 @@ jobs:
         run: python3 scripts/privacy_gate.py
       - name: Test privacy gate
         run: python3 -m unittest tests.test_privacy_gate
+      - name: Run deterministic test suite
+        run: python3 -m unittest discover -s tests
