@@ -2,6 +2,8 @@
 
 > **by 杰尼马（EdgeLab）** · 公众号 杰尼马 · X [@jienima8635](https://x.com/jienima8635)
 
+中文（下方） ｜ [**English**](#english)
+
 用于**股票与期权研究、交易决策梳理和复盘记录**的 11 个 Agent Skills：研究标的与板块、拆解概念、计算策略风险收益、审阅公开博主证据，并保存、接续和整理你的研究过程。
 
 提供通用 `SKILL.md` 指令与 Claude Code、Codex、CodeBuddy、WorkBuddy 的安装路径。具体可用的数据、工具和执行方式取决于宿主能力、已安装依赖及用户授权；支持安装不等于所有宿主的行为效果相同。
@@ -143,6 +145,52 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 <img src="docs/contact/wechat-qr.jpg" alt="微信二维码" width="220">
 
 用得上就点个 star，有问题开 issue。
+
+---
+
+## English
+
+**EdgeLab Skills** — 11 Agent Skills for equity and options research, trade journaling, and review. Written as portable `SKILL.md` instructions, so they run on any agent that can read files and run shell commands.
+
+> **Core premise**: in the AI era a retail investor's moat is not knowing more — it is making the reasoning visible. Human and AI each own their part, and every decision can be traced back. A decision you can see is a decision you can iterate into an edge.
+
+These skills are free for anyone to install. One optional mode in `elab-research` reads EdgeLab's own data (a fear index and crowding radar) and needs a member token; without it that mode degrades gracefully to public tools and everything else works unchanged.
+
+Current suite version: **0.6.0**.
+
+### The 11 skills
+
+| Skill | What it does |
+|---|---|
+| [`elab`](elab/README.md) | Entry point — routes your question to the right skill, guides broker connection |
+| [`elab-research`](elab-research/README.md) | Research a stock, ETF, option or sector; picks a method per question, ends with forced self-refutation |
+| [`elab-diagnosis`](elab-diagnosis/README.md) | Work through a trading decision — rationale, risk, rules, emotion; or audit your whole approach |
+| [`elab-trade`](elab-trade/README.md) | Log decisions before entry, update positions, diagnose broker statements, distil a playbook |
+| [`elab-model`](elab-model/README.md) | Local scripts for expected value, Kelly fraction and options structure math |
+| [`elab-deconstruct`](elab-deconstruct/README.md) | Break options concepts (IV, delta-neutral, hedging) down to operational atoms |
+| [`elab-benchmark`](elab-benchmark/README.md) | Check whether a trader's claimed results and method are real and reproducible |
+| [`elab-futu-research`](elab-futu-research/README.md) | Archive public Futu/Tiger blogger pages and audit claims against point-in-time prices |
+| [`elab-save`](elab-save/README.md) · [`elab-restore`](elab-restore/README.md) · [`elab-report`](elab-report/README.md) | Save research state, resume it in a new session, merge snapshots into a review report |
+
+### Install
+
+```bash
+git clone https://github.com/edgelab101/elab-skills.git
+cd elab-skills
+bash install.sh          # detects your runtime and installs
+bash install.sh --list   # show detected runtimes only, change nothing
+bash install.sh --link   # symlink mode: `git pull` is all you need to update
+```
+
+Installs into `~/.claude/skills/`, `~/.codex/skills/`, `~/.codebuddy/skills/` or `~/.workbuddy/skills/`. For any other agent, copy `elab*` and `_shared` into its skills directory — `_shared` is required. Supporting an install path is not a claim that every host behaves identically; available data and tools depend on the host, installed dependencies and your own authorisation.
+
+Trigger with `/elab` (Claude Code), `$elab` (Codex), or just describe what you need.
+
+### Boundaries
+
+These skills are for **investor education and method** — no recommendations, no signals, no stock picks, no promised returns. Every decision is yours. Broker connectors (Futu, Longbridge, IBKR) are read-only and never installed or authorised without your explicit action. `elab-futu-research` works only on public pages: it does not log in, read cookies, or collect private messages.
+
+Licensed **CC BY-NC 4.0** — use, modify and share freely; commercial use (reselling, bundling into a paid product, course or service) is not permitted.
 
 ## License
 
