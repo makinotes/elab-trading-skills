@@ -102,7 +102,7 @@ class BrokerProfileTest(unittest.TestCase):
         for relative, needle in expected.items():
             text = (ROOT / relative).read_text(encoding="utf-8")
             self.assertIn(needle, text, relative)
-        self.assertEqual((ROOT / "_shared" / "SUITE_VERSION").read_text().strip(), "0.6.0")
+        self.assertEqual((ROOT / "_shared" / "SUITE_VERSION").read_text().strip(), "0.6.1")
 
     def test_installer_copies_connector_to_all_supported_runtimes(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -122,7 +122,7 @@ class BrokerProfileTest(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
-            self.assertIn("EdgeLab Skills 0.6.0", completed.stdout)
+            self.assertIn("EdgeLab Skills 0.6.1", completed.stdout)
             for runtime in (".claude", ".codex", ".codebuddy", ".workbuddy"):
                 skill_root = home / runtime / "skills"
                 self.assertTrue((skill_root / "elab" / "SKILL.md").is_file())

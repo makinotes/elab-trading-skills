@@ -138,11 +138,14 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 - 公众号：**杰尼马**
 - X：[@jienima8635](https://x.com/jienima8635)
 - GitHub：[edgelab101](https://github.com/edgelab101)
-- 飞书：[添加联系人](https://www.feishu.cn/invitation/page/add_contact/?token=5d4qe0e8-1811-42d5-80e3-89f8bf4017b7&unique_id=2Kjla8sxnu-QcdiaY7tT0g==)
 
-**微信**（扫码加我，备注 `elab`）：
+扫码加我，备注 `elab`：
 
-<img src="docs/contact/wechat-qr.jpg" alt="微信二维码" width="220">
+| 微信 | 飞书 |
+|:---:|:---:|
+| <img src="docs/contact/wechat-qr.jpg" alt="微信二维码" width="200"> | <img src="docs/contact/feishu-qr.png" alt="飞书二维码" width="200"> |
+
+扫不了码就点：[飞书加联系人](https://www.feishu.cn/invitation/page/add_contact/?token=5d4qe0e8-1811-42d5-80e3-89f8bf4017b7&unique_id=2Kjla8sxnu-QcdiaY7tT0g==)
 
 用得上就点个 star，有问题开 issue。
 
@@ -190,8 +193,10 @@ Trigger with `/elab` (Claude Code), `$elab` (Codex), or just describe what you n
 
 These skills are for **investor education and method** — no recommendations, no signals, no stock picks, no promised returns. Every decision is yours. Broker connectors (Futu, Longbridge, IBKR) are read-only and never installed or authorised without your explicit action. `elab-futu-research` works only on public pages: it does not log in, read cookies, or collect private messages.
 
-Licensed **CC BY-NC 4.0** — use, modify and share freely; commercial use (reselling, bundling into a paid product, course or service) is not permitted.
+Licensed **CC BY-NC 4.0** — the source is fully public; use, modify and share freely. Commercial use (reselling, bundling into a paid product, course or service) is not permitted. The non-commercial clause means this is *source-available* rather than OSI-approved open source — no difference for personal use, the restriction only targets commercial resale.
 
 ## License
 
-**CC BY-NC 4.0**（署名-非商业性使用）——可自由使用、修改、分享，但**禁止商业用途**（不得转卖、打包进付费产品/课程/服务）。详见 [LICENSE](LICENSE)。
+**CC BY-NC 4.0**（署名-非商业性使用）——源码完全公开，可自由使用、修改、分享，但**禁止商业用途**（不得转卖、打包进付费产品/课程/服务）。详见 [LICENSE](LICENSE)。
+
+> 说明：非商业条款使 CC BY-NC **不属于 OSI 定义的「开源许可证」**，严格讲这套 skill 是「源码公开」而非 OSI 开源。对个人使用者没有任何区别——装、改、分享都不受限；限制只针对商业转售。
