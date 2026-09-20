@@ -147,7 +147,7 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 |:---:|:---:|
 | <img src="docs/contact/wechat-qr.jpg" alt="微信二维码" width="200"> | <img src="docs/contact/feishu-qr.png" alt="飞书二维码" width="200"> |
 
-扫不了码就点：[飞书加联系人](https://www.feishu.cn/invitation/page/add_contact/?token=5d4qe0e8-1811-42d5-80e3-89f8bf4017b7&unique_id=2Kjla8sxnu-QcdiaY7tT0g==)
+扫不了码（GitHub 图片在部分网络下加载不出来）就用文字：微信号 **flywithmk**，或点[飞书加联系人](https://www.feishu.cn/invitation/page/add_contact/?token=5d4qe0e8-1811-42d5-80e3-89f8bf4017b7&unique_id=2Kjla8sxnu-QcdiaY7tT0g==)。
 
 用得上就点个 star，有问题开 issue。
 
@@ -196,6 +196,8 @@ Trigger with `/elab` (Claude Code), `$elab` (Codex), or just describe what you n
 These skills are for **investor education and method** — no recommendations, no signals, no stock picks, no promised returns. Every decision is yours. Broker connectors (Futu, Longbridge, IBKR) are read-only and never installed or authorised without your explicit action. `elab-futu-research` works only on public pages: it does not log in, read cookies, or collect private messages.
 
 Licensed **CC BY-NC 4.0** — the source is fully public; use, modify and share freely. Commercial use (reselling, bundling into a paid product, course or service) is not permitted. The non-commercial clause means this is *source-available* rather than OSI-approved open source — no difference for personal use, the restriction only targets commercial resale.
+
+Questions or corrections: open an issue, or reach me on WeChat **flywithmk** / X [@jienima8635](https://x.com/jienima8635).
 
 ## License
 
