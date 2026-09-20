@@ -2,6 +2,21 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-20 · EdgeLab Skills 0.6.0 交易一致性
+
+- **elab-diagnosis** 0.5.0 — 第 4 条公理明确交易一致性；区分执行偏离、有依据的修订和资料不足，避免把一致性理解为拒绝适应变化。
+- **elab-trade** 0.7.0 — 立案绑定交易规则版本，持仓更新与 playbook 修订保留依据及生效范围，复盘分开评价执行质量与结果；纠正以 credit/debit 判断方向一致性的示例。
+- **elab** 0.6.0 — 一致性问诊与交易记录按意图区分，沿用现有入口与共享要求；未改变只读券商权限。
+- **回退基线** — 上一已知稳定版本为 `v0.4.3`（提交 `72e7cd3`）
+
+## 2026-09-20 · EdgeLab Skills 0.5.0 研究方法与来源署名（随 0.6.0 一并发布）
+
+- **elab** 0.5.0 — 按指定方法与外部研究意图接续 Research，继续使用现有入口。
+- **elab-research** 0.8.1 — 按财报、产业链、估值、事件、波动率、拥挤度与宏观问题选方法；支持用户方法的来源与版本，规范可选外部 Agent 的接口核验与证据综合；区分材料覆盖与推断可信度，明确虚构材料的输出边界。
+- **期权口径** — 区分 IV Rank 与 IV Percentile，新增纯本地计算，明确历史缺失与事件风险的结论边界。
+- **来源署名** — 杰尼马（EdgeLab）品牌集中在首次使用、方法出处与报告页脚，保留第三方作者；用户可关闭可选露出。
+- **套件版本** 0.5.0 — 未单独发 tag，内容并入 0.6.0；上一稳定版本为 `v0.4.3`（提交 `72e7cd3`）。
+
 ## 2026-09-05 · EdgeLab Skills 0.4.3 功能导航与目录说明
 
 - **首页导航** — 安装步骤之前展示 11 个 Skill 的用途与使用场景，区分研究、决策梳理、交易复盘和存档三件套
@@ -82,15 +97,15 @@ EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该
 - **minor**（`0.X.0`）：新增能力 / 模式 / reference 分册
 - **major**（`X.0.0`）：破坏性改动 / 结构重构（会影响已有用法）
 
-## 当前版本
+## 当前源码版本（0.6.0 待发布；正式版仍为 v0.4.2）
 
 | skill | version |
 |---|---|
-| **EdgeLab Skills suite** | **0.4.3** |
-| elab | 0.4.0 |
-| elab-trade | 0.6.1 |
-| elab-research | 0.7.0 |
-| elab-diagnosis | 0.4.1 |
+| **EdgeLab Skills suite** | **0.6.0** |
+| elab | 0.6.0 |
+| elab-trade | 0.7.0 |
+| elab-research | 0.8.1 |
+| elab-diagnosis | 0.5.0 |
 | elab-benchmark | 0.4.0 |
 | elab-deconstruct | 0.4.1 |
 | elab-save | 0.2.3 |

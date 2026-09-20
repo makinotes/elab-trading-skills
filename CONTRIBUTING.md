@@ -46,7 +46,9 @@ outputs: []                    # 产出路径/格式，见 §4
 - 公开仓的变更说明只描述产品行为和用户可见修复，不公开 case 编号、判分细则或内部验收分数。
 
 ## 6. 加一个外部工具 / 数据源
-走 `elab-research/references/tool-registry.md` §二：**玩具筛 5 关**（能本地跑/维护活跃/license 可商用/实盘机构真在用/数据质量满足场景）→ 过筛写登记条目 → 标接口衔接 + 合规。
+走 `elab-research/references/tool-registry.md` §二：按接口、许可证、任务增益、数据质量、权限与成本逐项评估，再写登记条目。外部研究 Agent 另读 `external-research.md`；只审过文档不算已连接。
+
+研究方法扩展见 `elab-research/references/research-methods.md`：注明适用问题、必需数据、步骤与失效条件，保留作者与来源。品牌露出遵循 `_shared/credit.md`，不将通用或第三方方法重命名为杰尼马原创，不给每个新方法增加顶层 Skill。
 
 ## 7. 合规护栏内嵌（投资场景，其他领域换对应合规）
 每个 skill 的"风格 & 合规"段写死领域红线。本套 = 930：不给买卖方向、不晒收益、不点"现在买 X"；市场数据只做客观呈现不做方向研判。合规当作 skill 的一等约束，不是事后补。

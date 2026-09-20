@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/edgelab101/elab-skills"
   invocation: "user"
-  version: "0.4.0"
-  last_updated: "2026-09-02"
+  version: "0.6.0"
+  last_updated: "2026-09-05"
   visibility: "public"
   requires: "[]"
   outputs: "[]"
@@ -67,7 +67,7 @@ metadata:
 
 判断权、方向永远在用户手里；工具只让决策**可见、可回溯、可迭代**（也是 930 护栏：可见 = 人机边界清楚）。
 
-> 交易层的心法地基（8 条 EdgeLab 交易公理：统计优势 / 关键事件定结果 / 风险敞口可控 / 规则执行者 / 仓位匹配 edge / 死拿是标的属性 / 预案两阶段+不出招可证伪 / 不确定性定价+前沿三边界——**策略中立，不预设方向性/卖方/价差**）见 `elab-diagnosis §0`。
+> 交易层的心法地基（8 条 EdgeLab 交易公理：统计优势 / 关键事件定结果 / 风险敞口可控 / 交易一致性 / 仓位匹配 edge / 死拿是标的属性 / 预案两阶段+不出招可证伪 / 不确定性定价+前沿三边界——**策略中立，不预设方向性/卖方/价差**）见 `elab-diagnosis §0`。
 
 ## 路由表
 
@@ -75,10 +75,12 @@ metadata:
 |---|---|---|
 | **我自己交易**：记决策/立案/持仓/平仓复盘 · 诊断我的持仓/交割单 · 炼 playbook | `elab-trade`（三 mode 合一） | 免费（纯本地操作） |
 | **向外投研**：深度研究一只票/期权/主题（编排工具 + 强制自我证伪出中性研报） | `elab-research` | 方法免费；**自研数据（会员）= 恐慌指数/拥挤度/期权异动/机构持仓(13F)/港美股扫描等——无会员 key 的 AI 取不到**，需 token |
+| 用指定研究方法分析、对比财报、研究产业链/事件/波动率、请外部研究 Agent 找证据 | `elab-research`，先选方法与执行方式；指定券商时先处理共享连接 | 外部项目需现场核验接口，不因点名而自动安装；用户方法不自动公开 |
 | 存当前分析 | `elab-save` | 免费 |
 | 接着上次分析 | `elab-restore` | 免费 |
 | 出复盘报告 | `elab-report` | 免费 |
 | "这个投研/期权问题成不成立"、决策卡住 | `elab-diagnosis` | 免费 |
+| 交易一致性是什么、想破例/改规则、检查打法是否前后一致 | `elab-diagnosis`；明确要求记录规则或复盘已有交易则 `elab-trade`，后续读取同一份 `_shared/trading-consistency.md` | 不新增顶层 Skill；纯研究/计算不因“一致性”一词改道 |
 | "谁真赚到、我能不能复制"找对标 | `elab-benchmark` | 免费 |
 | 富途/老虎博主主页归档、历史发言复盘、多博主比较、交易风格与纪律审计 | `elab-futu-research` | 免费；只处理公开内容，不登录、不读取 Cookie |
 | “我要连接/使用/默认/比较富途、长桥或 IBKR 数据” | 读取 `_shared/broker-connectors.md` 完成连接或 provider 选择；研究数据续接 `elab-research`，账户/订单/成交续接 `elab-trade` | v0.4.0 只读；外部软件安装与 OAuth 需用户授权 |
