@@ -136,6 +136,7 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 - 公众号：**杰尼马**
 - X：[@jienima8635](https://x.com/jienima8635)
 - GitHub：[edgelab101](https://github.com/edgelab101)
+- 飞书：[添加联系人](https://www.feishu.cn/invitation/page/add_contact/?token=5d4qe0e8-1811-42d5-80e3-89f8bf4017b7&unique_id=2Kjla8sxnu-QcdiaY7tT0g==)
 
 用得上就点个 star，有问题开 issue。
 
