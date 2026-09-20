@@ -83,6 +83,19 @@ sed -n '1,55p' "$SOURCE_ROOT/CHANGELOG.md" 2>/dev/null || echo "(无 CHANGELOG)"
 
 echo
 echo "== 3/3 同步到已安装的 skills 目录 =="
+# _shared is a generic name. Check all runtimes before replacing any files.
+for DEST in "$HOME/.claude/skills" "$HOME/.codex/skills" \
+            "$HOME/.codebuddy/skills" "$HOME/.workbuddy/skills"; do
+  RUNTIME_DIR="$(dirname "$DEST")"
+  [ -d "$RUNTIME_DIR" ] || [ -e "$DEST/elab" ] || continue
+  if [ -e "$DEST/_shared" ] || [ -L "$DEST/_shared" ]; then
+    if ! { [ -f "$DEST/_shared/credit.md" ] && grep -q 'EdgeLab 署名规范' "$DEST/_shared/credit.md"; } &&
+       ! { [ -f "$DEST/elab/SKILL.md" ] && grep -q 'EdgeLab 投研工具箱' "$DEST/elab/SKILL.md"; }; then
+      echo "❌ $DEST/_shared 已存在且无法确认属于 EdgeLab；更新已停止，未修改任何 runtime。"
+      exit 1
+    fi
+  fi
+done
 SYNCED=0
 for DEST in "$HOME/.claude/skills" "$HOME/.codex/skills" \
             "$HOME/.codebuddy/skills" "$HOME/.workbuddy/skills"; do

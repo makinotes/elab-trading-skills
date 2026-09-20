@@ -48,6 +48,27 @@ if [ "${#UNITS[@]}" -eq 0 ]; then
   exit 1
 fi
 
+# _shared is a generic name. Check every target before changing any runtime.
+# Older EdgeLab installs may lack SUITE_VERSION, so accept their elab entry.
+if [ "$LIST_ONLY" = 0 ]; then
+  for row in "${RUNTIMES[@]}"; do
+    IFS='|' read -r key label conf dest <<<"$row"
+    if [ "${#WANT[@]}" -gt 0 ]; then
+      hit=0
+      for w in "${WANT[@]}"; do [ "$w" = "$key" ] && hit=1; done
+      [ "$hit" = 1 ] || continue
+    fi
+    [ -d "$conf" ] || [ "${#WANT[@]}" -gt 0 ] || continue
+    if [ -e "$dest/_shared" ] || [ -L "$dest/_shared" ]; then
+      if ! { [ -f "$dest/_shared/credit.md" ] && grep -q 'EdgeLab 署名规范' "$dest/_shared/credit.md"; } &&
+         ! { [ -f "$dest/elab/SKILL.md" ] && grep -q 'EdgeLab 投研工具箱' "$dest/elab/SKILL.md"; }; then
+        echo "❌ $dest/_shared 已存在且无法确认属于 EdgeLab；安装已停止，未修改任何 runtime。"
+        exit 1
+      fi
+    fi
+  done
+fi
+
 echo "EdgeLab Skills · by 杰尼马（EdgeLab）"
 echo "套件版本：$SUITE_VERSION"
 echo "源目录：$REPO"
@@ -116,4 +137,4 @@ else
 fi
 echo
 echo "怎么用：Claude Code 敲 /elab，Codex 敲 \$elab，其他 agent 直接说「帮我看看这笔交易」。"
-echo "开源地址 github.com/edgelab101/elab-skills · 公众号 杰尼马"
+echo "源码地址 github.com/edgelab101/elab-skills · 公众号 杰尼马"

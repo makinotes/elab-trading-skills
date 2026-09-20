@@ -102,7 +102,7 @@ class BrokerProfileTest(unittest.TestCase):
         for relative, needle in expected.items():
             text = (ROOT / relative).read_text(encoding="utf-8")
             self.assertIn(needle, text, relative)
-        self.assertEqual((ROOT / "_shared" / "SUITE_VERSION").read_text().strip(), "0.6.2")
+        self.assertEqual((ROOT / "_shared" / "SUITE_VERSION").read_text().strip(), "0.6.3")
 
     def test_installer_copies_connector_to_all_supported_runtimes(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -122,7 +122,7 @@ class BrokerProfileTest(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
-            self.assertIn("EdgeLab Skills 0.6.2", completed.stdout)
+            self.assertIn("EdgeLab Skills 0.6.3", completed.stdout)
             for runtime in (".claude", ".codex", ".codebuddy", ".workbuddy"):
                 skill_root = home / runtime / "skills"
                 self.assertTrue((skill_root / "elab" / "SKILL.md").is_file())
@@ -139,6 +139,33 @@ class BrokerProfileTest(unittest.TestCase):
                 self.assertTrue(helper.is_file())
                 self.assertTrue(os.access(helper, os.X_OK))
                 self.assertFalse((skill_root / "elab-removed-from-suite").exists())
+
+    def test_installer_refuses_foreign_shared_before_changing_any_runtime(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            home = Path(temporary)
+            first = home / ".claude" / "skills"
+            first.mkdir(parents=True)
+            sentinel = first / "elab" / "SKILL.md"
+            sentinel.parent.mkdir()
+            sentinel.write_text("keep this installation\n", encoding="utf-8")
+            foreign = home / ".codex" / "skills" / "_shared"
+            foreign.mkdir(parents=True)
+            (foreign / "SUITE_VERSION").write_text("1.0.0\n", encoding="utf-8")
+            (foreign / "keep.txt").write_text("foreign data\n", encoding="utf-8")
+            env = os.environ.copy()
+            env["HOME"] = str(home)
+            completed = subprocess.run(
+                ["bash", str(ROOT / "install.sh")],
+                text=True,
+                capture_output=True,
+                env=env,
+                cwd=ROOT,
+                check=False,
+            )
+            self.assertEqual(completed.returncode, 1)
+            self.assertIn("无法确认属于 EdgeLab", completed.stdout)
+            self.assertEqual(sentinel.read_text(encoding="utf-8"), "keep this installation\n")
+            self.assertEqual((foreign / "keep.txt").read_text(encoding="utf-8"), "foreign data\n")
 
     def test_update_rejects_unversioned_target_before_network(self):
         completed = subprocess.run(
@@ -187,6 +214,23 @@ class BrokerProfileTest(unittest.TestCase):
             (stale / "SKILL.md").write_text("must be removed\n", encoding="utf-8")
             env = os.environ.copy()
             env["HOME"] = str(home)
+            foreign = home / ".claude" / "skills" / "_shared"
+            foreign.mkdir(parents=True)
+            (foreign / "keep.txt").write_text("foreign data\n", encoding="utf-8")
+            rejected = subprocess.run(
+                ["bash", str(repo / "update.sh"), "--to", "v0.4.0"],
+                cwd=repo,
+                env=env,
+                capture_output=True,
+                text=True,
+                errors="replace",
+                check=False,
+            )
+            self.assertEqual(rejected.returncode, 1)
+            self.assertIn("无法确认属于 EdgeLab", rejected.stdout)
+            self.assertTrue(stale.is_dir())
+            self.assertEqual((foreign / "keep.txt").read_text(), "foreign data\n")
+            shutil.rmtree(foreign)
             completed = subprocess.run(
                 ["bash", str(repo / "update.sh"), "--to", "v0.4.0"],
                 cwd=repo,
