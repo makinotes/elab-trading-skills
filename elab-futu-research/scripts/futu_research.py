@@ -37,7 +37,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
-VERSION = "1.3.5"
+VERSION = "1.3.6"
 SCHEMA_VERSION = "1.0"
 # Bump when market calculations or benchmark rules change derived row semantics.
 MARKET_CALCULATION_VERSION = "1"

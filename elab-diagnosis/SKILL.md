@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/edgelab101/elab-skills"
   invocation: "user"
-  version: "0.5.2"
-  last_updated: "2026-09-20"
+  version: "0.5.3"
+  last_updated: "2026-09-21"
   visibility: "public"
   requires: '["_shared/trading-consistency.md（交易一致性检查时）"]'
   outputs: "[]"
@@ -23,7 +23,7 @@ metadata:
 **启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
 
 ```
-> EdgeLab Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
+> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
 ```
 
 一个会话只出一次，只出这一行，不展开、不加欢迎语；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
@@ -261,7 +261,7 @@ metadata:
 
 ```
 ---
-本报告由 EdgeLab Skills 生成 · by 杰尼马（EdgeLab）
+本报告由 EdgeLab Trading Skills 生成 · by 杰尼马（EdgeLab）
 公众号 杰尼马 · X @jienima8635 · github.com/edgelab101/elab-skills
 仅供研究参考，不构成任何投资建议。
 ```

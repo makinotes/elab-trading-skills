@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# EdgeLab Skills 一键安装 · by 杰尼马（EdgeLab）
+# EdgeLab Trading Skills 一键安装 · by 杰尼马（EdgeLab）
 #
 # 自动识别你机器上装了哪些 agent，把 elab* + _shared 装进各自的 skills 目录。
 #

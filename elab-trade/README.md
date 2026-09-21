@@ -11,4 +11,4 @@
 
 研究外部标的用 [elab-research](../elab-research/README.md)；只保存一段对话进度用 [elab-save](../elab-save/README.md)。
 
-[返回全部 Skill](../README.md) · [完整执行说明](SKILL.md)
+[EdgeLab Trading Skills · 全部功能](../README.md) · [完整执行说明](SKILL.md)

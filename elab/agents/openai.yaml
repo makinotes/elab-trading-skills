@@ -1,5 +1,5 @@
 interface:
-  display_name: "EdgeLab 投研工具箱"
+  display_name: "EdgeLab Trading Skills"
   short_description: "路由投研交易任务，并引导连接富途、长桥或 IBKR 数据"
   default_prompt: "使用 $elab 路由我的投研交易问题；如果我指定富途、长桥或 IBKR，先检查连接并按只读方式续接研究或交易复盘。"
   brand_color: "#FF8A00"

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 可选 · 一次性设置：每日自动更新 EdgeLab skills（cron 每天调 update.sh）
+# 可选 · 一次性设置：每日自动更新 EdgeLab Trading Skills（cron 每天调 update.sh）
 # 用法：在 elab-skills 目录里跑一次  bash install-autoupdate.sh
 # 取消：crontab -e 删掉含 elab-skills/update.sh 的那行
 set -euo pipefail
