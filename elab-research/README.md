@@ -11,4 +11,4 @@
 
 记录自己的交易用 [elab-trade](../elab-trade/README.md)；决策卡住用 [elab-diagnosis](../elab-diagnosis/README.md)。
 
-[返回全部 Skill](../README.md) · [完整执行说明](SKILL.md)
+[EdgeLab Trading Skills · 全部功能](../README.md) · [完整执行说明](SKILL.md)

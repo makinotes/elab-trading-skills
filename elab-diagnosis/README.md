@@ -11,4 +11,4 @@
 
 单纯查资料用 [elab-research](../elab-research/README.md)；复盘已有成交用 [elab-trade](../elab-trade/README.md)。
 
-[返回全部 Skill](../README.md) · [完整执行说明](SKILL.md)
+[EdgeLab Trading Skills · 全部功能](../README.md) · [完整执行说明](SKILL.md)

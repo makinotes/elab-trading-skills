@@ -11,4 +11,4 @@
 
 想理解术语先用 [elab-deconstruct](../elab-deconstruct/README.md)。
 
-[返回全部 Skill](../README.md) · [完整执行说明](SKILL.md)
+[EdgeLab Trading Skills · 全部功能](../README.md) · [完整执行说明](SKILL.md)

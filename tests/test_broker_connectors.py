@@ -123,7 +123,7 @@ class BrokerProfileTest(unittest.TestCase):
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
             version = (ROOT / "_shared" / "SUITE_VERSION").read_text().strip()
-            self.assertIn(f"EdgeLab Skills {version}", completed.stdout)
+            self.assertIn(f"EdgeLab Trading Skills {version}", completed.stdout)
             for runtime in (".claude", ".codex", ".codebuddy", ".workbuddy"):
                 skill_root = home / runtime / "skills"
                 self.assertTrue((skill_root / "elab" / "SKILL.md").is_file())
@@ -250,7 +250,7 @@ class BrokerProfileTest(unittest.TestCase):
             after = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
             self.assertEqual(completed.returncode, 0, completed.stderr)
             self.assertEqual(before, after)
-            self.assertIn("已安装/回退到 EdgeLab Skills 0.4.0", completed.stdout)
+            self.assertIn("已安装/回退到 EdgeLab Trading Skills 0.4.0", completed.stdout)
             installed = home / ".codex" / "skills"
             self.assertEqual((installed / "_shared" / "SUITE_VERSION").read_text().strip(), "0.4.0")
             self.assertTrue((installed / "elab" / "SKILL.md").is_file())
@@ -297,7 +297,7 @@ class BrokerProfileTest(unittest.TestCase):
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
             self.assertIn("版本号取自 Git tag", completed.stdout)
-            self.assertIn("EdgeLab Skills 0.3.0", completed.stdout)
+            self.assertIn("EdgeLab Trading Skills 0.3.0", completed.stdout)
             installed = home / ".codex" / "skills"
             self.assertTrue((installed / "elab" / "SKILL.md").is_file())
             self.assertFalse((installed / "_shared" / "SUITE_VERSION").exists())

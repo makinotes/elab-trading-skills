@@ -8,8 +8,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/edgelab101/elab-skills"
   invocation: "user"
-  version: "1.3.5"
-  last_updated: "2026-09-20"
+  version: "1.3.6"
+  last_updated: "2026-09-21"
   visibility: "public"
   requires: "[]"
   outputs: "可续跑公开内容归档；证据有界的博主研究报告；多博主能力矩阵与规则卡"
@@ -21,7 +21,7 @@ metadata:
 **启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
 
 ```
-> EdgeLab Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
+> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
 ```
 
 一个会话只出一次，只出这一行；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
@@ -31,7 +31,7 @@ metadata:
 
 Turn one or more public profile URLs — Futu (q.futunn.com) or Tiger (laohu8.com) — into a resumable archive and an evidence-bounded research report. Start with alignment, including when the user only asks what happens next or says not to execute yet. After alignment is complete, run the confirmed workflow in one shot and return the report plus audit status.
 
-Version: `1.3.5` · Last updated: `2026-09-20`
+Version: `1.3.6` · Last updated: `2026-09-21`
 
 ## Invocation invariants (P0)
 

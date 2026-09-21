@@ -11,4 +11,4 @@
 
 需要先归档富途或老虎博主公开内容时，用 [elab-futu-research](../elab-futu-research/README.md)。
 
-[返回全部 Skill](../README.md) · [完整执行说明](SKILL.md)
+[EdgeLab Trading Skills · 全部功能](../README.md) · [完整执行说明](SKILL.md)

@@ -1,4 +1,8 @@
-# EdgeLab Skills
+# EdgeLab Trading Skills
+
+**给 AI Agent 用的投研与交易复盘工具集。**
+
+**让每一次交易判断，都有依据、有记录、能复盘。**
 
 > **by 杰尼马（EdgeLab）** · 公众号 杰尼马 · X [@jienima8635](https://x.com/jienima8635)
 
@@ -6,11 +10,11 @@
 
 [![license](https://img.shields.io/badge/license-CC%20BY--NC%204.0-informational)](LICENSE)
 
-用于**股票与期权研究、交易决策梳理和复盘记录**的 11 个 Agent Skills：研究标的与板块、拆解概念、计算策略风险收益、审阅公开博主证据，并保存、接续和整理你的研究过程。
+把研究、决策梳理、交易记录和结果复盘接成一套可继续使用的工作流。11 个 Agent Skills 覆盖股票与期权研究、概念拆解、策略计算和公开博主证据审阅，并帮助你保存进度、接续上次研究、整理复盘报告。
 
-提供通用 `SKILL.md` 指令与 Claude Code、Codex、CodeBuddy、WorkBuddy 的安装路径。具体可用的数据、工具和执行方式取决于宿主能力、已安装依赖及用户授权；支持安装不等于所有宿主的行为效果相同。
+如果研究散在多个聊天、笔记和表格里，下一次往往只记得结论，忘了依据。这套 Skills 要保留的是判断过程：**事实与来源、AI 推断、本人判断、后续结果分别记录**；原判断留下来，修改另记依据，让复盘能对照当时真正掌握的信息。
 
-> **内核命题**：AI 时代散户的护城河不是"知道得更多"，是把判断过程摊开——人和 AI 各担其责、每个决策可回溯。看得见的决策，才可能被迭代成 edge。整套 skill 都是这一句的展开（详见 `elab/SKILL.md`）。
+本项目以 `SKILL.md` 指令、脚本和共享记录规范的形式装进现有 Agent。提供 Claude Code、Codex、CodeBuddy、WorkBuddy 的安装路径；具体能力取决于宿主、工具、数据权限和已安装依赖。交易决定由使用者自己作出，券商连接只读。
 
 > 这些 skill **源码公开、非商业使用免费**。其中 `elab-research` 的「自研数据」模式（雷达 / 恐慌指数）需要 EdgeLab 会员 token 才能读取。没有 token 时可尝试公开数据路径；能否取到数据取决于已安装工具和数据源可用性。
 
@@ -20,6 +24,17 @@
 
 **语言范围**：本页提供中英文介绍；大多数 `SKILL.md` 执行说明和各 Skill 的 README 仍以中文为主。英文提问可以尝试，但英文工作流尚未完成系统行为验收。
 
+## 一次研究，能留下什么？
+
+| 环节 | 帮你完成什么 | 留下什么 |
+|---|---|---|
+| 研究 | 核对资料与概念，计算风险收益，寻找反证 | 来源、假设、数据缺口与待验证问题 |
+| 决策梳理 | 分开依据、规则、风险和情绪，检查判断条件 | 本人判断及其证伪条件 |
+| 交易记录 | 事前立案，按新信息更新，回填实际结果 | 带时间与规则版本的记录，保留修改依据 |
+| 复盘接续 | 对照原计划整理结果，恢复存档继续研究 | 判断变化、执行偏离和下一次要检查的问题 |
+
+这些环节按需调用。每个 Skill 可以单独用；共享的记录格式与来源标签帮助它们接续。先留下事前判断，再回填结果，才能检查规则、执行和结果之间的关系。
+
 ## 首次试用（无需会员 token）
 
 按下方[安装说明](#安装)装好后，用 Codex 输入 `$elab-deconstruct`、Claude Code 输入 `/elab-deconstruct`，接着提问：
@@ -27,6 +42,8 @@
 > Delta 中性是不是等于没有风险？请用虚构例子解释净 Delta、Gamma 和 Vega 的区别，不查询实时行情。
 
 这个例子只需要概念拆解，不需要券商账户或 EdgeLab 会员数据。核对回答是否说明净 Delta 接近零仍有其他风险，并把例子标为虚构。
+
+随后调用 `elab-save` 保存本次理解与未解问题；换一个会话，再调用 `elab-restore` 找回这份存档。这样可以先体验“拆解 → 记录 → 接续”，再按需要配置其他数据源。
 
 ## 每个 Skill 是做什么的？
 
@@ -151,7 +168,7 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 
 这些 skill 用于**投资者教育与方法论**，不构成投资建议、不荐股、不喊单、不承诺收益。所有决策由使用者自行作出。
 
-本仓库是公开产品仓，只接收安装所需的 skill、脚本、文档、虚构样例与普通单测。个人对话、账户数据、真实持仓、飞书暂存及内部评测资产不得进入本仓库；提交前运行 `python3 scripts/privacy_gate.py`，GitHub CI 也会执行同一检查。
+本仓库是公开产品仓，只接收安装所需的 skill、脚本、文档、虚构样例与普通单测。个人对话、账户数据、真实持仓、飞书暂存及内部评测资产不得进入本仓库；提交前运行 `python3 scripts/privacy_gate.py`。该检查可在本地独立执行，GitHub CI 提供同一检查的可选自动化。
 
 ## 作者
 
@@ -161,7 +178,7 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 - X：[@jienima8635](https://x.com/jienima8635)
 - GitHub：[edgelab101](https://github.com/edgelab101)
 
-扫码加我，备注 `elab`：
+交流工具用法、反馈数据勘误或研究方法，可扫码联系，来意注明 `Skills`：
 
 | 微信 | 飞书 |
 |:---:|:---:|
@@ -175,17 +192,32 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 
 ## English
 
+**EdgeLab Trading Skills — research, decision review, and trade journaling for your AI agent.**
+
+Give each trading decision a rationale, a record, and a review. These 11 skills help connect equity and options research, decision review, trade records, and follow-up. Save what you learned, resume it in a later session, and compare outcomes with what you recorded at the time.
+
+**Facts and sources, AI inferences, your own judgments, and later outcomes stay distinct.** Original judgments are preserved, with reasons recorded for subsequent changes. This makes it easier to examine how evidence, rules, and execution shaped a decision.
+
+The skills run inside your existing agent using `SKILL.md` instructions, scripts, and shared record formats. Available behavior depends on the host, installed tools, dependencies, and data permissions. You make the trading decisions; broker connections are read-only.
+
 **Release status:** This update is a prerelease. See [Releases](https://github.com/edgelab101/elab-skills/releases) for stable and preview versions; host behavior and optional integrations still need confirmation in your environment.
-
-**EdgeLab Skills** — 11 Agent Skills for equity and options research, trade journaling, and review. They use portable `SKILL.md` instructions that agents can read; available behavior depends on the host and its tools.
-
-> **Core premise**: in the AI era a retail investor's moat is not knowing more — it is making the reasoning visible. Human and AI each own their part, and every decision can be traced back. A decision you can see is a decision you can iterate into an edge.
 
 The source is public and noncommercial use is free. One optional mode in `elab-research` reads EdgeLab's own data (a fear index and crowding radar) and needs a member token. Without a token, public data paths may be available depending on installed tools and source availability.
 
 The current version is in [`_shared/SUITE_VERSION`](_shared/SUITE_VERSION); see [CHANGELOG](CHANGELOG.md) for changes and [Tags](https://github.com/edgelab101/elab-skills/tags) for versions you can roll back to.
 
 **Language status:** This page has an English overview. Most `SKILL.md` instructions and individual skill guides are still written in Chinese. You can try English prompts, but the English workflows have not completed comprehensive behavioral validation.
+
+### What the workflow leaves you with
+
+| Stage | What you keep |
+|---|---|
+| Research | Sources, assumptions, counterevidence, and unanswered questions |
+| Decision review | Your judgment and the conditions that would invalidate it |
+| Trade records | Dated records, rule versions, reasons for changes, and actual outcomes |
+| Review and resume | Changes in reasoning, deviations from the plan, and questions to revisit |
+
+Use each skill independently or connect them through the shared record formats and source labels. Steps are invoked as needed.
 
 ### The 11 skills
 
@@ -220,6 +252,8 @@ Legacy files without a manifest must match the current source or a local release
 Trigger with `/elab` (Claude Code), `$elab` (Codex), or just describe what you need.
 
 For a first try without a broker account or member token, invoke `/elab-deconstruct` in Claude Code or `$elab-deconstruct` in Codex, then ask: “Does delta-neutral mean risk-free? Use a hypothetical example to explain net delta, gamma and vega. Do not look up live market data.” Check that the answer names risks beyond net delta and labels the example as hypothetical.
+
+Then use `elab-save` to record what you learned and what remains unresolved. In a new session, use `elab-restore` to resume from that saved record.
 
 ### Boundaries
 

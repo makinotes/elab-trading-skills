@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# EdgeLab Skills 更新/回退：默认拉最新；--to vX.Y.Z 从已发布 tag 安装指定版本。
+# EdgeLab Trading Skills 更新/回退：默认拉最新；--to vX.Y.Z 从已发布 tag 安装指定版本。
 # 支持 Claude Code / Codex / CodeBuddy / WorkBuddy。
 # Parse the whole update before fast-forwarding a checkout that may replace this file.
 main() {
@@ -89,7 +89,7 @@ fi
 
 echo
 echo "== 2/3 版本与变更 =="
-echo "EdgeLab Skills $SUITE_VERSION"
+echo "EdgeLab Trading Skills $SUITE_VERSION"
 if [ "$PINNED" = 0 ]; then
   if [ "$OLD_HEAD" != "$NEW_HEAD" ]; then
     git log --oneline "${OLD_HEAD}..${NEW_HEAD}"
@@ -109,9 +109,9 @@ python3 "$REPO/scripts/install_runtime.py" --source "$SOURCE_ROOT" \
 
 echo
 if [ "$PINNED" = 1 ]; then
-  echo "🎉 已安装/回退到 EdgeLab Skills ${SUITE_VERSION}（${TARGET}）；当前 Git 工作树未改变。"
+  echo "🎉 已安装/回退到 EdgeLab Trading Skills ${SUITE_VERSION}（${TARGET}）；当前 Git 工作树未改变。"
 else
-  echo "🎉 更新完成：EdgeLab Skills ${SUITE_VERSION}。"
+  echo "🎉 更新完成：EdgeLab Trading Skills ${SUITE_VERSION}。"
 fi
 
 }

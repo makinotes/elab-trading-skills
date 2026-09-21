@@ -446,7 +446,7 @@ def main(argv=None):
 
     apply_plans(plans, advance if args.advance_repo else None)
     for plan in plans:
-        print(f"已安装 EdgeLab Skills {args.version} → {plan['dest']}（{plan['mode']}）")
+        print(f"已安装 EdgeLab Trading Skills {args.version} → {plan['dest']}（{plan['mode']}）")
     return 0
 
 
