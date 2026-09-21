@@ -4,10 +4,10 @@ description: |
   EdgeLab · 用可审计公式计算 EV、Kelly 仓位、策略结构数学（bull put spread 等）。触发：/elab-model、「算EV」「期望收益」「Kelly」「策略数学」「这单结构怎么样」「收得薄不薄」
   EdgeLab · Auditable-formula model layer: EV, Kelly sizing, and options strategy math. Trigger: /elab-model, "calculate EV", "expected value", "Kelly", "strategy math", "how does this structure look"
 author: 杰尼马（EdgeLab）
-homepage: https://github.com/edgelab101/elab-skills
+homepage: https://github.com/edgelab101/elab-trading-skills
 license: CC-BY-NC-4.0
 invocation: user
-version: 0.1.4
+version: 0.1.5
 last_updated: 2026-09-21
 visibility: public
 requires:
@@ -23,7 +23,7 @@ outputs:
 **启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
 
 ```
-> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
+> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-trading-skills
 ```
 
 一个会话只出一次，只出这一行，不展开、不加欢迎语；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。

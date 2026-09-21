@@ -6,9 +6,9 @@ description: |
 license: CC-BY-NC-4.0
 metadata:
   author: "杰尼马（EdgeLab）"
-  homepage: "https://github.com/edgelab101/elab-skills"
+  homepage: "https://github.com/edgelab101/elab-trading-skills"
   invocation: "user"
-  version: "1.3.6"
+  version: "1.3.7"
   last_updated: "2026-09-21"
   visibility: "public"
   requires: "[]"
@@ -21,7 +21,7 @@ metadata:
 **启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
 
 ```
-> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
+> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-trading-skills
 ```
 
 一个会话只出一次，只出这一行；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
@@ -31,7 +31,7 @@ metadata:
 
 Turn one or more public profile URLs — Futu (q.futunn.com) or Tiger (laohu8.com) — into a resumable archive and an evidence-bounded research report. Start with alignment, including when the user only asks what happens next or says not to execute yet. After alignment is complete, run the confirmed workflow in one shot and return the report plus audit status.
 
-Version: `1.3.6` · Last updated: `2026-09-21`
+Version: `1.3.7` · Last updated: `2026-09-21`
 
 ## Invocation invariants (P0)
 
@@ -88,7 +88,7 @@ Locate the script before running. The path depends on how the skill was installe
 | Claude Code | `~/.claude/skills/elab-futu-research/scripts/futu_research.py` |
 | Codex | `~/.codex/skills/elab-futu-research/scripts/futu_research.py` |
 | Repo clone | `elab-futu-research/scripts/futu_research.py` (run from repo root) |
-| Other / unknown | clone `https://github.com/edgelab101/elab-skills`, then use `elab-futu-research/scripts/futu_research.py` from the repo root |
+| Other / unknown | clone `https://github.com/edgelab101/elab-trading-skills`, then use `elab-futu-research/scripts/futu_research.py` from the repo root |
 
 If you are unsure which path applies, run the following to auto-detect:
 

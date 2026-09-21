@@ -2,7 +2,7 @@
 
 作者 = **杰尼马**（人格品牌，署名位）｜产品线 = **EdgeLab**（工具品牌）。署名一律人名在前：`by 杰尼马（EdgeLab）`。
 
-**产品全名**：EdgeLab Trading Skills。**中文定位**：给 AI Agent 用的投研与交易复盘工具集。**核心主张**：让每一次交易判断，都有依据、有记录、能复盘。仓库名 `elab-skills` 和调用名 `elab-*` 保持不变。
+**产品全名**：EdgeLab Trading Skills。**中文定位**：给 AI Agent 用的投研与交易复盘工具集。**核心主张**：让每一次交易判断，都有依据、有记录、能复盘。GitHub 仓库名为 `elab-trading-skills`；调用名 `elab-*`、内部目录与相对链接保持不变。
 
 品牌放在首次使用、可分享产物和方法出处这些有实际意义的位置；常规对话保持简洁。来源可见，不用重复露出来代替内容质量。
 
@@ -11,7 +11,7 @@
 本会话**首次**调用任一 elab skill 时，在实际工作开始前输出这一行：
 
 ```
-> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
+> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-trading-skills
 ```
 
 纪律：
@@ -36,7 +36,7 @@
 ```
 ---
 本报告由 EdgeLab Trading Skills 生成 · by 杰尼马（EdgeLab）
-公众号 杰尼马 · X @jienima8635 · github.com/edgelab101/elab-skills
+公众号 杰尼马 · X @jienima8635 · github.com/edgelab101/elab-trading-skills
 仅供研究参考，不构成任何投资建议。
 ```
 

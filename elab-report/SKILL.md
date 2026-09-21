@@ -6,10 +6,10 @@ description: |
   EdgeLab · Merge elab-save snapshots into a deliverable research/review report.
   Trigger: /elab-report, "package this up", "make me a report"
 author: 杰尼马（EdgeLab）
-homepage: https://github.com/edgelab101/elab-skills
+homepage: https://github.com/edgelab101/elab-trading-skills
 license: CC-BY-NC-4.0
 invocation: user
-version: 0.1.8
+version: 0.1.9
 last_updated: 2026-09-21
 visibility: public
 requires: ["~/.elab/sessions/ (多份 elab-save 存档)"]
@@ -22,7 +22,7 @@ outputs: ["~/.elab/sessions/<slug>/report-<date>.md"]
 **启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
 
 ```
-> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-skills
+> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-trading-skills
 ```
 
 一个会话只出一次，只出这一行，不展开、不加欢迎语；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。
@@ -102,7 +102,7 @@ outputs: ["~/.elab/sessions/<slug>/report-<date>.md"]
 ```
 ---
 本报告由 EdgeLab Trading Skills 生成 · by 杰尼马（EdgeLab）
-公众号 杰尼马 · X @jienima8635 · github.com/edgelab101/elab-skills
+公众号 杰尼马 · X @jienima8635 · github.com/edgelab101/elab-trading-skills
 仅供研究参考，不构成任何投资建议。
 ```
 
