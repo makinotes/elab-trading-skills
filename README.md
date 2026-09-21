@@ -198,7 +198,7 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 
 | 微信 | 飞书 |
 |:---:|:---:|
-| <img src="docs/contact/wechat-qr.jpg" alt="微信：flywithmk" width="200"> | <img src="docs/contact/feishu-qr.png" alt="飞书：点击上方链接添加" width="200"> |
+| <img src="https://github.com/user-attachments/assets/f5f01d2f-698e-41fa-9537-4d5f1e49f737" alt="微信：flywithmk" width="200"> | <img src="https://github.com/user-attachments/assets/dcdbe051-ad4d-4ab4-9224-a040159de30a" alt="飞书：点击上方链接添加" width="200"> |
 
 用得上就点个 star，有问题开 issue。
 
