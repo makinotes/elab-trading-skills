@@ -377,7 +377,9 @@ class PipelineTest(unittest.TestCase):
     # ------ F5: version ------
     def test_version_string(self):
         """VERSION constant must match the elab-skills integration release."""
-        self.assertEqual(FR.VERSION, "1.3.3")
+        skill = (ROOT / "elab-futu-research" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn(f'  version: "{FR.VERSION}"', skill)
+        self.assertIn(f"elab-futu-research/{FR.VERSION} ", FR.USER_AGENT)
 
     # ------ F1: OSError in main exits 2 cleanly ------
     def test_output_file_path_exits_cleanly(self):
@@ -1692,6 +1694,7 @@ class PipelineTest(unittest.TestCase):
         tiger_detail = {
             "source": "tiger",
             "post_id": "5551234",
+            "captured_at": "2026-07-15T04:00:00+00:00",
             "author_name": "John Tiger",
             "author_uid": "9990001",
             "title": "My Tiger Post",
@@ -1810,6 +1813,7 @@ class PipelineTest(unittest.TestCase):
         tiger_detail = {
             "source": "tiger",
             "post_id": "7771234",
+            "captured_at": "2026-07-22T04:00:00+00:00",
             "author_name": "TigerUser",
             "author_uid": "9990002",
             "title": "看好 $特斯拉(TSLA)$ 的走势",

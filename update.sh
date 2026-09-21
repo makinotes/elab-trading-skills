@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # EdgeLab Skills 更新/回退：默认拉最新；--to vX.Y.Z 从已发布 tag 安装指定版本。
 # 支持 Claude Code / Codex / CodeBuddy / WorkBuddy。
+# Parse the whole update before fast-forwarding a checkout that may replace this file.
+main() {
 set -euo pipefail
 
 REPO="$(cd "$(dirname "$0")" && pwd)"
@@ -24,7 +26,10 @@ case "${1:-}" in
     ;;
 esac
 
+command -v python3 >/dev/null 2>&1 || { echo "更新需要 Python 3.9+。"; exit 1; }
 SOURCE_ROOT="$REPO"
+ADVANCE=()
+MODE=auto
 PINNED=0
 TEMP_ROOT=""
 cleanup() {
@@ -46,14 +51,28 @@ if [ -n "$TARGET" ]; then
   git archive "$TARGET" | tar -x -C "$TEMP_ROOT"
   SOURCE_ROOT="$TEMP_ROOT"
   PINNED=1
+  MODE=copy
   echo "目标提交：$(git rev-list -n 1 "$TARGET")"
 else
   OLD_HEAD="$(git rev-parse HEAD)"
-  echo "== 1/3 拉取最新 =="
-  if ! git pull --ff-only; then
-    echo "❌ git pull 失败（多半本地有改动或当前分支无上游）。先用 git status 检查；不要覆盖本地改动。"
+  if [ -n "$(git status --porcelain)" ]; then
+    echo "更新需要干净的 Git 工作树；请先保存或备份本地改动。"
     exit 1
   fi
+  UPSTREAM="$(git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}')" || {
+    echo "当前分支没有上游，无法更新。"; exit 1;
+  }
+  echo "== 1/3 获取上游版本（暂不改变工作树） =="
+  git fetch
+  NEW_HEAD="$(git rev-parse "$UPSTREAM^{commit}")"
+  git merge-base --is-ancestor "$OLD_HEAD" "$NEW_HEAD" || {
+    echo "当前分支无法 fast-forward，保留原工作树与安装。"; exit 1;
+  }
+  TEMP_ROOT="$(mktemp -d)"
+  git archive "$NEW_HEAD" | tar -x -C "$TEMP_ROOT"
+  SOURCE_ROOT="$TEMP_ROOT"
+  ADVANCE=(--advance-repo "$REPO" --advance-commit "$NEW_HEAD" --expected-head "$OLD_HEAD")
+
 fi
 
 if [ -f "$SOURCE_ROOT/_shared/SUITE_VERSION" ]; then
@@ -72,8 +91,8 @@ echo
 echo "== 2/3 版本与变更 =="
 echo "EdgeLab Skills $SUITE_VERSION"
 if [ "$PINNED" = 0 ]; then
-  if [ "$OLD_HEAD" != "$(git rev-parse HEAD)" ]; then
-    git log --oneline "${OLD_HEAD}..HEAD"
+  if [ "$OLD_HEAD" != "$NEW_HEAD" ]; then
+    git log --oneline "${OLD_HEAD}..${NEW_HEAD}"
   else
     echo "(已是最新，无新提交)"
   fi
@@ -83,65 +102,21 @@ sed -n '1,55p' "$SOURCE_ROOT/CHANGELOG.md" 2>/dev/null || echo "(无 CHANGELOG)"
 
 echo
 echo "== 3/3 同步到已安装的 skills 目录 =="
-# _shared is a generic name. Check all runtimes before replacing any files.
-for DEST in "$HOME/.claude/skills" "$HOME/.codex/skills" \
-            "$HOME/.codebuddy/skills" "$HOME/.workbuddy/skills"; do
-  RUNTIME_DIR="$(dirname "$DEST")"
-  [ -d "$RUNTIME_DIR" ] || [ -e "$DEST/elab" ] || continue
-  if [ -e "$DEST/_shared" ] || [ -L "$DEST/_shared" ]; then
-    if ! { [ -f "$DEST/_shared/credit.md" ] && grep -q 'EdgeLab 署名规范' "$DEST/_shared/credit.md"; } &&
-       ! { [ -f "$DEST/elab/SKILL.md" ] && grep -q 'EdgeLab 投研工具箱' "$DEST/elab/SKILL.md"; }; then
-      echo "❌ $DEST/_shared 已存在且无法确认属于 EdgeLab；更新已停止，未修改任何 runtime。"
-      exit 1
-    fi
-  fi
-done
-SYNCED=0
-for DEST in "$HOME/.claude/skills" "$HOME/.codex/skills" \
-            "$HOME/.codebuddy/skills" "$HOME/.workbuddy/skills"; do
-  RUNTIME_DIR="$(dirname "$DEST")"
-  [ -d "$RUNTIME_DIR" ] || [ -e "$DEST/elab" ] || continue
-  mkdir -p "$DEST"
-  WAS_LINK=0
-  [ -L "$DEST/elab" ] && WAS_LINK=1
-  LINK_MODE=0
-  [ "$PINNED" = 0 ] && [ "$WAS_LINK" = 1 ] && LINK_MODE=1
-
-  # EdgeLab owns the elab / elab-* / _shared namespace in an installation.
-  # Clear it before rebuilding so removed/newer skills cannot survive a rollback.
-  for installed in "$DEST"/elab "$DEST"/elab-* "$DEST"/_shared; do
-    [ -e "$installed" ] || [ -L "$installed" ] || continue
-    rm -rf "${installed:?}"
-  done
-
-  if [ "$LINK_MODE" = 1 ]; then
-    for source in "$SOURCE_ROOT"/elab "$SOURCE_ROOT"/elab-* "$SOURCE_ROOT"/_shared; do
-      [ -e "$source" ] || continue
-      name="$(basename "$source")"
-      ln -sfn "$source" "$DEST/$name"
-    done
-    echo "✅ ${DEST}：软链安装，已按当前仓库完整重建。"
-  else
-    if [ "$PINNED" = 1 ] && [ "$WAS_LINK" = 1 ]; then
-      echo "ℹ️ ${DEST}：指定版本会把 elab 软链转换为版本固定的复制安装。"
-    fi
-    for source in "$SOURCE_ROOT"/elab "$SOURCE_ROOT"/elab-* "$SOURCE_ROOT"/_shared; do
-      [ -e "$source" ] || continue
-      name="$(basename "$source")"
-      rm -rf "${DEST:?}/$name"
-      cp -R "$source" "$DEST/"
-    done
-    echo "✅ ${DEST}：已同步 EdgeLab Skills ${SUITE_VERSION}（含 _shared）。"
-  fi
-  SYNCED=1
-done
-if [ "$SYNCED" = 0 ]; then
-  echo "⚠️ 未发现任何支持的 runtime，跳过同步。手动把 elab* + _shared 拷进 skills 目录。"
-fi
+# The current helper also installs legacy tags that predate the helper/manifest.
+python3 "$REPO/scripts/install_runtime.py" --source "$SOURCE_ROOT" \
+  --link-root "$REPO" --version "$SUITE_VERSION" --mode "$MODE" --update \
+  ${ADVANCE[@]+"${ADVANCE[@]}"}
 
 echo
 if [ "$PINNED" = 1 ]; then
   echo "🎉 已安装/回退到 EdgeLab Skills ${SUITE_VERSION}（${TARGET}）；当前 Git 工作树未改变。"
 else
-  echo "🎉 更新完成：EdgeLab Skills $SUITE_VERSION。"
+  echo "🎉 更新完成：EdgeLab Skills ${SUITE_VERSION}。"
 fi
+
+}
+
+{
+  main "$@"
+  exit
+}
