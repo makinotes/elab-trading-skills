@@ -18,9 +18,9 @@
 
 > 这些 skill **源码公开、非商业使用免费**。其中 `elab-research` 的「自研数据」模式（雷达 / 恐慌指数）需要 EdgeLab 会员 token 才能读取。没有 token 时可尝试公开数据路径；能否取到数据取决于已安装工具和数据源可用性。
 
-当前版本以 [`_shared/SUITE_VERSION`](_shared/SUITE_VERSION) 为准；每版改了什么见 [CHANGELOG](CHANGELOG.md)，可回退版本见 [Tags](https://github.com/edgelab101/elab-skills/tags)。
+当前版本以 [`_shared/SUITE_VERSION`](_shared/SUITE_VERSION) 为准；每版改了什么见 [CHANGELOG](CHANGELOG.md)，可回退版本见 [Tags](https://github.com/edgelab101/elab-trading-skills/tags)。
 
-**发布状态**：本次更新为预发布。正式版与预发布的区分见 [Releases](https://github.com/edgelab101/elab-skills/releases)；实际宿主行为和可选接口仍需按自身环境确认。
+**发布状态**：本次更新为预发布。正式版与预发布的区分见 [Releases](https://github.com/edgelab101/elab-trading-skills/releases)；实际宿主行为和可选接口仍需按自身环境确认。
 
 **语言范围**：本页提供中英文介绍；大多数 `SKILL.md` 执行说明和各 Skill 的 README 仍以中文为主。英文提问可以尝试，但英文工作流尚未完成系统行为验收。
 
@@ -71,12 +71,24 @@
 
 ## 安装
 
+### 已有用户：仓库改名，不改调用方式
+
+GitHub 仓库现名为 `edgelab101/elab-trading-skills`。`elab-*` Skill 名称、内部目录、相对链接、安装位置和本地记录路径保持不变；已有安装无需因仓库改名而重装。
+
+旧仓库地址由 GitHub 重定向，新安装示例显式使用本地目录 `elab-skills`，因此后续 `cd elab-skills` 与原来一致。已有 checkout 可继续使用，也可在其目录中更新远端地址：
+
+```bash
+git remote set-url origin https://github.com/edgelab101/elab-trading-skills.git
+```
+
+无需重命名本地文件夹，软链安装和已配置的更新任务可保留原路径。历史 Releases、Tags 和 Issues 随仓库保留；维护者不要重新占用旧仓库名，以免中断重定向。见 [GitHub 仓库改名说明](https://docs.github.com/en/repositories/creating-and-managing-repositories/renaming-a-repository)。
+
 ### 一键装（推荐）
 
 需要 Git、Bash 和 Python 3.9+（标准库，无需额外安装包）。
 
 ```bash
-git clone https://github.com/edgelab101/elab-skills.git
+git clone https://github.com/edgelab101/elab-trading-skills.git elab-skills
 cd elab-skills
 bash install.sh
 ```
@@ -200,11 +212,11 @@ Give each trading decision a rationale, a record, and a review. These 11 skills 
 
 The skills run inside your existing agent using `SKILL.md` instructions, scripts, and shared record formats. Available behavior depends on the host, installed tools, dependencies, and data permissions. You make the trading decisions; broker connections are read-only.
 
-**Release status:** This update is a prerelease. See [Releases](https://github.com/edgelab101/elab-skills/releases) for stable and preview versions; host behavior and optional integrations still need confirmation in your environment.
+**Release status:** This update is a prerelease. See [Releases](https://github.com/edgelab101/elab-trading-skills/releases) for stable and preview versions; host behavior and optional integrations still need confirmation in your environment.
 
 The source is public and noncommercial use is free. One optional mode in `elab-research` reads EdgeLab's own data (a fear index and crowding radar) and needs a member token. Without a token, public data paths may be available depending on installed tools and source availability.
 
-The current version is in [`_shared/SUITE_VERSION`](_shared/SUITE_VERSION); see [CHANGELOG](CHANGELOG.md) for changes and [Tags](https://github.com/edgelab101/elab-skills/tags) for versions you can roll back to.
+The current version is in [`_shared/SUITE_VERSION`](_shared/SUITE_VERSION); see [CHANGELOG](CHANGELOG.md) for changes and [Tags](https://github.com/edgelab101/elab-trading-skills/tags) for versions you can roll back to.
 
 **Language status:** This page has an English overview. Most `SKILL.md` instructions and individual skill guides are still written in Chinese. You can try English prompts, but the English workflows have not completed comprehensive behavioral validation.
 
@@ -238,7 +250,7 @@ Use each skill independently or connect them through the shared record formats a
 Requires Git, Bash and Python 3.9+; no additional Python packages are needed.
 
 ```bash
-git clone https://github.com/edgelab101/elab-skills.git
+git clone https://github.com/edgelab101/elab-trading-skills.git elab-skills
 cd elab-skills
 bash install.sh          # detects your runtime and installs
 bash install.sh --list   # show detected runtimes only, change nothing
@@ -248,6 +260,8 @@ bash install.sh --link   # symlink mode: `git pull` is all you need to update
 Installs into `~/.claude/skills/`, `~/.codex/skills/`, `~/.codebuddy/skills/` or `~/.workbuddy/skills/`. Installation uses an ownership manifest, preflights all targets and stages replacements with rollback. Copy mode preserves unmanaged files and third-party extensions; link mode refuses mixed directories. `_shared` must establish its own ownership. Updates require a clean checkout and touch only existing suite installations. Back up edits to managed files first. For any other agent, copy `elab*` and `_shared` into its skills directory — `_shared` is required. Supporting an install path is not a claim that every host behaves identically; available data and tools depend on the host, installed dependencies and your own authorisation.
 
 Legacy files without a manifest must match the current source or a local release tag before adoption; unknown conflicts stop migration without replacing the old installation. Default updates back up affected checkout directories, including ignored files. Failed Git updates restore the old checkout and retain recovery copies beside the repository; the error message gives their location.
+
+The repository is now `edgelab101/elab-trading-skills`. Existing `elab-*` skill names, relative links, installation paths, and local records are unchanged. GitHub redirects the previous repository URL; existing installations need no reinstall for the rename. The clone command above explicitly keeps the local folder name `elab-skills`. In an existing checkout, you may update its remote with `git remote set-url origin https://github.com/edgelab101/elab-trading-skills.git`; keep its local path to preserve symlinks and scheduled updates.
 
 Trigger with `/elab` (Claude Code), `$elab` (Codex), or just describe what you need.
 

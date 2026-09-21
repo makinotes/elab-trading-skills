@@ -2,6 +2,12 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-21 · EdgeLab Trading Skills 0.6.6 预发布：仓库改名兼容
+
+- **仓库地址** — 仓库改名为 `edgelab101/elab-trading-skills`；首页、Skill 主页、报告署名链接与公开脚本中的项目地址同步更新。
+- **兼容方式** — 保留全部 `elab-*` 调用名、内部目录、相对链接、安装位置与记录路径。新 clone 示例显式指定本地目录 `elab-skills`；已有 checkout 不需要改目录或重装，旧 Git 地址通过 GitHub 重定向继续使用。
+- **版本与范围** — 组件补丁版本同步更新；安装、更新、计算和权限逻辑不变。延续预发布，上一预发布为 `v0.6.5`，上一正式发行仍为 `v0.6.3`。
+
 ## 2026-09-21 · EdgeLab Trading Skills 0.6.5 预发布：产品命名与上手说明
 
 - **产品定位** — 统一名称为 EdgeLab Trading Skills，说明这是给 AI Agent 用的投研与交易复盘工具集，围绕研究、决策梳理、交易记录和结果复盘组织功能。
