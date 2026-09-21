@@ -10,7 +10,7 @@
 **报告生成日期**：2025-01-15
 **工具版本**：elab-futu-research 1.3.3
 **免责声明**：本报告仅供研究参考，不构成任何投资建议。历史公开发言和后续价格表现不能证明稳定 Alpha。
-by 杰尼马（EdgeLab） · github.com/edgelab101
+by 杰尼马（EdgeLab） · github.com/makinotes
 
 ---
 

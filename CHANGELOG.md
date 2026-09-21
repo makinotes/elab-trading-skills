@@ -2,6 +2,11 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-21 · EdgeLab Trading Skills 0.6.8 预发布：仓库迁移至 makinotes
+
+- **仓库地址** — 仓库从 `edgelab101/elab-trading-skills` 迁移到 `makinotes/elab-trading-skills`。首页、各 Skill `homepage`、署名行、报告脚注与 `futu_research.py` 的公开链接同步更新；`elab-*` 调用名、安装路径与本地记录路径不变。已有安装请执行 `git remote set-url origin https://github.com/makinotes/elab-trading-skills.git` 后再 `update.sh`。
+- **其他** — 无功能变更。
+
 ## 2026-09-21 · EdgeLab Trading Skills 0.6.7 预发布：数据口径与跨会话衔接
 
 - **行情一致性** — 验证有效价格、OHLC、币种和重复日期；复权数据统一价格尺度，基准使用同一观察区间。样本不足不输出完整窗口指标；报告绑定并重算冻结输入，说明一致性校验的信任范围。

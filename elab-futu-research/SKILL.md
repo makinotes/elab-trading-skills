@@ -6,9 +6,9 @@ description: |
 license: CC-BY-NC-4.0
 metadata:
   author: "杰尼马（EdgeLab）"
-  homepage: "https://github.com/edgelab101/elab-trading-skills"
+  homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "1.3.8"
+  version: "1.3.9"
   last_updated: "2026-09-21"
   visibility: "public"
   requires: "[]"
@@ -23,7 +23,7 @@ metadata:
 **启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
 
 ```
-> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-trading-skills
+> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/makinotes/elab-trading-skills
 ```
 
 一个会话只出一次，只出这一行；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。用户要求纯 JSON、严格输出结构或关闭署名时省略回显。
@@ -90,7 +90,7 @@ Locate the script before running. The path depends on how the skill was installe
 | Claude Code | `~/.claude/skills/elab-futu-research/scripts/futu_research.py` |
 | Codex | `~/.codex/skills/elab-futu-research/scripts/futu_research.py` |
 | Repo clone | `elab-futu-research/scripts/futu_research.py` (run from repo root) |
-| Other / unknown | clone `https://github.com/edgelab101/elab-trading-skills`, then use `elab-futu-research/scripts/futu_research.py` from the repo root |
+| Other / unknown | clone `https://github.com/makinotes/elab-trading-skills`, then use `elab-futu-research/scripts/futu_research.py` from the repo root |
 
 Use the current loaded Skill directory. Do not probe another runtime's installation as a fallback: it may be a different version. If the matching script is missing, report that installation issue before running the pipeline.
 

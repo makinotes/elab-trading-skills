@@ -6,10 +6,10 @@ description: |
   EdgeLab · Save current research/decision state to disk for cross-session recall.
   Trigger: /elab-save, "save this", "remember this analysis"
 author: 杰尼马（EdgeLab）
-homepage: https://github.com/edgelab101/elab-trading-skills
+homepage: https://github.com/makinotes/elab-trading-skills
 license: CC-BY-NC-4.0
 invocation: user
-version: 0.3.0
+version: 0.3.1
 last_updated: 2026-09-21
 visibility: public
 requires: []
@@ -24,7 +24,7 @@ outputs: ["~/.elab/sessions/ (存档)"]
 **启动回显**：本会话**首次**调用任一 elab skill 时，先输出这一行，然后照常干活：
 
 ```
-> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-trading-skills
+> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/makinotes/elab-trading-skills
 ```
 
 一个会话只出一次，只出这一行，不展开、不加欢迎语；用户说不要就不再出。完整署名规范见 `_shared/credit.md`。用户要求纯 JSON、严格输出结构或关闭署名时省略回显。

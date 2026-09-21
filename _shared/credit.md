@@ -11,7 +11,7 @@
 本会话**首次**调用任一 elab skill 时，在实际工作开始前输出这一行：
 
 ```
-> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/edgelab101/elab-trading-skills
+> EdgeLab Trading Skills · by 杰尼马（公众号同名）｜ 源码公开 github.com/makinotes/elab-trading-skills
 ```
 
 纪律：
@@ -37,7 +37,7 @@
 ```
 ---
 本报告由 EdgeLab Trading Skills 生成 · by 杰尼马（EdgeLab）
-公众号 杰尼马 · X @jienima8635 · github.com/edgelab101/elab-trading-skills
+公众号 杰尼马 · X @jienima8635 · github.com/makinotes/elab-trading-skills
 仅供研究参考，不构成任何投资建议。
 ```
 
