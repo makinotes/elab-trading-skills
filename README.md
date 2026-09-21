@@ -188,17 +188,17 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 
 **杰尼马**（EdgeLab）。专注美港股与期权研究，持续记录方法、工具与实盘。
 
+- 微信：**flywithmk**（添加时注明 `Skills`）
+- 飞书：[点击添加联系人](https://www.feishu.cn/invitation/page/add_contact/?token=5d4qe0e8-1811-42d5-80e3-89f8bf4017b7&unique_id=6cJdoAGOM3fGDI98z5Gdug==)
 - 公众号：**杰尼马**
 - X：[@jienima8635](https://x.com/jienima8635)
 - GitHub：[edgelab101](https://github.com/edgelab101)
 
-交流工具用法、反馈数据勘误或研究方法，可扫码联系，来意注明 `Skills`：
+交流工具用法、反馈数据勘误或研究方法，可用上面的联系方式，也可以扫码：
 
 | 微信 | 飞书 |
 |:---:|:---:|
-| <img src="docs/contact/wechat-qr.jpg" alt="微信二维码" width="200"> | <img src="docs/contact/feishu-qr.png" alt="飞书二维码" width="200"> |
-
-扫不了码（GitHub 图片在部分网络下加载不出来）就用文字：微信号 **flywithmk**，或点[飞书加联系人](https://www.feishu.cn/invitation/page/add_contact/?token=5d4qe0e8-1811-42d5-80e3-89f8bf4017b7&unique_id=2Kjla8sxnu-QcdiaY7tT0g==)。
+| <img src="docs/contact/wechat-qr.jpg" alt="微信：flywithmk" width="200"> | <img src="docs/contact/feishu-qr.png" alt="飞书：点击上方链接添加" width="200"> |
 
 用得上就点个 star，有问题开 issue。
 
