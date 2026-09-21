@@ -2,7 +2,7 @@
 
 > 版本：v1.0.0 · 2026-07-19
 > 仅定协议，不含实现。实现归 quant-engine（Codex 领地）；elab-model 侧规定请求/结果格式，两边照协议对话。
-> 设计 SSOT：`docs/plans/2026-07-19-elab-model-design.md` §4 + §5（私有仓 `edgelab101/elab-skills-internal`）
+> 设计 SSOT：`docs/plans/2026-07-19-elab-model-design.md` §4 + §5（私有仓 `makinotes/elab-skills-internal`）
 
 ---
 

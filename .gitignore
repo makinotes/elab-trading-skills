@@ -3,7 +3,7 @@
 .env
 __pycache__/
 
-# Private evaluation assets belong in edgelab101/elab-skills-internal.
+# Private evaluation assets belong in makinotes/elab-skills-internal.
 /eval/
 /evaluations/
 /goldset/

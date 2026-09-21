@@ -43,7 +43,7 @@ outputs: []                    # 产出路径/格式，见 §4
 
 ### 5.1 评测资产分仓
 - 公开 `elab-skills` 只放安装和使用所需的 skill、脚本、参考文档、虚构样例，以及不包含评测题/答案的普通确定性单测。
-- Goldset、评测题、标准答案、rubric、judge prompt、transcript、评分结果和审计报告只进私有 `edgelab101/elab-skills-internal`，不得提交到公开仓。
+- Goldset、评测题、标准答案、rubric、judge prompt、transcript、评分结果和审计报告只进私有 `makinotes/elab-skills-internal`，不得提交到公开仓。
 - 公开仓的变更说明只描述产品行为和用户可见修复，不公开 case 编号、判分细则或内部验收分数。
 
 ## 6. 加一个外部工具 / 数据源
