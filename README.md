@@ -71,11 +71,11 @@
 
 ## 安装
 
-### 已有用户：仓库改名，不改调用方式
+### 已有用户：仓库迁移，不改调用方式
 
-GitHub 仓库现名为 `makinotes/elab-trading-skills`。`elab-*` Skill 名称、内部目录、相对链接、安装位置和本地记录路径保持不变；已有安装无需因仓库改名而重装。
+GitHub 仓库已迁移到 `makinotes/elab-trading-skills`（原 `edgelab101/elab-trading-skills`）。`elab-*` Skill 名称、内部目录、相对链接、安装位置和本地记录路径保持不变；已有安装无需重装，只需更新远端地址。
 
-旧仓库地址由 GitHub 重定向，新安装示例显式使用本地目录 `elab-skills`，因此后续 `cd elab-skills` 与原来一致。已有 checkout 可继续使用，也可在其目录中更新远端地址：
+旧仓库地址已停用，不会重定向；已有 checkout 必须先在其目录中更新远端地址，`update.sh` 才能继续工作。新安装示例显式使用本地目录 `elab-skills`，因此后续 `cd elab-skills` 与原来一致：
 
 ```bash
 git remote set-url origin https://github.com/makinotes/elab-trading-skills.git
@@ -263,7 +263,7 @@ Installs into `~/.claude/skills/`, `~/.codex/skills/`, `~/.codebuddy/skills/` or
 
 Legacy files without a manifest must match the current source or a local release tag before adoption; unknown conflicts stop migration without replacing the old installation. Default updates back up affected checkout directories, including ignored files. Failed Git updates restore the old checkout and retain recovery copies beside the repository; the error message gives their location.
 
-The repository is now `makinotes/elab-trading-skills`. Existing `elab-*` skill names, relative links, installation paths, and local records are unchanged. GitHub redirects the previous repository URL; existing installations need no reinstall for the rename. The clone command above explicitly keeps the local folder name `elab-skills`. In an existing checkout, you may update its remote with `git remote set-url origin https://github.com/makinotes/elab-trading-skills.git`; keep its local path to preserve symlinks and scheduled updates.
+The repository has moved to `makinotes/elab-trading-skills` (previously `edgelab101/elab-trading-skills`). Existing `elab-*` skill names, relative links, installation paths, and local records are unchanged. The previous repository URL is retired and does not redirect, so an existing checkout must update its remote before `update.sh` will work: `git remote set-url origin https://github.com/makinotes/elab-trading-skills.git`. Keep its local path to preserve symlinks and scheduled updates. The clone command above explicitly keeps the local folder name `elab-skills`.
 
 Trigger with `/elab` (Claude Code), `$elab` (Codex), or just describe what you need.
 

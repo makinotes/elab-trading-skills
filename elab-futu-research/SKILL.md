@@ -33,7 +33,7 @@ metadata:
 
 Turn one or more public profile URLs — Futu (q.futunn.com) or Tiger (laohu8.com) — into a resumable archive and an evidence-bounded research report. Start with alignment, including when the user only asks what happens next or says not to execute yet. After alignment is complete, run the confirmed workflow in one shot and return the report plus audit status.
 
-Version: `1.3.7` · Last updated: `2026-09-21`
+Version: `1.3.9` · Last updated: `2026-09-21`
 
 ## Invocation invariants (P0)
 
