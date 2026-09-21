@@ -37,10 +37,10 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
-VERSION = "1.3.7"
+VERSION = "1.3.8"
 SCHEMA_VERSION = "1.0"
 # Bump when market calculations or benchmark rules change derived row semantics.
-MARKET_CALCULATION_VERSION = "1"
+MARKET_CALCULATION_VERSION = "2"
 LIST_URL = "https://q.futunn.com/nnq/personal-list"
 REPORT_FOOTER = (
     "\n---\n"
@@ -360,10 +360,12 @@ def read_jsonl(path: Path) -> List[Dict[str, Any]]:
                 continue
             try:
                 value = json.loads(line)
-            except json.JSONDecodeError as error:
+                json.dumps(value, allow_nan=False)
+                if not isinstance(value, dict):
+                    raise ValueError("expected a JSON object on every non-empty line")
+            except (ValueError, RecursionError) as error:
                 raise ResearchError(f"Invalid JSONL at {path}:{number}: {error}") from error
-            if isinstance(value, dict):
-                rows.append(value)
+            rows.append(value)
     return rows
 
 
@@ -404,6 +406,8 @@ def safe_int(value: Any, default: int = 0) -> int:
 
 
 def safe_float(value: Any) -> Optional[float]:
+    if isinstance(value, bool):
+        return None
     try:
         number = float(value)
     except (TypeError, ValueError):
@@ -2973,8 +2977,85 @@ def parse_claim_time(value: Any) -> Optional[datetime]:
     return None
 
 
+def checked_market_number(value: Any, field: str, *, optional: bool = False) -> Optional[float]:
+    if optional and value in (None, ""):
+        return None
+    number = safe_float(value)
+    if number is None or (number < 0 if field == "volume" else number <= 0):
+        raise ResearchError(f"Invalid market {field}: expected a finite {'non-negative' if field == 'volume' else 'positive'} number")
+    return number
+
+
+def check_price_range(row: Dict[str, Any]) -> None:
+    if row["high"] is not None and row["high"] < max(row["open"], row["close"]):
+        raise ResearchError("Market high is below open or close")
+    if row["low"] is not None and row["low"] > min(row["open"], row["close"]):
+        raise ResearchError("Market low is above open or close")
+
+
+def adjust_price_range(row: Dict[str, Any], adjusted_close: Optional[float]) -> None:
+    # Check source bounds before rounding can mask an invalid original price.
+    check_price_range(row)
+    if adjusted_close is None:
+        return
+    raw_close = row["close"]
+    for field in ("open", "high", "low"):
+        if row[field] is not None:
+            # Divide first: an endpoint equal to raw_close maps exactly to the
+            # supplied adjusted_close, instead of drifting by one binary ULP.
+            row[field] = (row[field] / raw_close) * adjusted_close
+    row["close"] = adjusted_close
+
+
+def validate_price_bars(bars: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Reject corrupted prices instead of silently moving an outcome's horizon."""
+    unique: Dict[str, Dict[str, Any]] = {}
+    currencies = set()
+    for original in bars:
+        row = dict(original)
+        try:
+            row["date"] = date.fromisoformat(str(row["date"])).isoformat()
+        except (KeyError, ValueError, TypeError):
+            raise ResearchError("Invalid market date; expected YYYY-MM-DD") from None
+        for key in ("open", "close", "high", "low", "volume"):
+            row[key] = checked_market_number(row.get(key), key, optional=key in {"high", "low", "volume"})
+        check_price_range(row)
+        currency = row.get("currency")
+        if currency:
+            currency = str(currency).upper()
+            if not re.fullmatch(r"[A-Z]{3}", currency):
+                raise ResearchError("Invalid market currency")
+            row["currency"] = currency
+            currencies.add(currency)
+        previous = unique.get(row["date"])
+        if previous is not None and any(previous.get(k) != row.get(k) for k in
+                                        ("open", "high", "low", "close", "volume", "currency")):
+            raise ResearchError("Conflicting daily bars for the same date")
+        unique[row["date"]] = row
+    if len(currencies) > 1:
+        raise ResearchError("Mixed market currencies cannot form one price series")
+    return [unique[key] for key in sorted(unique)]
+
+
+def expected_market_currency(symbol: str) -> str:
+    value = str(symbol).upper()
+    if value.startswith("HK.") or value.endswith(".HK") or value == "^HSI":
+        return "HKD"
+    if value.startswith(("SH.", "SZ.")) or value.endswith((".SH", ".SS", ".SZ")):
+        return "CNY"
+    return "USD"
+
+
+def check_market_currency(bars: Sequence[Dict[str, Any]], symbol: str) -> None:
+    expected = expected_market_currency(symbol)
+    if any(row.get("currency") and row["currency"] != expected for row in bars):
+        raise ResearchError(f"Market currency does not match the requested symbol ({expected})")
+
+
 def load_price_bars(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
     chart = payload.get("chart") or {}
+    if not isinstance(chart, dict):
+        raise ResearchError("Invalid Yahoo chart envelope")
     result = chart.get("result") or []
     if not result or not isinstance(result[0], dict):
         return []
@@ -2985,38 +3066,46 @@ def load_price_bars(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
         ((item.get("indicators") or {}).get("adjclose") or [{}])[0].get("adjclose")
         or []
     )
+    if not isinstance(timestamps, list) or not isinstance(quotes, dict):
+        raise ResearchError("Invalid Yahoo daily bar arrays")
+    def quote_at(field: str, index: int, optional: bool = False) -> Any:
+        values = quotes.get(field)
+        if optional and values is None:
+            return None
+        if not isinstance(values, list) or index >= len(values):
+            raise ResearchError("Incomplete Yahoo daily bar arrays")
+        return values[index]
     bars = []
     for index, stamp in enumerate(timestamps):
         try:
-            raw_close = safe_float((quotes.get("close") or [])[index])
+            close_value = quote_at("close", index)
+            open_value = quote_at("open", index)
+            if close_value is None and open_value is None:
+                continue
+            raw_close = checked_market_number(close_value, "close")
             adjusted_close = (
-                safe_float(adjusted_values[index])
-                if index < len(adjusted_values)
-                else None
+                checked_market_number(adjusted_values[index], "adjusted_close")
+                if adjusted_values else None
             )
-            adjustment = (
-                adjusted_close / raw_close
-                if adjusted_close is not None and raw_close not in (None, 0)
-                else 1.0
-            )
-            raw_open = safe_float((quotes.get("open") or [])[index])
-            raw_high = safe_float((quotes.get("high") or [])[index])
-            raw_low = safe_float((quotes.get("low") or [])[index])
+            raw_open = checked_market_number(open_value, "open")
+            raw_high = checked_market_number(quote_at("high", index, True), "high", optional=True)
+            raw_low = checked_market_number(quote_at("low", index, True), "low", optional=True)
             row = {
                 "date": datetime.fromtimestamp(int(stamp), UTC).date().isoformat(),
                 "timestamp": int(stamp),
-                "open": raw_open * adjustment if raw_open is not None else None,
-                "high": raw_high * adjustment if raw_high is not None else None,
-                "low": raw_low * adjustment if raw_low is not None else None,
-                "close": adjusted_close if adjusted_close is not None else raw_close,
-                "volume": safe_float((quotes.get("volume") or [])[index]),
+                "open": raw_open,
+                "high": raw_high,
+                "low": raw_low,
+                "close": raw_close,
+                "volume": checked_market_number(quote_at("volume", index, True), "volume", optional=True),
+                "currency": str((item.get("meta") or {}).get("currency") or "").upper() or None,
             }
-        except (IndexError, TypeError, ValueError):
-            continue
+            adjust_price_range(row, adjusted_close)
+        except (IndexError, TypeError, ValueError, OverflowError):
+            raise ResearchError("Invalid Yahoo daily bar record") from None
         if row["open"] is not None and row["close"] is not None:
             bars.append(row)
-    unique = {bar["date"]: bar for bar in bars}
-    return [unique[key] for key in sorted(unique)]
+    return validate_price_bars(bars)
 
 
 def fetch_yahoo_history(
@@ -3042,10 +3131,20 @@ def fetch_yahoo_history(
             time.sleep(0.12 + random.random() * 0.08)
         except Exception as error:
             return [], str(error)
-    error_value = (payload.get("chart") or {}).get("error")
+    if not isinstance(payload.get("chart"), dict):
+        return [], "Invalid Yahoo chart envelope"
+    error_value = payload["chart"].get("error")
     if error_value:
         return [], json.dumps(error_value, ensure_ascii=False)
-    bars = load_price_bars(payload)
+    try:
+        item = ((payload.get("chart") or {}).get("result") or [{}])[0]
+        returned_symbol = (item.get("meta") or {}).get("symbol")
+        if returned_symbol and str(returned_symbol).upper() != symbol.upper():
+            raise ResearchError("Yahoo symbol does not match the requested symbol")
+        bars = load_price_bars(payload)
+        check_market_currency(bars, symbol)
+    except (ResearchError, AttributeError, TypeError, IndexError) as error:
+        return [], "Invalid Yahoo market data: " + str(error)
     if not bars:
         return [], "no usable daily bars returned"
     return bars, None
@@ -3059,6 +3158,7 @@ def load_market_csv(path: Path) -> Tuple[List[Dict[str, Any]], Optional[str]]:
     if not path.exists():
         return [], "file_not_found"
     rows = []
+    adjusted_basis = set()
     try:
         with path.open(newline="", encoding="utf-8-sig") as handle:
             reader = csv.DictReader(handle)
@@ -3066,32 +3166,30 @@ def load_market_csv(path: Path) -> Tuple[List[Dict[str, Any]], Optional[str]]:
                 normalized = {str(key).strip().lower(): value for key, value in source.items()}
                 raw_day = normalized.get("date") or normalized.get("day")
                 if not raw_day:
-                    continue
+                    raise ResearchError("Market CSV row is missing its date")
                 with contextlib.suppress(ValueError):
                     raw_day = date.fromisoformat(str(raw_day)[:10]).isoformat()
+                close = checked_market_number(normalized.get("close") or normalized.get("adj close"), "close")
+                adjusted = checked_market_number(normalized.get("adj close"), "adjusted_close", optional=True)
+                adjusted_basis.add(adjusted is not None)
                 row = {
                     "date": str(raw_day)[:10],
-                    "timestamp": int(
-                        datetime.combine(
-                            date.fromisoformat(str(raw_day)[:10]),
-                            datetime_time(0, 0),
-                            tzinfo=UTC,
-                        ).timestamp()
-                    ),
-                    "open": safe_float(normalized.get("open")),
-                    "high": safe_float(normalized.get("high")),
-                    "low": safe_float(normalized.get("low")),
-                    "close": safe_float(
-                        normalized.get("close") or normalized.get("adj close")
-                    ),
-                    "volume": safe_float(normalized.get("volume")),
+                    "timestamp": int(datetime.combine(date.fromisoformat(str(raw_day)[:10]),
+                                                       datetime_time(0, 0), tzinfo=UTC).timestamp()),
+                    "open": checked_market_number(normalized.get("open"), "open"),
+                    "high": checked_market_number(normalized.get("high"), "high", optional=True),
+                    "low": checked_market_number(normalized.get("low"), "low", optional=True),
+                    "close": close,
+                    "volume": checked_market_number(normalized.get("volume"), "volume", optional=True),
+                    "currency": normalized.get("currency") or None,
                 }
-                if row["open"] is not None and row["close"] is not None:
-                    rows.append(row)
-    except (OSError, ValueError, csv.Error) as error:
+                adjust_price_range(row, adjusted)
+                rows.append(row)
+        if len(adjusted_basis) > 1:
+            raise ResearchError("Market CSV mixes adjusted and unadjusted prices")
+        result = validate_price_bars(rows)
+    except (OSError, ValueError, csv.Error, ResearchError) as error:
         return [], str(error)
-    unique = {row["date"]: row for row in rows}
-    result = [unique[key] for key in sorted(unique)]
     return (result, None) if result else ([], "no_usable_rows")
 
 
@@ -3144,16 +3242,15 @@ def parse_eastmoney_bars(payload: Dict[str, Any]) -> List[Dict[str, Any]]:
                         date.fromisoformat(day), datetime_time(0, 0), tzinfo=UTC
                     ).timestamp()
                 ),
-                "open": safe_float(parts[1]),
-                "close": safe_float(parts[2]),
-                "high": safe_float(parts[3]),
-                "low": safe_float(parts[4]),
-                "volume": safe_float(parts[5]),
+                "open": checked_market_number(parts[1], "open", optional=False),
+                "close": checked_market_number(parts[2], "close", optional=False),
+                "high": checked_market_number(parts[3], "high", optional=True),
+                "low": checked_market_number(parts[4], "low", optional=True),
+                "volume": checked_market_number(parts[5], "volume", optional=True),
             }
             if row["open"] is not None and row["close"] is not None:
                 rows.append(row)
-    unique = {row["date"]: row for row in rows}
-    return [unique[key] for key in sorted(unique)]
+    return validate_price_bars(rows)
 
 
 def fetch_eastmoney_history(
@@ -3189,7 +3286,20 @@ def fetch_eastmoney_history(
             except Exception as error:
                 errors.append(f"{secid}: {error}")
                 continue
-        bars = parse_eastmoney_bars(payload)
+        try:
+            if not isinstance(payload, dict):
+                raise ResearchError("Invalid Eastmoney response envelope")
+            data = payload.get("data")
+            if not isinstance(data, dict):
+                raise ResearchError("Invalid Eastmoney data envelope")
+            returned_code = data.get("code")
+            requested_code = secid.split(".", 1)[1]
+            if returned_code is not None and str(returned_code).upper().lstrip("0") != requested_code.upper().lstrip("0"):
+                raise ResearchError("Eastmoney symbol does not match the requested symbol")
+            bars = parse_eastmoney_bars(payload)
+        except ResearchError as error:
+            errors.append(f"{secid}: {error}")
+            continue
         if bars:
             return bars, None, f"eastmoney:{secid}"
         errors.append(f"{secid}: no usable daily bars")
@@ -3212,6 +3322,10 @@ def fetch_price_history(
     for path in input_candidates:
         bars, error = load_market_csv(path)
         if bars:
+            try:
+                check_market_currency(bars, provider_symbol)
+            except ResearchError as error:
+                return [], f"CSV {path.name}: {error}", None
             return bars, None, f"csv:{path.name}"
         if error != "file_not_found":
             return [], f"CSV {path}: {error}", None
@@ -3276,6 +3390,11 @@ def compute_market_row(
     benchmark_symbol: Optional[str] = None,
     benchmark_bars: Optional[Sequence[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
+    bars = validate_price_bars(bars)
+    check_market_currency(bars, provider_symbol)
+    benchmark_bars = validate_price_bars(benchmark_bars or [])
+    if benchmark_symbol:
+        check_market_currency(benchmark_bars, benchmark_symbol)
     claim_time = parse_claim_time(claim.get("published_at"))
     direction = claim.get("direction") or claim.get("direction_prelabel")
     direction_sign = 1.0 if direction == "bullish" else -1.0 if direction == "bearish" else None
@@ -3294,6 +3413,9 @@ def compute_market_row(
         "market_data_source": None,
         "context_cutoff": None,
         "evaluation_open_date": None,
+        "evaluation_close_20_date": None,
+        "benchmark_status": "not_requested" if not benchmark_symbol else "missing_endpoints",
+        "excursion_20_status": "incomplete_horizon",
         "trend": "unknown",
         "volatility": "unknown",
         "close_vs_ma20": None,
@@ -3333,8 +3455,8 @@ def compute_market_row(
         if bar["close"] is not None
     ]
     close = bars[context_index]["close"]
-    ma20 = mean(closes20)
-    ma60 = mean(closes60)
+    ma20 = mean(closes20) if len(closes20) == 20 else None
+    ma60 = mean(closes60) if len(closes60) == 60 else None
     base["close_vs_ma20"] = metric_round(percent_change(close, ma20))
     base["close_vs_ma60"] = metric_round(percent_change(close, ma60))
     recent_highs = [
@@ -3342,14 +3464,14 @@ def compute_market_row(
         if bar["high"] is not None
     ]
     base["drawdown_60d"] = metric_round(
-        percent_change(close, max(recent_highs) if recent_highs else None)
+        percent_change(close, max(recent_highs) if len(recent_highs) == 60 else None)
     )
     old_ma20_values = [
         bar["close"]
         for bar in bars[max(0, context_index - 24) : max(0, context_index - 4)]
         if bar["close"] is not None
     ]
-    old_ma20 = mean(old_ma20_values[-20:])
+    old_ma20 = mean(old_ma20_values[-20:]) if len(old_ma20_values) >= 20 else None
     slope = percent_change(ma20, old_ma20)
     if ma60 is not None and slope is not None:
         if close > ma60 and slope > 0:
@@ -3389,31 +3511,37 @@ def compute_market_row(
                 if raw_return is not None and direction_sign is not None
                 else None
             )
-    path20 = bars[start_index : min(len(bars), start_index + 20)]
-    highs = [bar["high"] for bar in path20 if bar["high"] is not None]
-    lows = [bar["low"] for bar in path20 if bar["low"] is not None]
-    raw_high_excursion = percent_change(max(highs), entry) if highs else None
-    raw_low_excursion = percent_change(min(lows), entry) if lows else None
-    if direction == "bearish":
-        base["mfe_20"] = metric_round(-raw_low_excursion if raw_low_excursion is not None else None)
-        base["mae_20"] = metric_round(-raw_high_excursion if raw_high_excursion is not None else None)
+    path20 = bars[start_index : start_index + 20]
+    if len(path20) < 20:
+        base["missing_reason"] = "incomplete_forward_20"
     else:
-        base["mfe_20"] = metric_round(raw_high_excursion)
-        base["mae_20"] = metric_round(raw_low_excursion)
+        base["evaluation_close_20_date"] = path20[-1]["date"]
+        highs = [bar["high"] for bar in path20 if bar["high"] is not None]
+        lows = [bar["low"] for bar in path20 if bar["low"] is not None]
+        base["excursion_20_status"] = "missing_high_low"
+        if len(highs) == len(lows) == 20:
+            raw_high_excursion = percent_change(max(highs), entry)
+            raw_low_excursion = percent_change(min(lows), entry)
+            if direction == "bearish":
+                base["mfe_20"] = metric_round(-raw_low_excursion)
+                base["mae_20"] = metric_round(-raw_high_excursion)
+            else:
+                base["mfe_20"] = metric_round(raw_high_excursion)
+                base["mae_20"] = metric_round(raw_low_excursion)
+            base["excursion_20_status"] = "calculated"
 
-    if benchmark_bars and base["ret_20"] is not None:
-        benchmark_context = [bar for bar in benchmark_bars if bar["date"] <= base["evaluation_open_date"]]
-        benchmark_future = [bar for bar in benchmark_bars if bar["date"] >= base["evaluation_open_date"]]
-        if benchmark_context and len(benchmark_future) >= 20:
-            benchmark_entry = benchmark_future[0]["open"]
-            benchmark_ret = percent_change(benchmark_future[19]["close"], benchmark_entry)
-            if benchmark_ret is not None:
-                base["excess_ret_20"] = metric_round(base["ret_20"] - benchmark_ret)
-                base["directional_excess_ret_20"] = metric_round(
-                    (base["ret_20"] - benchmark_ret) * direction_sign
-                    if direction_sign is not None
-                    else None
-                )
+    if benchmark_symbol and base["ret_20"] is not None:
+        benchmark_by_day = {bar["date"]: bar for bar in benchmark_bars}
+        first = benchmark_by_day.get(base["evaluation_open_date"])
+        last = benchmark_by_day.get(base["evaluation_close_20_date"])
+        if first is not None and last is not None:
+            benchmark_ret = percent_change(last["close"], first["open"])
+            base["excess_ret_20"] = metric_round(base["ret_20"] - benchmark_ret)
+            base["directional_excess_ret_20"] = metric_round(
+                (base["ret_20"] - benchmark_ret) * direction_sign
+                if direction_sign is not None else None
+            )
+            base["benchmark_status"] = "calculated_same_dates"
     return base
 
 
@@ -3513,6 +3641,15 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
             f"source={source or 'none'} error={error or 'none'}"
         )
 
+    snapshot = {
+        "market_calculation_version": MARKET_CALCULATION_VERSION,
+        "mapped_symbols": mapped,
+        "prices": {symbol: validate_price_bars(bars) for symbol, bars in bars_by_symbol.items()},
+        "data_sources": data_sources,
+        "fetch_errors": fetch_errors,
+    }
+    snapshot_sha256 = claim_fingerprint(snapshot)
+    atomic_write_json(market_dir / "inputs.snapshot.json", snapshot)
     rows = []
     for claim in claims:
         raw = str(claim.get("symbol_raw") or "")
@@ -3520,6 +3657,7 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
         if not provider:
             row = compute_market_row(claim, "", [])
             row["missing_reason"] = "unresolved_symbol"
+            row["market_input_sha256"] = snapshot_sha256
             rows.append(row)
             continue
         benchmark = benchmark_for(raw)
@@ -3531,6 +3669,7 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
             bars_by_symbol.get(benchmark, []),
         )
         row["market_data_source"] = data_sources.get(provider)
+        row["market_input_sha256"] = snapshot_sha256
         if provider in fetch_errors:
             row["missing_reason"] = f"provider_error: {fetch_errors[provider]}"
         rows.append(row)
@@ -3550,8 +3689,12 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
         "provider_symbol",
         "benchmark_symbol",
         "market_data_source",
+        "market_input_sha256",
         "context_cutoff",
         "evaluation_open_date",
+        "evaluation_close_20_date",
+        "benchmark_status",
+        "excursion_20_status",
         "trend",
         "volatility",
         "close_vs_ma20",
@@ -3584,6 +3727,8 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
         "mode": mode,
         "claims_considered": len(claims),
         "rows": len(rows),
+        "market_input_sha256": snapshot_sha256,
+        "market_rows_sha256": claim_fingerprint(rows),
         "rows_with_forward_20": sum(row.get("ret_20") is not None for row in rows),
         "unresolved_symbols": sorted(set(unresolved)),
         "provider_errors": fetch_errors,
@@ -3591,6 +3736,7 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
         "time_protocol": {
             "context": "last daily bar strictly before the publication date",
             "evaluation": "first daily open strictly after the publication date",
+            "benchmark": "same opening date and same 20-session outcome date as the asset",
         },
         "warning": (
             "Exploratory machine prelabels were used; review and freeze claims before "
@@ -4034,6 +4180,49 @@ def _export_authors_impl(output: Path, posts: List[Dict[str, Any]]) -> Dict[str,
     }
 
 
+def market_derivation_errors(output: Path, claims: Sequence[Dict[str, Any]], rows: Sequence[Dict[str, Any]]) -> List[str]:
+    """Recompute exported metrics from the frozen input snapshot, without a network call."""
+    market_dir = confined_path(output, "analysis", "market")
+    manifest_path = confined_path(output, "analysis", "market", "market_manifest.json")
+    if not rows and not manifest_path.exists():
+        return []
+    try:
+        manifest = read_json(manifest_path)
+        snapshot = read_json(confined_path(output, "analysis", "market", "inputs.snapshot.json"))
+        if not isinstance(manifest, dict) or not isinstance(snapshot, dict):
+            return ["market input snapshot is missing; rerun market"]
+        snapshot_hash = claim_fingerprint(snapshot)
+        if (manifest.get("market_input_sha256") != snapshot_hash
+                or snapshot.get("market_calculation_version") != MARKET_CALCULATION_VERSION):
+            return ["market input snapshot is changed or outdated; rerun market"]
+        if manifest.get("market_rows_sha256") != claim_fingerprint(list(rows)):
+            return ["exported market rows are changed or incomplete; rerun market"]
+        frozen = {str(claim.get("claim_id") or claim.get("candidate_id")): claim for claim in claims}
+        errors = []
+        for row in rows:
+            identity = str(row.get("claim_id"))
+            claim = frozen.get(identity)
+            if claim is None:
+                errors.append(f"{identity}: source claim is missing; rerun market")
+                continue
+            provider = snapshot["mapped_symbols"].get(str(claim.get("symbol_raw") or ""))
+            benchmark = benchmark_for(claim.get("symbol_raw")) if provider else None
+            expected = compute_market_row(claim, provider or "", snapshot["prices"].get(provider, []),
+                                          benchmark, snapshot["prices"].get(benchmark, []))
+            expected["market_input_sha256"] = snapshot_hash
+            if not provider:
+                expected["missing_reason"] = "unresolved_symbol"
+            else:
+                expected["market_data_source"] = snapshot["data_sources"].get(provider)
+                if provider in snapshot["fetch_errors"]:
+                    expected["missing_reason"] = f"provider_error: {snapshot['fetch_errors'][provider]}"
+            if expected != row:
+                errors.append(f"{identity}: market metrics cannot be reproduced; rerun market")
+        return errors
+    except (OSError, ValueError, TypeError, KeyError, ResearchError):
+        return ["market derivation evidence is invalid; rerun market"]
+
+
 def report(args: argparse.Namespace) -> Dict[str, Any]:
     output = Path(args.output).expanduser().resolve()
     posts_path = output / "archive" / "posts.jsonl"
@@ -4047,6 +4236,7 @@ def report(args: argparse.Namespace) -> Dict[str, Any]:
     claims = resolve_claim_platforms(reviewed or candidates, posts)
     market_rows = read_jsonl(output / "analysis" / "market" / "claims_market.jsonl")
     binding_errors = market_binding_errors(claims, market_rows)
+    binding_errors.extend(market_derivation_errors(output, claims, market_rows))
     if binding_errors:
         raise ResearchError("Invalid market/claim binding: " + "; ".join(binding_errors[:10]))
     market_by_id = {
@@ -4490,6 +4680,8 @@ def audit(args: argparse.Namespace) -> Dict[str, Any]:
     )
     binding_errors = market_binding_errors(reviewed or candidates, market_rows)
     add("market_rows_match_frozen_claims", not binding_errors, "error", binding_errors[:50])
+    derivation_errors = market_derivation_errors(output, reviewed or candidates, market_rows)
+    add("market_metrics_reproduce_from_snapshot", not derivation_errors, "error", derivation_errors[:50])
     time_violations = []
     for row in market_rows:
         published = parse_claim_time(row.get("published_at"))
@@ -4621,6 +4813,7 @@ def audit(args: argparse.Namespace) -> Dict[str, Any]:
                 and bool(reviewed)
                 and bool(market_rows)
                 and not provider_missing
+                and not missing_market_claims
             ),
             "note": "PASS validates traceability and chronology, not stable alpha.",
         },

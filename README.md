@@ -129,6 +129,8 @@ cp -R elab-skills/elab* elab-skills/_shared ~/你的agent/skills/   # _shared �
 
 按 runtime 不同：Claude Code 用斜杠命令 `/elab` 或直接说人话；Codex 用 `$elab` mention、`/skills`，或自然语言隐式匹配；CodeBuddy / WorkBuddy 按其调用习惯。skill 内文写的 `/elab-xxx` 泛指「调用对应 skill」。
 
+默认私人状态保存在 `~/.elab/`。也可以直接说：“这次状态都存到当前项目的 `./state`，项目名用 `research-demo`；保存后给我接续路径。”同一次工作中的研究、存档、交易和报告会沿用指定状态根与项目；换新会话时把保存回执里的路径一起带上。自定义状态根不搬移会员 token 或券商凭证，也不修改宿主配置。目录与来源交接规则见 [`_shared/schema.md`](_shared/schema.md)。
+
 拿不准用哪个：Codex 输入 `$elab`，Claude Code 输入 `/elab`；主入口会把你路由到对应 skill。
 
 你也可以直接说：“我要用富途数据”“以后默认用长桥”“用 IBKR 查看我的历史成交”。`elab` 会先检查连接并给出当前 runtime 的安装/授权方法；验证通过后，公开市场、资讯和期权数据交给 `elab-research`，账户、持仓、订单与成交交给 `elab-trade`。连接器说明见 [`_shared/broker-connectors.md`](_shared/broker-connectors.md)。

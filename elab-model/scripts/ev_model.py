@@ -63,6 +63,17 @@ def _load_thresholds(config_path: Optional[str]) -> Tuple[Dict[str, Any], List[s
     try:
         with open(resolved) as f:
             data = json.load(f)
+        if not isinstance(data, dict):
+            raise ValueError("thresholds must be a JSON object")
+        for key, value in data.items():
+            if key not in FALLBACK_THRESHOLDS:
+                continue
+            if key == "min_sample_size":
+                if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+                    raise ValueError("min_sample_size must be a positive integer")
+            elif (isinstance(value, bool) or not isinstance(value, (int, float))
+                  or not math.isfinite(value) or not 0 <= value <= 1):
+                raise ValueError("ratio thresholds must be finite numbers between 0 and 1")
         # Start from fallback so missing keys are covered by defaults.
         result: Dict[str, Any] = dict(FALLBACK_THRESHOLDS)
         result.update(data)
@@ -83,8 +94,12 @@ def compute_breakeven_pop(avg_win: float, avg_loss: float) -> float:
     avg_loss must be negative.  Equivalent to breakeven_win_rate returned by
     _compute_ev_core, but callable without the full core computation.
     """
+    if (not math.isfinite(avg_win) or not math.isfinite(avg_loss)
+            or avg_win <= 0 or avg_loss >= 0):
+        raise ValueError("breakeven requires a positive finite win and negative finite loss")
     abs_loss = abs(avg_loss)
-    return abs_loss / (avg_win + abs_loss)
+    scale = max(avg_win, abs_loss)
+    return (abs_loss / scale) / (avg_win / scale + abs_loss / scale)
 
 
 # ---------------------------------------------------------------------------
@@ -96,6 +111,8 @@ def _sample_size_warnings(sample_size: Optional[int], min_sample_size: int) -> L
     """Return provenance warnings based on sample size."""
     if sample_size is None:
         return ["win_rate 来源为假设值，非统计数据"]
+    if isinstance(sample_size, bool) or not isinstance(sample_size, int) or sample_size < 1:
+        raise ValueError("sample_size must be a positive integer when supplied")
     if sample_size < min_sample_size:
         return [
             f"win_rate 样本仅 {sample_size} 笔，低于 {min_sample_size} 笔阈值，样本不足"
@@ -141,7 +158,11 @@ def _compute_ev_core(
     b: float = payoff_ratio
     p: float = win_rate
     q: float = 1.0 - win_rate
-    raw_kelly: float = (b * p - q) / b
+    if not math.isfinite(b) or b <= 0:
+        raise ValueError("payoff ratio is outside the supported finite range")
+    raw_kelly: float = p - q / b
+    if not math.isfinite(raw_kelly) or not math.isfinite(ev_per_trade):
+        raise ValueError("calculated result is outside the supported finite range")
 
     if raw_kelly < 0.0:
         # 负 Kelly 归零: EV in current assumptions is negative; zero output, no ops guidance
@@ -260,7 +281,7 @@ def _cmd_ev(args: argparse.Namespace) -> None:
         "warnings": all_warnings,
         "as_of": date.today().isoformat(),
     }
-    print(json.dumps(output, ensure_ascii=False))
+    print(json.dumps(output, ensure_ascii=False, allow_nan=False))
 
 
 def _cmd_kelly(args: argparse.Namespace) -> None:
@@ -325,7 +346,7 @@ def _cmd_kelly(args: argparse.Namespace) -> None:
         "warnings": all_warnings,
         "as_of": date.today().isoformat(),
     }
-    print(json.dumps(output, ensure_ascii=False))
+    print(json.dumps(output, ensure_ascii=False, allow_nan=False))
 
 
 def _cmd_option_credit(args: argparse.Namespace) -> None:
@@ -376,12 +397,14 @@ def _cmd_option_credit(args: argparse.Namespace) -> None:
     if pop_source == "manual":
         warnings.append("pop 来源为用户假设值，非统计或工具输出")
     elif pop_source == "delta":
+        warnings.append("delta是局部价格敏感度，不能直接当真实获利概率；到期价内概率近似与扣除权利金后的获利概率不同，近似误差方向未验证")
         credit_ratio = credit / max_loss
         if credit_ratio < otm_deep_ratio:
             warnings.append(
-                "OTM 场景 delta 近似 pop 系统性偏高，实际 pop 可能更低"
+                "credit/max-loss 比例低于配置阈值；该比例不能确定价内外程度，也不能确定 delta 近似概率的误差方向"
             )
 
+    warnings.append("本次EV把收益简化为credit与负的(max_loss-credit)两个结果；真实连续损益需完整分布，不能只凭获利概率确定EV")
     warnings.extend(thresh_warnings)
 
     # Field names: ev_per_share (per-share) + ev_per_contract (×100)
@@ -414,7 +437,7 @@ def _cmd_option_credit(args: argparse.Namespace) -> None:
         "warnings": warnings,
         "as_of": date.today().isoformat(),
     }
-    print(json.dumps(output, ensure_ascii=False))
+    print(json.dumps(output, ensure_ascii=False, allow_nan=False))
 
 
 # ---------------------------------------------------------------------------
@@ -460,9 +483,9 @@ def _build_parser() -> StrictParser:
     oc_p.add_argument("--credit", type=float, required=True,
                       help="Premium received per share ($)")
     oc_p.add_argument("--max-loss", type=float, required=True,
-                      help="Maximum possible loss per share ($, positive)")
+                      help="Gross spread width before credit per share ($); legacy flag name, NOT net maximum loss")
     oc_p.add_argument("--pop", type=float, required=True,
-                      help="Probability of profit (0 < p < 1)")
+                      help="Assumed probability of the positive binary outcome (0 < p < 1); not a measured continuous-payoff probability")
     oc_p.add_argument("--pop-source", type=str, default="manual",
                       choices=["delta", "manual"],
                       help="Source of pop: 'delta' (option chain delta approx) or 'manual'")

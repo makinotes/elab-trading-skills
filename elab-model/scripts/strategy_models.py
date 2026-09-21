@@ -17,9 +17,9 @@ exit 0 = success; exit 1 = parameter or data error.
 Python 3.9 compatible; stdlib only (no pip).
 
 Terminology hardcoded per elab-model registry §4 硬规则:
-  bull-put-spread: 收 credit 看多，非对冲工具
-  bear-put-spread: 付 debit 看跌，对冲工具（非 bull put）
-  covered-call: 有 premium 的一次性止盈，不是真分层对冲
+  bull-put-spread: 收 credit、偏多；不能保护已有正股多头的下跌风险
+  bear-put-spread: 付 debit、偏空；可为匹配的多头持仓提供有限区间保护
+  covered-call: 持股同时卖出 call，权利金提供有限缓冲并限制上行；不能提供完整下行保护
   cash-secured-put: 收 credit，愿意以 strike 价买入标的
   long-put: 付 debit，方向性看跌或对冲多头
 
@@ -94,6 +94,17 @@ def _load_thresholds(config_path: Optional[str]) -> Tuple[Dict[str, Any], List[s
     try:
         with open(resolved) as f:
             data = json.load(f)
+        if not isinstance(data, dict):
+            raise ValueError("thresholds must be a JSON object")
+        for key, value in data.items():
+            if key not in FALLBACK_THRESHOLDS:
+                continue
+            if key == "min_sample_size":
+                if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+                    raise ValueError("min_sample_size must be a positive integer")
+            elif (isinstance(value, bool) or not isinstance(value, (int, float))
+                  or not math.isfinite(value) or not 0 <= value <= 1):
+                raise ValueError("ratio thresholds must be finite numbers between 0 and 1")
         # Start from fallback so missing keys are covered
         result: Dict[str, Any] = dict(FALLBACK_THRESHOLDS)
         result.update(data)
@@ -160,8 +171,8 @@ def _spot_distance_pct(spot: Optional[float], short_strike: float) -> Optional[f
     return round((spot - short_strike) / short_strike * 100, 2)
 
 
-def _dte_weeks(dte: int) -> float:
-    return round(dte / 7, 4)
+def _dte_weeks(dte: Optional[int]) -> Optional[float]:
+    return None if dte is None else round(dte / 7, 4)
 
 
 def _require_finite(cli_name: str, val: float) -> None:
@@ -174,20 +185,37 @@ def _require_finite(cli_name: str, val: float) -> None:
         sys.exit(1)
 
 
+def _require_positive(cli_name: str, val: float) -> None:
+    _require_finite(cli_name, val)
+    if val <= 0:
+        raise ValueError(f"--{cli_name} must be positive")
+
+
 def _output(data: Dict[str, Any]) -> None:
     """Write JSON to stdout (the only stdout output)."""
-    print(json.dumps(data, ensure_ascii=False))
+    dte = data.get("inputs", {}).get("dte")
+    data["payoff_scope"] = "at_expiration_before_fees"
+    data["ev_breakeven_pop_assumption"] = "binary_extreme_outcomes_only"
+    data["warnings"].append(
+        "ev_breakeven_pop仅适用于每次只发生最大盈利或最大亏损的二元假设；真实到期损益有中间状态，不能把它当通用获利概率或盈利概率门槛。"
+    )
+    if dte is None or dte == 0:
+        data["greeks_exposure"] = None
+        data["warnings"].append(
+            "未提供剩余期限或按到期情景计算：仅解释到期损益，不提供持有期希腊值或指派概率；0 DTE不代表盘中已结算。"
+        )
+    print(json.dumps(data, ensure_ascii=False, allow_nan=False))
 
 
 # ---------------------------------------------------------------------------
 # Template: bull-put-spread
-# Terminology (registry §4a hardcoded): 收 credit 看多，非对冲工具
+# Terminology (registry §4a hardcoded): 收 credit、偏多；不能保护已有正股多头的下跌风险
 # ---------------------------------------------------------------------------
 
 def _cmd_bull_put_spread(args: argparse.Namespace) -> None:
     """bull-put-spread: sell higher-strike put, buy lower-strike put.
 
-    收 credit 看多，非对冲工具。
+    收 credit、偏多；不能保护已有正股多头的下跌风险。
     NOT a hedge for an existing long position (use bear-put-spread for that).
 
     Registry §4a formula:
@@ -205,11 +233,11 @@ def _cmd_bull_put_spread(args: argparse.Namespace) -> None:
     config_path: Optional[str] = args.config
 
     # NaN/inf guard (item 5)
-    _require_finite("short-strike", short_strike)
-    _require_finite("long-strike", long_strike)
+    _require_positive("short-strike", short_strike)
+    _require_positive("long-strike", long_strike)
     _require_finite("credit", credit)
     if spot is not None:
-        _require_finite("spot", spot)
+        _require_positive("spot", spot)
 
     # Validation
     if short_strike <= long_strike:
@@ -229,8 +257,8 @@ def _cmd_bull_put_spread(args: argparse.Namespace) -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    if dte <= 0:
-        print("ERROR: --dte must be positive", file=sys.stderr)
+    if dte is not None and dte < 0:
+        print("ERROR: --dte must be nonnegative", file=sys.stderr)
         sys.exit(1)
 
     # Thresholds
@@ -264,7 +292,7 @@ def _cmd_bull_put_spread(args: argparse.Namespace) -> None:
     _output({
         "model": "bull-put-spread",
         # Terminology hardcoded per registry §4a 硬规则
-        "strategy_note": "收 credit 看多，非对冲工具",
+        "strategy_note": "收 credit、偏多；不能保护已有正股多头的下跌风险",
         "inputs": {
             "short_strike": short_strike,
             "long_strike": long_strike,
@@ -280,8 +308,8 @@ def _cmd_bull_put_spread(args: argparse.Namespace) -> None:
         "ev_breakeven_pop": ev_breakeven_pop,
         "greeks_exposure": _greeks(
             delta="正（净多 delta，看多偏多）",
-            theta="正（净空期权，时间流逝有利）",
-            vega="负（净空波动率敞口，IV 上升不利）",
+            theta="不固定；取决于标的相对两腿的位置和定价参数，须逐腿计算后相加",
+            vega="不固定；两腿 Vega 抵消后的符号取决于位置、期限及各腿 IV",
         ),
         "assignment_risk": {
             "spot_distance_pct": _spot_distance_pct(spot, short_strike),
@@ -300,13 +328,13 @@ def _cmd_bull_put_spread(args: argparse.Namespace) -> None:
 
 # ---------------------------------------------------------------------------
 # Template: bear-put-spread
-# Terminology (registry §4b hardcoded): 付 debit 看跌，对冲工具（非 bull put）
+# Terminology (registry §4b hardcoded): 付 debit、偏空；可为匹配的多头持仓提供有限区间保护
 # ---------------------------------------------------------------------------
 
 def _cmd_bear_put_spread(args: argparse.Namespace) -> None:
     """bear-put-spread: buy higher-strike put, sell lower-strike put.
 
-    付 debit 看跌，对冲工具（非 bull put）。
+    付 debit、偏空；可为匹配的多头持仓提供有限区间保护。
     Used to hedge an existing long position (NOT a credit strategy).
 
     Registry §4b formula:
@@ -323,11 +351,11 @@ def _cmd_bear_put_spread(args: argparse.Namespace) -> None:
     config_path: Optional[str] = args.config
 
     # NaN/inf guard (item 5)
-    _require_finite("long-strike", long_strike)
-    _require_finite("short-strike", short_strike)
+    _require_positive("long-strike", long_strike)
+    _require_positive("short-strike", short_strike)
     _require_finite("debit", debit)
     if spot is not None:
-        _require_finite("spot", spot)
+        _require_positive("spot", spot)
 
     # Validation
     if long_strike <= short_strike:
@@ -346,8 +374,8 @@ def _cmd_bear_put_spread(args: argparse.Namespace) -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    if dte <= 0:
-        print("ERROR: --dte must be positive", file=sys.stderr)
+    if dte is not None and dte < 0:
+        print("ERROR: --dte must be nonnegative", file=sys.stderr)
         sys.exit(1)
 
     # Thresholds (item 2: use debit_width_min_ratio key)
@@ -374,14 +402,14 @@ def _cmd_bear_put_spread(args: argparse.Namespace) -> None:
     debit_ratio = debit / width
     if debit_ratio < debit_width_min_ratio:
         warnings.append(
-            f"保护范围太窄：debit 仅占宽度 {debit_ratio:.0%}，"
-            f"低于 {debit_width_min_ratio:.0%} 阈值，下行保护有限"
+            f"成本/宽度比例：debit 占宽度 {debit_ratio:.0%}，"
+            f"低于配置阈值 {debit_width_min_ratio:.0%}；不能据此判断保护范围，须核对原持仓、行权价及期限"
         )
 
     _output({
         "model": "bear-put-spread",
         # Terminology hardcoded per registry §4b 硬规则
-        "strategy_note": "付 debit 看跌，对冲工具（非 bull put）",
+        "strategy_note": "付 debit、偏空；可为匹配的多头持仓提供有限区间保护",
         "inputs": {
             "long_strike": long_strike,
             "short_strike": short_strike,
@@ -397,8 +425,8 @@ def _cmd_bear_put_spread(args: argparse.Namespace) -> None:
         "ev_breakeven_pop": ev_breakeven_pop,
         "greeks_exposure": _greeks(
             delta="负（净空 delta，看跌对冲）",
-            theta="负（净多期权，时间流逝不利）",
-            vega="正（净多波动率敞口，IV 上升有利）",
+            theta="不固定；取决于标的相对两腿的位置和定价参数，须逐腿计算后相加",
+            vega="不固定；两腿 Vega 抵消后的符号取决于位置、期限及各腿 IV",
         ),
         "assignment_risk": {
             "spot_distance_pct": _spot_distance_pct(spot, short_strike),
@@ -417,13 +445,13 @@ def _cmd_bear_put_spread(args: argparse.Namespace) -> None:
 
 # ---------------------------------------------------------------------------
 # Template: covered-call
-# Note (hardcoded): 有 premium 的一次性止盈，不是真分层对冲
+# Note (hardcoded): 持股同时卖出 call，权利金提供有限缓冲并限制上行；不能提供完整下行保护
 # ---------------------------------------------------------------------------
 
 def _cmd_covered_call(args: argparse.Namespace) -> None:
     """covered-call: own 100 shares, sell OTM call to collect premium.
 
-    有 premium 的一次性止盈，不是真分层对冲。
+    持股同时卖出 call，权利金提供有限缓冲并限制上行；不能提供完整下行保护。
 
     Registry §4c formula:
       max_profit = (call_strike − entry_price + credit) × 100  (per-contract dollar)
@@ -438,11 +466,11 @@ def _cmd_covered_call(args: argparse.Namespace) -> None:
     config_path: Optional[str] = args.config
 
     # NaN/inf guard (item 5)
-    _require_finite("entry-price", entry_price)
-    _require_finite("call-strike", call_strike)
+    _require_positive("entry-price", entry_price)
+    _require_positive("call-strike", call_strike)
     _require_finite("credit", credit)
     if spot is not None:
-        _require_finite("spot", spot)
+        _require_positive("spot", spot)
 
     # Validation
     if entry_price <= 0.0:
@@ -468,8 +496,8 @@ def _cmd_covered_call(args: argparse.Namespace) -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    if dte <= 0:
-        print("ERROR: --dte must be positive", file=sys.stderr)
+    if dte is not None and dte < 0:
+        print("ERROR: --dte must be nonnegative", file=sys.stderr)
         sys.exit(1)
 
     # Thresholds (not used for covered-call warnings currently, loaded for extensibility)
@@ -498,7 +526,7 @@ def _cmd_covered_call(args: argparse.Namespace) -> None:
     _output({
         "model": "covered-call",
         # Terminology hardcoded per registry §4c
-        "strategy_note": "有 premium 的一次性止盈，不是真分层对冲",
+        "strategy_note": "持股同时卖出 call，权利金提供有限缓冲并限制上行；不能提供完整下行保护",
         "inputs": {
             "entry_price": entry_price,
             "call_strike": call_strike,
@@ -551,10 +579,10 @@ def _cmd_cash_secured_put(args: argparse.Namespace) -> None:
     config_path: Optional[str] = args.config
 
     # NaN/inf guard (item 5)
-    _require_finite("strike", strike)
+    _require_positive("strike", strike)
     _require_finite("credit", credit)
     if spot is not None:
-        _require_finite("spot", spot)
+        _require_positive("spot", spot)
 
     # Validation
     if strike <= 0.0:
@@ -569,8 +597,8 @@ def _cmd_cash_secured_put(args: argparse.Namespace) -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    if dte <= 0:
-        print("ERROR: --dte must be positive", file=sys.stderr)
+    if dte is not None and dte < 0:
+        print("ERROR: --dte must be nonnegative", file=sys.stderr)
         sys.exit(1)
 
     # Thresholds
@@ -643,10 +671,10 @@ def _cmd_long_put(args: argparse.Namespace) -> None:
     config_path: Optional[str] = args.config
 
     # NaN/inf guard (item 5)
-    _require_finite("strike", strike)
+    _require_positive("strike", strike)
     _require_finite("debit", debit)
     if spot is not None:
-        _require_finite("spot", spot)
+        _require_positive("spot", spot)
 
     # Validation
     if strike <= 0.0:
@@ -661,8 +689,8 @@ def _cmd_long_put(args: argparse.Namespace) -> None:
             file=sys.stderr,
         )
         sys.exit(1)
-    if dte <= 0:
-        print("ERROR: --dte must be positive", file=sys.stderr)
+    if dte is not None and dte < 0:
+        print("ERROR: --dte must be nonnegative", file=sys.stderr)
         sys.exit(1)
 
     # Thresholds (loaded for consistency; no specific check for long-put currently)
@@ -743,7 +771,8 @@ def _build_parser() -> StrictParser:
         )
 
     def _add_dte(p: argparse.ArgumentParser) -> None:
-        p.add_argument("--dte", type=int, required=True, help="Days to expiration")
+        p.add_argument("--dte", type=int, default=None,
+                       help="Days to expiration; optional for expiry-payoff math; 0 means expiry")
 
     def _add_spot(p: argparse.ArgumentParser) -> None:
         p.add_argument("--spot", type=float, default=None,

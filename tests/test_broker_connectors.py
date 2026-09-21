@@ -12,6 +12,7 @@ import stat
 import subprocess
 import tempfile
 import unittest
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -80,7 +81,12 @@ class BrokerProfileTest(unittest.TestCase):
         self.assertIsNone(json.loads(clear_result.stdout)["default_provider"])
 
     def test_doctor_is_read_only_and_does_not_claim_auth(self):
-        result = BP.doctor("all")
+        with tempfile.TemporaryDirectory() as temporary, \
+             mock.patch.object(BP.Path, "home", return_value=Path(temporary)), \
+             mock.patch.object(BP, "tcp_reachable", return_value=False), \
+             mock.patch.object(BP.shutil, "which", return_value=None), \
+             mock.patch.object(BP.importlib.util, "find_spec", return_value=None):
+            result = BP.doctor("all")
         self.assertFalse(result["network_auth_verified"])
         self.assertEqual(set(result["providers"]), set(BP.PROVIDERS))
         for status in result["providers"].values():
@@ -92,6 +98,32 @@ class BrokerProfileTest(unittest.TestCase):
             for value in (None, [], "invalid"):
                 path.write_text(json.dumps({"mcpServers": value}), encoding="utf-8")
                 self.assertFalse(BP.json_has_mcp(path, "longbridge"))
+
+    def test_disabled_or_empty_mcp_entries_are_not_ready_hints(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "mcp.json"
+            for entry in (None, {}, {"command": ""}, {"url": False},
+                          {"url": "https://example.invalid", "disabled": True},
+                          {"command": "connector", "enabled": False}):
+                path.write_text(json.dumps({"mcpServers": {"longbridge": entry}}))
+                self.assertFalse(BP.json_has_mcp(path, "longbridge"))
+            for entry in ({"command": "connector"}, {"url": "https://example.invalid"}):
+                path.write_text(json.dumps({"mcpServers": {"longbridge": entry}}))
+                self.assertTrue(BP.json_has_mcp(path, "longbridge"))
+            path = Path(temporary) / "config.toml"
+            for body in ('enabled = false\ncommand = "connector"', '', 'command = ""'):
+                path.write_text('[mcp_servers.ibkr]\n' + body + '\n')
+                self.assertFalse(BP.codex_has_mcp(path, "ibkr"))
+            path.write_text('[mcp_servers.ibkr]\ncommand = "connector"\n')
+            self.assertTrue(BP.codex_has_mcp(path, "ibkr"))
+
+    def test_invalid_opend_port_fails_before_any_socket(self):
+        for value in ("-1", "0", "65536", "invalid"):
+            with mock.patch.dict(os.environ, {"FUTU_OPEND_PORT": value}), \
+                 mock.patch.object(BP, "tcp_reachable") as connect:
+                with self.assertRaises(BP.ProfileError):
+                    BP.doctor("futu")
+                connect.assert_not_called()
 
     def test_skill_wiring_and_suite_version(self):
         expected = {

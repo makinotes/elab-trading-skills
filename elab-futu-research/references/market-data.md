@@ -78,3 +78,7 @@ Rows and the market manifest also record `market_calculation_version`; `report` 
 - Missing or inconsistent OHLC remains a missing result.
 
 For consequential research, spot-check a sample against a second source, especially around splits, dividends, suspensions, delistings, and symbol changes.
+
+### Frozen inputs and trust boundary
+
+Calculation version 2 stores normalized input bars in `market/inputs.snapshot.json` and binds their hash to the market manifest. `report` and `audit` recompute indicators from this snapshot, checking dates, currency and result consistency. These checks do not authenticate vendor data or compare the snapshot with the current original CSV bytes; a party able to rewrite every file and hash remains outside this integrity guarantee. Preserve source provenance and capture time, investigate suspicious source data, and rerun `market → report → audit` after a correction instead of editing hashes.

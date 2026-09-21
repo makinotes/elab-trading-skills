@@ -123,6 +123,12 @@ def tcp_reachable(host: str, port: int, timeout: float = 0.25) -> bool:
         return False
 
 
+def usable_mcp_entry(entry: Any) -> bool:
+    if not isinstance(entry, dict) or entry.get("disabled") is True or entry.get("enabled") is False:
+        return False
+    return any(isinstance(entry.get(key), str) and bool(entry[key].strip()) for key in ("command", "url", "serverUrl"))
+
+
 def json_has_mcp(path: Path, server_name: str) -> bool:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -131,7 +137,7 @@ def json_has_mcp(path: Path, server_name: str) -> bool:
     if not isinstance(data, dict):
         return False
     servers = data.get("mcpServers", {})
-    return isinstance(servers, dict) and server_name in servers
+    return isinstance(servers, dict) and usable_mcp_entry(servers.get(server_name))
 
 
 def codex_has_mcp(path: Path, server_name: str) -> bool:
@@ -139,8 +145,25 @@ def codex_has_mcp(path: Path, server_name: str) -> bool:
         text = path.read_text(encoding="utf-8")
     except OSError:
         return False
-    pattern = rf"(?m)^\s*\[mcp_servers\.{re.escape(server_name)}\]\s*$"
-    return re.search(pattern, text) is not None
+    try:
+        import tomllib
+    except ImportError:
+        # Python 3.9/3.10 has no TOML parser. Only accept a simple unambiguous
+        # server table; a malformed/advanced config remains an unverified hint.
+        pattern = rf"(?m)^\s*\[mcp_servers\.{re.escape(server_name)}\][ \t]*(?:#.*)?$"
+        match = re.search(pattern, text)
+        if match is None:
+            return False
+        block = re.split(r"(?m)^\s*\[", text[match.end():], maxsplit=1)[0]
+        if re.search(r"(?m)^\s*(?:enabled\s*=\s*false|disabled\s*=\s*true)\b", block):
+            return False
+        return re.search(r"(?m)^\s*(?:command|url)\s*=\s*([\"'])([^\r\n]+?)\1[ \t]*(?:#.*)?$", block) is not None
+    try:
+        data = tomllib.loads(text)
+    except ValueError:
+        return False
+    servers = data.get("mcp_servers", {})
+    return isinstance(servers, dict) and usable_mcp_entry(servers.get(server_name))
 
 
 def mcp_configured_in(server_name: str, home: Path) -> list[str]:
@@ -185,6 +208,8 @@ def doctor(provider: str) -> dict[str, Any]:
             port = int(os.environ.get("FUTU_OPEND_PORT", "11111"))
         except ValueError as exc:
             raise ProfileError("FUTU_OPEND_PORT must be an integer") from exc
+        if not 1 <= port <= 65535:
+            raise ProfileError("FUTU_OPEND_PORT must be from 1 to 65535")
         sdk = importlib.util.find_spec("futu") is not None
         skills = skill_installed("futuapi", home)
         opend = tcp_reachable(host, port)
