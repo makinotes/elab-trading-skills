@@ -51,6 +51,15 @@ class ReadmeConsistencyTest(unittest.TestCase):
         )
         self.assertEqual(missing, [], f"README points at missing files: {missing}")
 
+    def test_changelog_latest_release_matches_suite_source(self):
+        text = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        first_release = re.search(r"^## .*?EdgeLab Skills (\d+\.\d+\.\d+)", text, re.M)
+        self.assertIsNotNone(first_release)
+        version = (ROOT / "_shared" / "SUITE_VERSION").read_text().strip()
+        self.assertEqual(first_release.group(1), version)
+        self.assertNotRegex(text, re.compile(r"^## 当前源码版本.*\d+\.\d+\.\d+", re.M))
+        self.assertNotIn("| **EdgeLab Skills suite** |", text)
+
 
 if __name__ == "__main__":
     unittest.main()

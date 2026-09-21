@@ -51,6 +51,10 @@ All-history status is `complete_visible_history` only when both streams reach `h
 - Write temporary downloads with `.part`, then atomically rename.
 - Keep run metadata in `manifest.json`.
 
+Futu retains `raw/list/<uid>` and `raw/details/<uid>` paths. Tiger captures use `platforms/tiger/raw/` so matching numeric IDs never share files. The combined feed index records the platform. A legacy Tiger detail can be copied into this namespace only when its stored source identifies it as Tiger; ambiguous or damaged caches require restoration or recapture. Reusing a directory for another profile preserves already identified records and their adapter.
+
+UIDs and feed IDs must be single safe filename components. Capture and media paths are checked against the selected output root, including existing symlinks. Invalid source identifiers abort processing before they can be used as output paths.
+
 ## Time and date handling
 
 Save:
@@ -61,6 +65,8 @@ Save:
 - retrieval timestamp in UTC.
 
 Do not silently coerce an unparseable timestamp. Keep the raw value and flag `timestamp_parse_error`.
+
+Tiger list pages store a `page_*.metadata.json` sidecar with `captured_at`. Relative source times such as `10:00` or `07-22` are interpreted using that capture date, and detail records retain the resulting absolute `published_at`. Cached content never borrows the current run's date. Legacy relative times without a recorded capture date require `archive --refresh`; explicit full dates remain readable. Refreshing list pages can recover the absolute timestamp for an identified cached detail without changing its saved text.
 
 ## Browser fallback
 

@@ -75,6 +75,55 @@ class PrivacyGateTest(unittest.TestCase):
         self.assertIn("tests/test_privacy_gate.py", result.stdout)
         self.assertNotIn(locator, result.stdout)
 
+    def test_internal_detail_in_ordinary_document_fails(self) -> None:
+        content = "goldset" + " case " + str(42) + " internal acceptance\n"
+        (self.root / "notes.md").write_text(content)
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("internal evaluation detail", result.stdout)
+        self.assertNotIn(content.strip(), result.stdout)
+
+    def test_boundary_documentation_is_not_an_evaluation_result(self) -> None:
+        (self.root / "CONTRIBUTING.md").write_text(
+            "Goldset、评分结果和标准答案只保存在私有仓。\n"
+        )
+        result = self.run_gate()
+        self.assertEqual(result.returncode, 0, result.stdout)
+
+    def test_credential_patterns_are_blocked_even_in_policy_tests(self) -> None:
+        fixtures = ["mk_live_" + "x" * 32, "ghp_" + "x" * 36,
+                    "sk-" + "x" * 32, "-----BEGIN " + "PRIVATE KEY-----"]
+        for relative in ("config.json", "tests/test_privacy_gate.py"):
+            path = self.root / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            for value in fixtures:
+                with self.subTest(path=relative, kind=value[:8]):
+                    path.write_text(value)
+                    result = self.run_gate()
+                    self.assertEqual(result.returncode, 1, result.stdout)
+                    self.assertNotIn(value, result.stdout)
+            path.unlink()
+
+    def test_machine_paths_do_not_require_a_specific_username(self) -> None:
+        for prefix in ("/Users/", "/home/"):
+            value = prefix + "fictional-owner" + "/private/file.txt"
+            (self.root / "notes.md").write_text(value)
+            result = self.run_gate()
+            self.assertEqual(result.returncode, 1, result.stdout)
+            self.assertNotIn(value, result.stdout)
+
+    def test_staged_gate_reads_index_not_unstaged_cleanup(self) -> None:
+        path = self.root / "notes.md"
+        value = "mk_live_" + "x" * 32
+        path.write_text(value)
+        subprocess.run(["git", "add", "notes.md"], cwd=self.root, check=True)
+        path.write_text("Clean worktree, unsafe index.\n")
+        result = subprocess.run(["python3", "scripts/privacy_gate.py", "--staged"],
+                                cwd=self.root, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("notes.md", result.stdout)
+        self.assertNotIn(value, result.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()

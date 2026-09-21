@@ -16,6 +16,8 @@
 
 当前版本以 [`_shared/SUITE_VERSION`](_shared/SUITE_VERSION) 为准；每版改了什么见 [CHANGELOG](CHANGELOG.md)，可回退版本见 [Tags](https://github.com/edgelab101/elab-skills/tags)。
 
+**发布状态**：本次更新为预发布。正式版与预发布的区分见 [Releases](https://github.com/edgelab101/elab-skills/releases)；实际宿主行为和可选接口仍需按自身环境确认。
+
 **语言范围**：本页提供中英文介绍；大多数 `SKILL.md` 执行说明和各 Skill 的 README 仍以中文为主。英文提问可以尝试，但英文工作流尚未完成系统行为验收。
 
 ## 首次试用（无需会员 token）
@@ -54,6 +56,8 @@
 
 ### 一键装（推荐）
 
+需要 Git、Bash 和 Python 3.9+（标准库，无需额外安装包）。
+
 ```bash
 git clone https://github.com/edgelab101/elab-skills.git
 cd elab-skills
@@ -62,7 +66,9 @@ bash install.sh
 
 脚本按本机目录识别安装目标，把 11 个 `elab*` skill 和 `_shared` 装进对应 skills 目录。`elab-futu-research` 已内置，不再需要单独安装另一个仓库。支持以下四种安装路径；这张表说明安装位置，不代表四个宿主均已完成行为实测：
 
-安装和更新会重建已有的 `elab`、`elab-*` 和 `_shared`。脚本会先检查每个目标的 `_shared` 是否属于 EdgeLab；无法确认时会停止，不覆盖该目录。若你自行修改过已安装的文件，先备份改动。
+安装和更新用本机 `.elab-install.json` 清单管理套件文件，先检查所有目标再暂存与替换；失败会回滚。复制模式保留未管理文件和第三方扩展，软链模式遇混合目录会停止。`_shared` 必须单独验证归属；源码与替换目标相交时拒绝安装。清单内的本地修改仍会被替换，请先备份。
+
+没有清单的旧安装只自动接管与当前源一致、或匹配本地 `vX.Y.Z` tag 同路径内容的文件。未知的同路径文件会使迁移停止，原目录保持不变；请先备份并处理冲突，不要直接删除共享目录来绕过检查。
 
 | Agent | 个人 skills 目录 |
 |---|---|
@@ -107,7 +113,9 @@ bash update.sh
 bash update.sh --to vX.Y.Z   # 将 vX.Y.Z 换成 Tags 中实际存在的版本；不改变当前 Git 工作树
 ```
 
-它自动：`git pull` → 显示 CHANGELOG 本次变更 → 同步到已安装的 skills 目录（Claude Code / Codex / CodeBuddy / WorkBuddy 四个都检测；cp 或软链装法都自动处理，含 `_shared`）。
+它要求干净的 Git 工作树，先获取上游版本并显示变更，完成预检和暂存后再更新源码与已安装套件。四个 runtime 都会检测，但只更新已有本套件安装的目标；复制和软链模式均按安装清单处理。显式 `--to` 回退会改成固定版本的复制安装。
+
+默认更新会先备份受影响的源码顶层目录（包含其中的 ignored 文件，需要相应磁盘空间）。Git 检出失败时直接恢复原文件与安装，并把失败现场保留在仓库旁的 `.elab-checkout-backup-*` 目录，控制台会给出路径；确认不需要其中的改动后再手动清理。
 
 **自动更新（可选，一次性设置）**——跑一次，之后每天自动跟进最新版：
 
@@ -120,7 +128,7 @@ bash install-autoupdate.sh        # 默认每天 9:00；bash install-autoupdate.
 > 正式版本使用 `vX.Y.Z` Git tag；`--to` 只接受已发布 tag，方便错误版本快速回退。
 > ⚠️ 自动更新 = 主理人 push 后静默跟进；想先看变更再更就别开，用手动。
 
-> ⚠️ **本地改过 skill 文件的注意**：更新会覆盖你的改动——`update.sh`（cp 装法）同步时整目录覆盖，开了自动更新更是每天静默覆盖；软链装法 `git pull` 时直接冲突。想自定义，三选一：
+> ⚠️ **本地改过 skill 文件的注意**：清单内的套件文件会被新版本替换，先备份；未管理文件在复制模式保留。软链安装的源码有本地改动时，`update.sh` 会停止。想自定义，三选一：
 > ① 改进建议**提 PR**（见 `CONTRIBUTING.md`），合并后所有人受益；
 > ② **fork / 复制一份出去改**，代价是脱离更新通道，之后自己手动合并上游；
 > ③ **个人偏好写进你 agent 的全局配置**（Claude Code 的 `CLAUDE.md` / Codex 的 `AGENTS.md` / CodeBuddy 与 WorkBuddy 的对应全局规则文件）去覆盖行为，不动 skill 文件本身——这样既保留偏好又不挡更新（推荐）。
@@ -137,7 +145,7 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 
 ## EdgeLab 会员数据（可选）
 
-`elab-research` 的自研模式可接入 EdgeLab 雷达 / 恐慌指数数据。接入方式：把会员 token 存到 `~/.elab/token`，skill 会自动带上。没有 token 时不影响其他功能。
+`elab-research` 的自研模式可接入 EdgeLab 雷达 / 恐慌指数数据。接入方式：把会员 token 存到 `~/.elab/token`，并设为仅本人可读写（`chmod 600 ~/.elab/token`）；客户端在进程内读取，勿把 token 发到对话。客户端拒绝重定向，错误只输出状态码和脱敏说明。没有 token 时仍可使用不依赖会员数据的功能。
 
 ## 合规
 
@@ -167,6 +175,8 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 
 ## English
 
+**Release status:** This update is a prerelease. See [Releases](https://github.com/edgelab101/elab-skills/releases) for stable and preview versions; host behavior and optional integrations still need confirmation in your environment.
+
 **EdgeLab Skills** — 11 Agent Skills for equity and options research, trade journaling, and review. They use portable `SKILL.md` instructions that agents can read; available behavior depends on the host and its tools.
 
 > **Core premise**: in the AI era a retail investor's moat is not knowing more — it is making the reasoning visible. Human and AI each own their part, and every decision can be traced back. A decision you can see is a decision you can iterate into an edge.
@@ -193,6 +203,8 @@ The current version is in [`_shared/SUITE_VERSION`](_shared/SUITE_VERSION); see 
 
 ### Install
 
+Requires Git, Bash and Python 3.9+; no additional Python packages are needed.
+
 ```bash
 git clone https://github.com/edgelab101/elab-skills.git
 cd elab-skills
@@ -201,7 +213,9 @@ bash install.sh --list   # show detected runtimes only, change nothing
 bash install.sh --link   # symlink mode: `git pull` is all you need to update
 ```
 
-Installs into `~/.claude/skills/`, `~/.codex/skills/`, `~/.codebuddy/skills/` or `~/.workbuddy/skills/`. Installation and updates replace existing `elab`, `elab-*` and `_shared` entries; the scripts stop if they cannot identify an existing `_shared` as EdgeLab's. Back up local edits first. For any other agent, copy `elab*` and `_shared` into its skills directory — `_shared` is required. Supporting an install path is not a claim that every host behaves identically; available data and tools depend on the host, installed dependencies and your own authorisation.
+Installs into `~/.claude/skills/`, `~/.codex/skills/`, `~/.codebuddy/skills/` or `~/.workbuddy/skills/`. Installation uses an ownership manifest, preflights all targets and stages replacements with rollback. Copy mode preserves unmanaged files and third-party extensions; link mode refuses mixed directories. `_shared` must establish its own ownership. Updates require a clean checkout and touch only existing suite installations. Back up edits to managed files first. For any other agent, copy `elab*` and `_shared` into its skills directory — `_shared` is required. Supporting an install path is not a claim that every host behaves identically; available data and tools depend on the host, installed dependencies and your own authorisation.
+
+Legacy files without a manifest must match the current source or a local release tag before adoption; unknown conflicts stop migration without replacing the old installation. Default updates back up affected checkout directories, including ignored files. Failed Git updates restore the old checkout and retain recovery copies beside the repository; the error message gives their location.
 
 Trigger with `/elab` (Claude Code), `$elab` (Codex), or just describe what you need.
 

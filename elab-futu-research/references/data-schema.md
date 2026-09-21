@@ -9,7 +9,9 @@ Required:
 ```json
 {
   "schema_version": "1.0",
+  "platform": "futu|tiger",
   "feed_id": "string",
+  "profile_uid": "string",
   "author_uid": "string",
   "author_name": "string|null",
   "published_at": "ISO-8601|null",
@@ -39,6 +41,8 @@ Required:
 
 For reposts, `text` contains the author's own comment (may be empty for silent reposts), `original_text` contains the reposted content, and `original_author` contains the original poster's name when available in the payload. Both fields are `null` for original posts.
 
+Profile identity is `(platform, profile_uid)`, and post identity is `(platform, profile_uid, feed_id)`. Numeric UIDs and post IDs from different platforms must remain separate. Older records may recover their platform from the recorded source URL; ambiguous legacy claims require explicit source verification before regeneration.
+
 Keep raw exchange prefixes. Do not reduce `HK.00700` to `00700` or merge securities from different markets.
 
 ## Candidate claim
@@ -48,7 +52,8 @@ Machine-generated candidate:
 ```json
 {
   "schema_version": "1.0",
-  "candidate_id": "<feed_id>:<symbol-or-general>",
+  "candidate_id": "<platform>:<profile_uid>:<feed_id>:<symbol-or-general>",
+  "platform": "futu|tiger",
   "feed_id": "string",
   "author_uid": "string",
   "published_at": "ISO-8601|null",
@@ -71,6 +76,7 @@ The prelabel is never final and never `A`.
 {
   "schema_version": "1.0",
   "claim_id": "stable string",
+  "platform": "futu|tiger",
   "candidate_id": "string",
   "feed_id": "string",
   "author_uid": "string",
@@ -136,6 +142,9 @@ CSV or JSON:
 ```json
 {
   "claim_id": "string",
+  "claim_sha256": "SHA-256 of the frozen claim",
+  "market_calculation_version": "1",
+  "platform": "futu|tiger",
   "symbol_raw": "US.EXAMPLE",
   "provider_symbol": "EXAMPLE",
   "context_cutoff": "YYYY-MM-DD",
@@ -163,6 +172,10 @@ CSV or JSON:
 ```
 
 `ret_*` is the raw underlying return. `directional_ret_*` multiplies it by the frozen bullish/bearish direction. `mfe_20` and `mae_20` are also direction-aware, so favorable excursion is positive and adverse excursion is negative for either long or short calls.
+
+`claim_sha256` hashes the full claim JSON after platform resolution, with sorted keys, UTF-8 encoding and compact separators. Any changed frozen field invalidates the derived market row. `report` refuses stale, unbound or duplicate market rows; `audit` blocks publication. Older market rows without this hash must be regenerated with `market`; they are never automatically treated as current.
+
+`market_calculation_version` independently identifies the calculation and benchmark rules, is recorded in each JSONL/CSV row and the market manifest, and must match the script's `MARKET_CALCULATION_VERSION`; missing or outdated versions require rerunning `market` even when the claim hash matches.
 
 ## Crawl audit
 

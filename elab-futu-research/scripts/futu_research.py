@@ -26,6 +26,7 @@ import os
 import random
 import re
 import statistics
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -36,8 +37,10 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
 
 
-VERSION = "1.3.3"
+VERSION = "1.3.5"
 SCHEMA_VERSION = "1.0"
+# Bump when market calculations or benchmark rules change derived row semantics.
+MARKET_CALCULATION_VERSION = "1"
 LIST_URL = "https://q.futunn.com/nnq/personal-list"
 REPORT_FOOTER = (
     "\n---\n"
@@ -50,7 +53,7 @@ DETAIL_URL = "https://q.futunn.com/v2/api/feed/detail"
 YAHOO_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 EASTMONEY_URL = "https://push2his.eastmoney.com/api/qt/stock/kline/get"
 USER_AGENT = (
-    "elab-futu-research/1.3.3 "
+    f"elab-futu-research/{VERSION} "
     "(public-research-tool; +https://github.com/edgelab101/elab-skills/tree/main/elab-futu-research)"
 )
 # Tiger Brokerage (laohu8.com) requires a browser User-Agent to avoid HTTP 403.
@@ -243,6 +246,71 @@ class ResearchError(RuntimeError):
     """A user-actionable workflow failure."""
 
 
+def safe_component(value: Any, label: str = "identifier") -> str:
+    value = str(value)
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}", value):
+        raise ResearchError(f"Unsafe {label}: {value!r}")
+    return value
+
+
+def confined_path(root: Path, *parts: str) -> Path:
+    """Reject traversal and existing symlinks that escape the selected output root."""
+    path = root.joinpath(*parts)
+    try:
+        path.resolve().relative_to(root.resolve())
+    except ValueError as error:
+        raise ResearchError(f"Path escapes output directory: {path}") from error
+    return path
+
+
+def record_platform(row: Dict[str, Any]) -> str:
+    source = row.get("source") if isinstance(row.get("source"), dict) else {}
+    platform = row.get("platform") or row.get("adapter") or source.get("platform")
+    if platform:
+        if platform not in {"futu", "tiger"}:
+            raise ResearchError(f"Unsupported cached platform: {platform!r}")
+        return str(platform)
+    url = str(row.get("profile_url") or source.get("profile_url") or row.get("source_url") or row.get("url") or "")
+    host = (urllib.parse.urlparse(url).hostname or "").lower()
+    if host == "laohu8.com" or host.endswith(".laohu8.com"):
+        return "tiger"
+    return "futu"  # Legacy Futu records predate the platform field.
+
+
+def profile_key(row: Dict[str, Any]) -> str:
+    uid = row.get("profile_uid") or row.get("uid") or row.get("author_uid") or ""
+    return f"{record_platform(row)}:{safe_component(uid, 'UID')}"
+
+
+def author_key(row: Dict[str, Any]) -> str:
+    uid = row.get("author_uid") or ""
+    return f"{record_platform(row)}:{safe_component(uid, 'UID') if uid else ''}"
+
+
+def resolve_claim_platforms(claims: Sequence[Dict[str, Any]], posts: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    sources: Dict[Tuple[str, str], set] = defaultdict(set)
+    for post in posts:
+        sources[(str(post.get("profile_uid") or ""), str(post.get("feed_id") or ""))].add(record_platform(post))
+    result = []
+    for original in claims:
+        row = dict(original)
+        if not row.get("platform"):
+            alternatives = sources.get((str(row.get("author_uid") or ""), str(row.get("feed_id") or "")), set())
+            if row.get("source_url"):
+                row["platform"] = record_platform(row)
+            elif len(alternatives) > 1:
+                raise ResearchError("Legacy claim has an ambiguous platform; add the verified platform and rerun market.")
+            else:
+                row["platform"] = next(iter(alternatives)) if alternatives else record_platform(row)
+        result.append(row)
+    return result
+
+
+def capture_root(output: Path, platform: str) -> Path:
+    # Keep existing Futu paths readable; Tiger receives an independent namespace.
+    return confined_path(output, "platforms", "tiger") if platform == "tiger" else output
+
+
 def now_iso() -> str:
     return datetime.now(UTC).isoformat(timespec="seconds")
 
@@ -251,11 +319,24 @@ def log(message: str) -> None:
     print(message, flush=True)
 
 
-def atomic_write_text(path: Path, text: str) -> None:
+@contextlib.contextmanager
+def atomic_text_writer(path: Path, encoding: str = "utf-8", newline: Optional[str] = None):
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(path.name + ".tmp")
-    temporary.write_text(text, encoding="utf-8")
-    os.replace(temporary, path)
+    handle = tempfile.NamedTemporaryFile(mode="w", encoding=encoding, newline=newline,
+                                         dir=path.parent, prefix=".elab-", delete=False)
+    temporary = Path(handle.name)
+    try:
+        with handle:
+            yield handle
+        os.replace(temporary, path)
+    finally:
+        if temporary.exists():
+            temporary.unlink()
+
+
+def atomic_write_text(path: Path, text: str) -> None:
+    with atomic_text_writer(path) as handle:
+        handle.write(text)
 
 
 def atomic_write_json(path: Path, value: Any) -> None:
@@ -404,7 +485,8 @@ def request_json(
 
 def list_feed_id(feed: Dict[str, Any]) -> str:
     common = feed.get("feed_comm") or feed.get("feedCommon") or {}
-    return str(common.get("feed_id") or common.get("feedId") or "")
+    value = str(common.get("feed_id") or common.get("feedId") or "")
+    return safe_component(value, "feed ID") if value else ""
 
 
 def list_timestamp(feed: Dict[str, Any]) -> int:
@@ -452,7 +534,8 @@ def crawl_stream(
     max_pages: int,
 ) -> Tuple[Dict[str, Dict[str, Any]], Dict[str, Any]]:
     label = STREAMS[feed_type]
-    stream_dir = output / "raw" / "list" / uid / label
+    uid = safe_component(uid, "UID")
+    stream_dir = confined_path(output, "raw", "list", uid, label)
     stream_dir.mkdir(parents=True, exist_ok=True)
     page = 0
     more_mark = ""
@@ -592,11 +675,13 @@ def fetch_details(
     output: Path,
     workers: int,
 ) -> Tuple[List[str], List[Dict[str, Any]]]:
-    detail_dir = output / "raw" / "details" / uid
+    uid = safe_component(uid, "UID")
+    feed_ids = [safe_component(value, "feed ID") for value in feed_ids]
+    detail_dir = confined_path(output, "raw", "details", uid)
     detail_dir.mkdir(parents=True, exist_ok=True)
 
     def fetch_one(feed_id: str) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
-        path = detail_dir / f"{feed_id}.json"
+        path = confined_path(output, "raw", "details", uid, f"{feed_id}.json")
         cached = read_json(path)
         if isinstance(cached, dict):
             try:
@@ -1036,13 +1121,14 @@ def download_media(
                    EVIDENCE_MEDIA_KEYWORDS; others get a skip record in manifest
       'none'     — caller should not reach here (archive() guards this)
     """
+    uid = safe_component(uid, "UID")
     jobs: List[Tuple[str, int, Dict[str, str]]] = []
     skip_records: List[Dict[str, Any]] = []
 
     for path in detail_paths:
         envelope = read_json(path, {})
         detail = detail_data(envelope)
-        feed_id = str((detail.get("feedCommon") or {}).get("feedId") or path.stem)
+        feed_id = safe_component((detail.get("feedCommon") or {}).get("feedId") or path.stem, "feed ID")
         media_urls = extract_media_urls(detail)
 
         if media_mode == "evidence" and media_urls:
@@ -1065,9 +1151,10 @@ def download_media(
 
     def fetch_one(job: Tuple[str, int, Dict[str, str]]) -> Dict[str, Any]:
         feed_id, index, item = job
-        base = output / "media" / uid / feed_id
+        base = confined_path(output, "media", uid, feed_id)
         existing = sorted(base.glob(f"{index:03d}.*")) if base.exists() else []
         for path in existing:
+            confined_path(output, str(path.relative_to(output)))
             if path.suffix != ".part" and path.stat().st_size > 0:
                 return {
                     "uid": uid,
@@ -1089,9 +1176,15 @@ def download_media(
             extension = extension_for(item["url"], content_type)
             path = base / f"{index:03d}{extension}"
             path.parent.mkdir(parents=True, exist_ok=True)
-            temporary = path.with_name(path.name + ".part")
-            temporary.write_bytes(body)
-            os.replace(temporary, path)
+            with tempfile.NamedTemporaryFile(dir=path.parent, prefix=".elab-", suffix=".part", delete=False) as handle:
+                temporary = Path(handle.name)
+                try:
+                    handle.write(body)
+                    handle.close()
+                    os.replace(temporary, path)
+                finally:
+                    if temporary.exists():
+                        temporary.unlink()
             return {
                 "uid": uid,
                 "feed_id": feed_id,
@@ -1150,7 +1243,8 @@ def normalize_detail(
     )
     author = detail.get("authorInfo") or {}
     author_uid = str(author.get("userId") or "")
-    feed_id = str(common.get("feedId") or path.stem)
+    uid = safe_component(uid, "UID")
+    feed_id = safe_component(common.get("feedId") or path.stem, "feed ID")
     title = clean_text(str(detail.get("feedTitle") or ""))
     modules = detail.get("moduleData") or []
 
@@ -1209,6 +1303,7 @@ def normalize_detail(
         warnings.append("empty_extractable_text")
     return {
         "schema_version": SCHEMA_VERSION,
+        "platform": "futu",
         "feed_id": feed_id,
         "author_uid": author_uid or uid,
         "profile_uid": uid,
@@ -1270,7 +1365,7 @@ def within_requested_range(
 
 
 def write_archive_files(output: Path, records: Sequence[Dict[str, Any]]) -> None:
-    archive = output / "archive"
+    archive = confined_path(output, "archive")
     archive.mkdir(parents=True, exist_ok=True)
     ordered = sorted(
         records,
@@ -1302,10 +1397,9 @@ def write_archive_files(output: Path, records: Sequence[Dict[str, Any]]) -> None
         "text",
         "detail_path",
     ]
-    csv_path = archive / "posts.csv"
+    csv_path = confined_path(output, "archive", "posts.csv")
     csv_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = csv_path.with_name(csv_path.name + ".tmp")
-    with temporary.open("w", newline="", encoding="utf-8-sig") as handle:
+    with atomic_text_writer(csv_path, newline="", encoding="utf-8-sig") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         for row in ordered:
@@ -1340,9 +1434,7 @@ def write_archive_files(output: Path, records: Sequence[Dict[str, Any]]) -> None
                     "detail_path": (row.get("source") or {}).get("detail_path"),
                 }
             )
-    os.replace(temporary, csv_path)
-
-    monthly_dir = archive / "monthly"
+    monthly_dir = confined_path(output, "archive", "monthly")
     monthly_dir.mkdir(parents=True, exist_ok=True)
     for old in monthly_dir.glob("*.md"):
         old.unlink()
@@ -1401,7 +1493,7 @@ def write_archive_files(output: Path, records: Sequence[Dict[str, Any]]) -> None
                     "",
                 ]
             )
-        atomic_write_text(monthly_dir / f"{month}.md", "\n".join(lines))
+        atomic_write_text(confined_path(output, "archive", "monthly", f"{safe_component(month, 'month')}.md"), "\n".join(lines))
 
 
 # ─── Capture-adapter layer ─────────────────────────────────────────────────────
@@ -1800,6 +1892,12 @@ class TigerAdapter(CaptureAdapter):
         raw = str(raw or "").strip()
         if not raw:
             return None, None
+        if re.match(r"^\d{4}-\d{2}-\d{2}T", raw):
+            with contextlib.suppress(ValueError):
+                parsed = datetime.fromisoformat(raw)
+                if parsed.tzinfo is not None:
+                    return parsed, parsed.isoformat(timespec="seconds")
+            return None, None
 
         # HH:MM — same-day posts (page loaded today)
         m = re.fullmatch(r"(\d{1,2}):(\d{2})", raw)
@@ -1844,6 +1942,16 @@ class TigerAdapter(CaptureAdapter):
 
         return None, None
 
+    def _cached_time(self, raw: str, captured_at: Optional[str]) -> Tuple[Optional[datetime], Optional[str]]:
+        captured = parse_claim_time(captured_at)
+        if not captured and raw and not re.match(r"^\d{4}-\d{2}-\d{2}(?:T|$)", raw):
+            raise ResearchError(
+                "Tiger cache contains a relative publication time without its capture date; "
+                "rerun archive --refresh to regenerate the timestamp from the source."
+            )
+        anchor = captured.astimezone(CN_TZ).date() if captured else date(2000, 1, 1)
+        return self._parse_publish_time(raw, anchor)
+
     # ── Stream crawl ───────────────────────────────────────────────────────────
 
     def crawl_streams_for_uid(
@@ -1861,10 +1969,10 @@ class TigerAdapter(CaptureAdapter):
         designed to iterate over this list so single-stream adapters are handled
         transparently.
         """
-        list_dir = output / "raw" / "list" / uid / "all"
+        uid = safe_component(uid, "UID")
+        list_dir = confined_path(output, "raw", "list", uid, "all")
         list_dir.mkdir(parents=True, exist_ok=True)
 
-        crawl_date = datetime.now(CN_TZ).date()
         page = 1
         cursor = ""
         feeds: Dict[str, Dict[str, Any]] = {}
@@ -1875,13 +1983,16 @@ class TigerAdapter(CaptureAdapter):
         older_streak = 0
 
         while page <= max_pages:
-            cache_path = list_dir / f"page_{page:05d}.html"
+            cache_path = confined_path(output, "raw", "list", uid, "all", f"page_{page:05d}.html")
+            metadata_path = cache_path.with_suffix(".metadata.json")
+            captured_at = None
             source = "network"
             html_text: Optional[str] = None
 
             if cache_path.exists() and not refresh:
                 html_text = cache_path.read_text(encoding="utf-8")
                 source = "cache"
+                captured_at = (read_json(metadata_path, {}) or {}).get("captured_at")
 
             if html_text is None:
                 if page == 1:
@@ -1893,13 +2004,15 @@ class TigerAdapter(CaptureAdapter):
                     )
                 try:
                     html_text = _tiger_fetch_html(url)
-                    cache_path.write_text(html_text, encoding="utf-8")
+                    captured_at = now_iso()
+                    atomic_write_text(cache_path, html_text)
+                    atomic_write_json(metadata_path, {"captured_at": captured_at})
                 except ResearchError as error:
                     errors.append(str(error))
                     terminal_reason = "error"
                     break
 
-            post_ids, time_map, next_cursor = self._parse_list_page(html_text, crawl_date)
+            post_ids, time_map, next_cursor = self._parse_list_page(html_text, date(2000, 1, 1))
 
             # Detect cursor loops: same post-id set returned on two successive pages.
             pid_sig = frozenset(post_ids)
@@ -1918,7 +2031,7 @@ class TigerAdapter(CaptureAdapter):
             timestamps: List[int] = []
             for pid in post_ids:
                 raw_time = time_map.get(pid, "")
-                dt, iso = self._parse_publish_time(raw_time, crawl_date)
+                dt, iso = self._cached_time(raw_time, captured_at)
                 ts = int(dt.timestamp()) if dt else 0
                 if pid not in feeds:
                     new_ids += 1
@@ -2038,8 +2151,12 @@ class TigerAdapter(CaptureAdapter):
         extractor.feed(html_text)
         text = extractor.result()
 
+        captured_at = now_iso()
+        _, published_at = self._cached_time(publish_time_from_list or publish_time_detail, captured_at)
         return {
             "source": "tiger",
+            "captured_at": captured_at,
+            "published_at": published_at,
             "post_id": post_id,
             "author_name": author_name_val,
             "author_uid": author_uid_val,
@@ -2057,17 +2174,18 @@ class TigerAdapter(CaptureAdapter):
     ) -> Dict[str, str]:
         """Build {post_id: raw_publish_time} from previously cached list HTML pages."""
         time_map: Dict[str, str] = {}
-        list_dir = output / "raw" / "list" / uid / "all"
+        uid = safe_component(uid, "UID")
+        list_dir = confined_path(output, "raw", "list", uid, "all")
         if not list_dir.exists():
             return time_map
-        today = datetime.now(CN_TZ).date()
         for html_path in sorted(list_dir.glob("page_*.html")):
-            try:
-                html_text = html_path.read_text(encoding="utf-8")
-                _, page_time_map, _ = self._parse_list_page(html_text, today)
-                time_map.update(page_time_map)
-            except Exception as error:
-                log(f"[tiger] Warning: could not parse list cache {html_path}: {error}")
+            confined_path(output, str(html_path.relative_to(output)))
+            html_text = html_path.read_text(encoding="utf-8")
+            _, page_time_map, _ = self._parse_list_page(html_text, date(2000, 1, 1))
+            captured_at = (read_json(html_path.with_suffix(".metadata.json"), {}) or {}).get("captured_at")
+            for post_id, raw in page_time_map.items():
+                _, absolute = self._cached_time(raw, captured_at)
+                time_map[post_id] = absolute or ""
         return time_map
 
     # ── Post detail fetching ───────────────────────────────────────────────────
@@ -2083,16 +2201,21 @@ class TigerAdapter(CaptureAdapter):
 
         Saves each file at output/raw/details/{uid}/{post_id}.json.
         """
-        detail_dir = output / "raw" / "details" / uid
+        uid = safe_component(uid, "UID")
+        feed_ids = [safe_component(value, "post ID") for value in feed_ids]
+        detail_dir = confined_path(output, "raw", "details", uid)
         detail_dir.mkdir(parents=True, exist_ok=True)
         time_map = self._build_time_map_from_cache(uid, output)
 
         def fetch_one(post_id: str) -> Tuple[Optional[str], Optional[Dict[str, Any]]]:
-            path = detail_dir / f"{post_id}.json"
+            path = confined_path(output, "raw", "details", uid, f"{post_id}.json")
             if path.exists():
                 try:
                     cached = json.loads(path.read_text(encoding="utf-8"))
                     if isinstance(cached, dict) and cached.get("source") == "tiger":
+                        if not cached.get("published_at") and time_map.get(post_id):
+                            cached["published_at"] = time_map[post_id]
+                            atomic_write_json(path, cached)
                         return post_id, None  # valid cached Tiger detail
                 except (json.JSONDecodeError, OSError):
                     pass  # stale or corrupt — fall through to re-fetch
@@ -2158,7 +2281,8 @@ class TigerAdapter(CaptureAdapter):
                 f"Not a valid Tiger detail file (source field missing or wrong): {path}"
             )
 
-        post_id = str(detail.get("post_id") or path.stem)
+        uid = safe_component(uid, "UID")
+        post_id = safe_component(detail.get("post_id") or path.stem, "post ID")
         author_name_val: Optional[str] = str(detail.get("author_name") or "") or None
         author_uid_val = str(detail.get("author_uid") or uid)
         title = str(detail.get("title") or "").strip()
@@ -2166,16 +2290,16 @@ class TigerAdapter(CaptureAdapter):
 
         # Resolve publish time: prefer list-page value (more complete date formats)
         # then fall back to the detail-page time (HH:MM only for same-day posts).
-        crawl_date = datetime.now(CN_TZ).date()
         published_at: Optional[str] = None
         published_raw: Optional[str] = None
         for raw in (
+            str(detail.get("published_at") or ""),
             str(detail.get("publish_time_list") or ""),
             str(detail.get("publish_time_detail") or ""),
         ):
             raw = raw.strip()
             if raw and raw not in ("·", "·", "·", ""):
-                dt, iso = self._parse_publish_time(raw, crawl_date)
+                dt, iso = self._cached_time(raw, detail.get("captured_at"))
                 if iso:
                     published_at = iso
                     published_raw = raw
@@ -2209,6 +2333,7 @@ class TigerAdapter(CaptureAdapter):
 
         return {
             "schema_version": SCHEMA_VERSION,
+            "platform": "tiger",
             "feed_id": post_id,
             "author_uid": author_uid_val,
             "profile_uid": uid,
@@ -2289,6 +2414,38 @@ def select_adapter(url_or_uid: str) -> CaptureAdapter:
     )
 
 
+def load_capture_index(output: Path) -> Dict[str, Dict[str, Any]]:
+    path = confined_path(output, "raw", "feed_index.json")
+    try:
+        previous = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    except (OSError, json.JSONDecodeError) as error:
+        raise ResearchError("Cannot read cached feed index; restore or regenerate it.") from error
+    if not isinstance(previous, dict):
+        raise ResearchError("Cached feed index must be an object; restore or regenerate it.")
+    index: Dict[str, Dict[str, Any]] = {}
+    for item in previous.values():
+        if not isinstance(item, dict):
+            raise ResearchError("Invalid cached feed index entry; restore or regenerate it.")
+        item = dict(item)
+        uid = safe_component(item.get("uid") or "", "UID")
+        fid = safe_component(item.get("feed_id") or "", "feed ID")
+        legacy = confined_path(output, "raw", "details", uid, f"{fid}.json")
+        legacy_detail = read_json(legacy, {})
+        platform = record_platform(item)
+        if not item.get("platform") and not item.get("profile_url") and isinstance(legacy_detail, dict) and legacy_detail.get("source") == "tiger":
+            platform = "tiger"
+        item["platform"] = platform
+        if platform == "tiger":
+            target_root = capture_root(output, platform)
+            target = confined_path(target_root, "raw", "details", uid, f"{fid}.json")
+            if not target.exists() and legacy.exists():
+                if not isinstance(legacy_detail, dict) or legacy_detail.get("source") != "tiger":
+                    raise ResearchError("Ambiguous legacy Tiger cache; use a fresh output directory and recapture.")
+                atomic_write_json(target, legacy_detail)
+        index[f"{platform}:{uid}:{fid}"] = item
+    return index
+
+
 def archive(args: argparse.Namespace) -> Dict[str, Any]:
     output = Path(args.output).expanduser().resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -2296,15 +2453,12 @@ def archive(args: argparse.Namespace) -> Dict[str, Any]:
     until_dt = parse_day(args.until, end=True)
     if since_dt and until_dt and since_dt > until_dt:
         raise ResearchError("--since must be on or before --until.")
-    uids = []
-    _adapters_by_uid: Dict[str, CaptureAdapter] = {}
+    requested: Dict[str, Tuple[str, CaptureAdapter]] = {}
     for profile in args.profile:
         _adp = select_adapter(profile)
-        uid = _adp.resolve_uid(profile)
-        if uid not in uids:
-            uids.append(uid)
-            _adapters_by_uid[uid] = _adp
-    if not uids:
+        uid = safe_component(_adp.resolve_uid(profile), "UID")
+        requested.setdefault(f"{_adp.name}:{uid}", (uid, _adp))
+    if not requested:
         raise ResearchError("At least one --profile is required.")
 
     # F1: resolve effective media mode.
@@ -2323,20 +2477,33 @@ def archive(args: argparse.Namespace) -> Dict[str, Any]:
                 file=sys.stderr,
             )
 
-    previous_index = read_json(output / "raw" / "feed_index.json", {})
-    if not isinstance(previous_index, dict):
-        previous_index = {}
-    index: Dict[str, Dict[str, Any]] = previous_index
+    index = load_capture_index(output)
     stream_audits: List[Dict[str, Any]] = []
     detail_failures: List[Dict[str, Any]] = []
     media_items: List[Dict[str, Any]] = []
     profiles: Dict[str, Dict[str, Any]] = {}
+    previous_audit = read_json(output / "qa" / "crawl_audit.json", {})
+    if isinstance(previous_audit, dict):
+        for profile in previous_audit.get("profiles") or []:
+            identity = profile_key(profile)
+            if identity not in requested:
+                profiles[identity] = profile
+        for stream in previous_audit.get("streams") or []:
+            # Old stream rows inherit the platform from their recorded profile.
+            stream = dict(stream)
+            possible = [p for p in profiles.values() if str(p.get("uid")) == str(stream.get("profile_uid"))]
+            if not stream.get("platform") and len(possible) == 1:
+                stream["platform"] = record_platform(possible[0])
+            if profile_key(stream) in profiles:
+                stream_audits.append(stream)
 
-    for uid in uids:
-        _uid_adapter = _adapters_by_uid[uid]
+    for identity, (uid, _uid_adapter) in requested.items():
+        platform = _uid_adapter.name
+        platform_output = capture_root(output, platform)
         profile_url = _uid_adapter.profile_url(uid)
-        profiles[uid] = {
+        profiles[identity] = {
             "uid": uid,
+            "platform": platform,
             "profile_url": profile_url,
             "adapter": _uid_adapter.name,
             "expected_streams": list(_uid_adapter.expected_streams),
@@ -2344,11 +2511,13 @@ def archive(args: argparse.Namespace) -> Dict[str, Any]:
         combined: Dict[str, Dict[str, Any]] = {}
         memberships: Dict[str, set] = defaultdict(set)
         for feeds, audit_row in _uid_adapter.crawl_streams_for_uid(
-            uid, output, since_dt, args.refresh, args.max_pages
+            uid, platform_output, since_dt, args.refresh, args.max_pages
         ):
+            audit_row["platform"] = platform
             stream_audits.append(audit_row)
             _stream_label = str(audit_row.get("stream") or "")
             for feed_id, feed in feeds.items():
+                safe_component(feed_id, "feed ID")
                 combined.setdefault(feed_id, feed)
                 memberships[feed_id].add(_stream_label)
 
@@ -2356,31 +2525,32 @@ def archive(args: argparse.Namespace) -> Dict[str, Any]:
         for feed_id, feed in combined.items():
             if within_requested_range(list_timestamp(feed), since_dt, until_dt):
                 retained.append(feed_id)
-                key = f"{uid}:{feed_id}"
+                key = f"{platform}:{uid}:{feed_id}"
                 existing = index.get(key) if isinstance(index.get(key), dict) else {}
                 existing_memberships = set(existing.get("stream_membership") or [])
                 index[key] = {
                     "uid": uid,
+                    "platform": platform,
                     "feed_id": feed_id,
                     "timestamp": list_timestamp(feed),
                     "stream_membership": sorted(existing_memberships | memberships[feed_id]),
                     "profile_url": profile_url,
                 }
         successes, failures = _uid_adapter.fetch_posts(
-            uid, retained, output, workers=args.detail_workers
+            uid, retained, platform_output, workers=args.detail_workers
         )
         detail_failures.extend(failures)
         detail_paths = [
-            output / "raw" / "details" / uid / f"{feed_id}.json"
+            confined_path(platform_output, "raw", "details", uid, f"{safe_component(feed_id, 'feed ID')}.json")
             for feed_id in successes
         ]
-        if media_mode != "none":
+        if media_mode != "none" and platform == "futu":
             media_items.extend(
                 download_media(uid, detail_paths, output, workers=args.media_workers, media_mode=media_mode)
             )
 
-    atomic_write_json(output / "raw" / "feed_index.json", index)
-    media_manifest_path = output / "raw" / "media_manifest.json"
+    atomic_write_json(confined_path(output, "raw", "feed_index.json"), index)
+    media_manifest_path = confined_path(output, "raw", "media_manifest.json")
     previous_media = read_json(media_manifest_path, {})
     previous_items = previous_media.get("items") if isinstance(previous_media, dict) else []
     media_by_key: Dict[Tuple[str, str, int], Dict[str, Any]] = {}
@@ -2406,26 +2576,24 @@ def archive(args: argparse.Namespace) -> Dict[str, Any]:
     records: List[Dict[str, Any]] = []
     normalization_failures = []
     for key, item in sorted(index.items()):
-        uid = str(item.get("uid") or "")
-        feed_id = str(item.get("feed_id") or "")
-        if not uid or not feed_id:
-            continue
-        if uids and uid not in uids and not (output / "raw" / "details" / uid).exists():
-            continue
-        path = output / "raw" / "details" / uid / f"{feed_id}.json"
+        uid = safe_component(item.get("uid") or "", "UID")
+        feed_id = safe_component(item.get("feed_id") or "", "feed ID")
+        platform = record_platform(item)
+        platform_output = capture_root(output, platform)
+        path = confined_path(platform_output, "raw", "details", uid, f"{feed_id}.json")
         if not path.exists():
             continue
         if not within_requested_range(safe_int(item.get("timestamp"), 0), since_dt, until_dt):
             continue
         try:
-            _norm_adp = _adapters_by_uid.get(uid, _FUTU_ADAPTER)
+            _norm_adp = next(adapter for adapter in _ADAPTERS if adapter.name == platform)
             records.append(
                 _norm_adp.normalize_post(
                     path,
                     uid,
                     item.get("stream_membership") or [],
                     {
-                        feed_id: media_lookup.get((uid, feed_id), [])
+                        feed_id: media_lookup.get((uid, feed_id), []) if platform == "futu" else []
                     },
                     str(item.get("profile_url") or _norm_adp.profile_url(uid)),
                 )
@@ -2445,7 +2613,7 @@ def archive(args: argparse.Namespace) -> Dict[str, Any]:
         _uid_r = str(record.get("profile_uid") or "")
         _fid_r = str(record.get("feed_id") or "")
         if _uid_r and _fid_r:
-            _p = output / "raw" / "details" / _uid_r / f"{_fid_r}.json"
+            _p = confined_path(capture_root(output, record_platform(record)), "raw", "details", safe_component(_uid_r, "UID"), f"{safe_component(_fid_r, 'feed ID')}.json")
             if _p.exists():
                 _env_r = read_json(_p, {})
                 if isinstance(_env_r, dict) and extract_media_urls(detail_data(_env_r)):
@@ -2456,7 +2624,7 @@ def archive(args: argparse.Namespace) -> Dict[str, Any]:
     detail_expected = sum(
         1
         for item in index.values()
-        if str(item.get("uid") or "") in uids
+        if profile_key(item) in requested
         and within_requested_range(
             safe_int(item.get("timestamp"), 0), since_dt, until_dt
         )
@@ -2503,7 +2671,7 @@ def archive(args: argparse.Namespace) -> Dict[str, Any]:
             "Deleted, private, restricted, or otherwise unavailable content is outside the archive boundary.",
         ],
     }
-    atomic_write_json(output / "qa" / "crawl_audit.json", crawl_audit)
+    atomic_write_json(confined_path(output, "qa", "crawl_audit.json"), crawl_audit)
     manifest = {
         "tool": "elab-futu-research",
         "tool_version": VERSION,
@@ -2525,7 +2693,7 @@ def archive(args: argparse.Namespace) -> Dict[str, Any]:
         },
         "crawl_audit": "qa/crawl_audit.json",
     }
-    atomic_write_json(output / "manifest.json", manifest)
+    atomic_write_json(confined_path(output, "manifest.json"), manifest)
     log(
         f"Archive {status}: posts={len(records)} columns="
         f"{manifest['counts']['columns']} output={output}"
@@ -2644,13 +2812,14 @@ def prepare(args: argparse.Namespace) -> Dict[str, Any]:
             )
             effective_evidence = "D" if is_trailing else evidence
             effective_action = "none" if is_trailing else action
-            candidate_id = f"{row.get('feed_id')}:{raw_symbol or 'GENERAL'}"
+            candidate_id = f"{profile_key(row)}:{row.get('feed_id')}:{raw_symbol or 'GENERAL'}"
             candidates.append(
                 {
                     "schema_version": SCHEMA_VERSION,
                     "candidate_id": candidate_id,
                     "feed_id": str(row.get("feed_id") or ""),
                     "author_uid": str(row.get("profile_uid") or row.get("author_uid") or ""),
+                    "platform": record_platform(row),
                     "author_name": row.get("author_name"),
                     "published_at": row.get("published_at"),
                     "symbol_raw": raw_symbol,
@@ -2674,7 +2843,7 @@ def prepare(args: argparse.Namespace) -> Dict[str, Any]:
                     "source_url": row.get("url"),
                 }
             )
-    analysis = output / "analysis"
+    analysis = confined_path(output, "analysis")
     write_jsonl(analysis / "candidates.jsonl", candidates)
     summary = {
         "schema_version": SCHEMA_VERSION,
@@ -2752,7 +2921,8 @@ def yahoo_symbol(raw: Optional[str], overrides: Dict[str, str]) -> Optional[str]
 
 
 def benchmark_for(raw: Optional[str]) -> Optional[str]:
-    value = str(raw or "").upper()
+    normalized = canonical_symbol(str(raw or ""))
+    value = str((normalized or {}).get("raw") or "")
     if value.startswith("HK."):
         return "^HSI"
     if value.startswith(("SH.", "SZ.")):
@@ -2760,6 +2930,35 @@ def benchmark_for(raw: Optional[str]) -> Optional[str]:
     if value:
         return "^GSPC"
     return None
+
+
+def claim_fingerprint(claim: Dict[str, Any]) -> str:
+    try:
+        encoded = json.dumps(claim, ensure_ascii=False, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    except (TypeError, ValueError) as error:
+        raise ResearchError(f"Claim cannot be frozen as valid JSON: {error}") from error
+    return hashlib.sha256(encoded.encode("utf-8")).hexdigest()
+
+
+def market_binding_errors(claims: Sequence[Dict[str, Any]], rows: Sequence[Dict[str, Any]]) -> List[str]:
+    frozen: Dict[str, str] = {}
+    errors = []
+    for claim in claims:
+        identity = str(claim.get("claim_id") or claim.get("candidate_id") or "")
+        if not identity or identity in frozen:
+            errors.append(f"missing or duplicate claim ID: {identity!r}")
+        frozen[identity] = claim_fingerprint(claim)
+    seen = set()
+    for row in rows:
+        identity = str(row.get("claim_id") or "")
+        if identity in seen:
+            errors.append(f"duplicate market claim ID: {identity}")
+        seen.add(identity)
+        if identity not in frozen or row.get("claim_sha256") != frozen[identity]:
+            errors.append(f"{identity}: market data does not match the frozen claim; rerun market")
+        if row.get("market_calculation_version") != MARKET_CALCULATION_VERSION:
+            errors.append(f"{identity}: market calculation version is missing or outdated; rerun market")
+    return errors
 
 
 def parse_claim_time(value: Any) -> Optional[datetime]:
@@ -3005,7 +3204,7 @@ def fetch_price_history(
     market_dir: Path,
     refresh: bool,
 ) -> Tuple[List[Dict[str, Any]], Optional[str], Optional[str]]:
-    input_dir = market_dir / "input"
+    input_dir = confined_path(market_dir, "input")
     input_candidates = [
         input_dir / f"{safe_market_filename(raw_symbol)}.csv",
         input_dir / f"{safe_market_filename(provider_symbol)}.csv",
@@ -3017,7 +3216,7 @@ def fetch_price_history(
         if error != "file_not_found":
             return [], f"CSV {path}: {error}", None
 
-    cache_dir = market_dir / "raw"
+    cache_dir = confined_path(market_dir, "raw")
     bars, eastmoney_error, source = fetch_eastmoney_history(
         raw_symbol, provider_symbol, start, end, cache_dir, refresh
     )
@@ -3082,6 +3281,9 @@ def compute_market_row(
     direction_sign = 1.0 if direction == "bullish" else -1.0 if direction == "bearish" else None
     base = {
         "claim_id": claim.get("claim_id") or claim.get("candidate_id"),
+        "claim_sha256": claim_fingerprint(claim),
+        "market_calculation_version": MARKET_CALCULATION_VERSION,
+        "platform": record_platform(claim),
         "feed_id": claim.get("feed_id"),
         "author_uid": claim.get("author_uid"),
         "published_at": claim.get("published_at"),
@@ -3231,6 +3433,7 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
     else:
         claims = read_jsonl(candidates_path)
         mode = "machine_prelabelled_exploratory"
+    claims = resolve_claim_platforms(claims, read_jsonl(output / "archive" / "posts.jsonl"))
     claims = [
         row
         for row in claims
@@ -3244,7 +3447,10 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
     ]
     if not claims:
         raise ResearchError("No eligible symbol-specific directional claims found.")
-    override_path = output / "analysis" / "symbol_overrides.json"
+    identity_errors = market_binding_errors(claims, [])
+    if identity_errors:
+        raise ResearchError("Invalid frozen claims: " + "; ".join(identity_errors[:10]))
+    override_path = confined_path(output, "analysis", "symbol_overrides.json")
     overrides = read_json(override_path, {})
     if not isinstance(overrides, dict):
         raise ResearchError(f"{override_path} must contain a JSON object.")
@@ -3273,7 +3479,7 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
         raise ResearchError("No parseable claim timestamps.")
     start = min(valid_times) - timedelta(days=450)
     end = max(max(valid_times) + timedelta(days=150), datetime.now(UTC) + timedelta(days=2))
-    market_dir = output / "analysis" / "market"
+    market_dir = confined_path(output, "analysis", "market")
     bars_by_symbol: Dict[str, List[Dict[str, Any]]] = {}
     fetch_errors: Dict[str, str] = {}
     data_sources: Dict[str, str] = {}
@@ -3329,10 +3535,13 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
             row["missing_reason"] = f"provider_error: {fetch_errors[provider]}"
         rows.append(row)
 
-    market_dir = output / "analysis" / "market"
+    market_dir = confined_path(output, "analysis", "market")
     write_jsonl(market_dir / "claims_market.jsonl", rows)
     fields = [
         "claim_id",
+        "claim_sha256",
+        "market_calculation_version",
+        "platform",
         "feed_id",
         "author_uid",
         "published_at",
@@ -3362,16 +3571,15 @@ def market(args: argparse.Namespace) -> Dict[str, Any]:
         "directional_excess_ret_20",
         "missing_reason",
     ]
-    csv_path = market_dir / "claims_market.csv"
+    csv_path = confined_path(output, "analysis", "market", "claims_market.csv")
     csv_path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = csv_path.with_name(csv_path.name + ".tmp")
-    with temporary.open("w", newline="", encoding="utf-8") as handle:
+    with atomic_text_writer(csv_path, newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
         writer.writerows({key: row.get(key) for key in fields} for row in rows)
-    os.replace(temporary, csv_path)
     summary = {
         "schema_version": SCHEMA_VERSION,
+        "market_calculation_version": MARKET_CALCULATION_VERSION,
         "generated_at": now_iso(),
         "mode": mode,
         "claims_considered": len(claims),
@@ -3440,15 +3648,22 @@ def bootstrap_interval(
 def binomial_two_sided_pvalue(successes: int, total: int) -> Optional[float]:
     if total <= 0:
         return None
-    lower = sum(
-        math.comb(total, index) * (0.5**total)
-        for index in range(0, successes + 1)
-    )
-    upper = sum(
-        math.comb(total, index) * (0.5**total)
-        for index in range(successes, total + 1)
-    )
-    return min(1.0, 2.0 * min(lower, upper))
+    if not 0 <= successes <= total:
+        raise ResearchError("Binomial successes must be between zero and total.")
+    tail = min(successes, total - successes)
+    if tail == total // 2:
+        return 1.0
+    # Evaluate the smaller tail relative to its largest probability. This avoids
+    # converting huge combinations to floats or underflowing 0.5 ** total first.
+    log_mass = math.lgamma(total + 1) - math.lgamma(tail + 1) - math.lgamma(total - tail + 1) - total * math.log(2)
+    term = 1.0
+    scaled_terms = [term]
+    for index in range(tail, 0, -1):
+        term *= index / (total - index + 1)
+        scaled_terms.append(term)
+        if term < 1e-16:
+            break
+    return min(1.0, 2.0 * math.exp(log_mass) * math.fsum(scaled_terms))
 
 
 def benjamini_hochberg(pvalues: Dict[str, float]) -> Dict[str, float]:
@@ -3472,7 +3687,7 @@ def build_episode_candidates(
 ) -> List[Dict[str, Any]]:
     groups: Dict[Tuple[str, str], List[Dict[str, Any]]] = defaultdict(list)
     for claim in claims:
-        uid = str(claim.get("author_uid") or "")
+        uid = author_key(claim) if claim.get("author_uid") else ""
         symbol = str(claim.get("symbol_raw") or "")
         published = parse_claim_time(claim.get("published_at"))
         if uid and symbol and published:
@@ -3554,7 +3769,9 @@ def build_episode_candidates(
                     "episode_id": f"EP-{digest}",
                     "status": "machine_grouped_needs_review",
                     "mode": mode,
-                    "author_uid": uid,
+                    "author_uid": chunk[0].get("author_uid"),
+                    "author_key": uid,
+                    "platform": record_platform(chunk[0]),
                     "symbol_raw": symbol,
                     "claim_ids": claim_ids,
                     "started_at": started.isoformat() if started else None,
@@ -3572,7 +3789,7 @@ def build_episode_candidates(
                     ],
                 }
             )
-    write_jsonl(output / "analysis" / "episodes.jsonl", episodes)
+    write_jsonl(confined_path(output, "analysis", "episodes.jsonl"), episodes)
     return episodes
 
 
@@ -3612,13 +3829,13 @@ def _export_authors_impl(output: Path, posts: List[Dict[str, Any]]) -> Dict[str,
 
     Returns a summary dict with counts.
     """
-    by_author_dir = output / "archive" / "by-author"
+    by_author_dir = confined_path(output, "archive", "by-author")
     by_author_dir.mkdir(parents=True, exist_ok=True)
 
     # Group posts by profile_uid (skip posts with no uid)
     grouped: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for post in posts:
-        uid = str(post.get("profile_uid") or "")
+        uid = profile_key(post) if post.get("profile_uid") else ""
         if uid:
             grouped[uid].append(post)
 
@@ -3636,7 +3853,8 @@ def _export_authors_impl(output: Path, posts: List[Dict[str, Any]]) -> Dict[str,
         author_name = name_counter.most_common(1)[0][0] if name_counter else ""
 
         safe_name = _safe_filename(author_name) if author_name else ""
-        filename = f"{safe_name}_{uid}.md" if safe_name else f"uid_{uid}.md"
+        filename_uid = safe_market_filename(uid)
+        filename = f"{safe_name}_{filename_uid}.md" if safe_name else f"uid_{filename_uid}.md"
 
         # Independent counts (is_column and is_repost are orthogonal flags)
         orig_count = sum(1 for p in author_posts if not p.get("is_repost"))
@@ -3826,19 +4044,22 @@ def report(args: argparse.Namespace) -> Dict[str, Any]:
     posts = read_jsonl(posts_path)
     candidates = read_jsonl(output / "analysis" / "candidates.jsonl")
     reviewed = read_jsonl(output / "analysis" / "claims.reviewed.jsonl")
-    claims = reviewed or candidates
+    claims = resolve_claim_platforms(reviewed or candidates, posts)
     market_rows = read_jsonl(output / "analysis" / "market" / "claims_market.jsonl")
+    binding_errors = market_binding_errors(claims, market_rows)
+    if binding_errors:
+        raise ResearchError("Invalid market/claim binding: " + "; ".join(binding_errors[:10]))
     market_by_id = {
         str(row.get("claim_id")): row for row in market_rows if row.get("claim_id")
     }
     mode = "reviewed" if reviewed else "machine_prelabelled_exploratory"
     episodes = build_episode_candidates(output, claims, market_by_id, mode)
-    episodes_by_uid = Counter(str(row.get("author_uid") or "") for row in episodes)
-    reports = output / "reports"
+    episodes_by_uid = Counter(str(row.get("author_key") or "") for row in episodes)
+    reports = confined_path(output, "reports")
     reports.mkdir(parents=True, exist_ok=True)
     profile_names: Dict[str, str] = {}
     for post in posts:
-        uid = str(post.get("profile_uid") or post.get("author_uid") or "")
+        uid = profile_key(post) if post.get("profile_uid") or post.get("author_uid") else ""
         if uid and post.get("author_name") and not post.get("is_repost"):
             profile_names.setdefault(uid, str(post["author_name"]))
 
@@ -3856,12 +4077,12 @@ def report(args: argparse.Namespace) -> Dict[str, Any]:
             ]
         )
     author_uids = sorted(
-        {str(row.get("profile_uid") or "") for row in posts if row.get("profile_uid")}
+        {profile_key(row) for row in posts if row.get("profile_uid")}
     )
     author_outcomes: Dict[str, List[Tuple[str, float]]] = {}
     pvalues: Dict[str, float] = {}
     for uid in author_uids:
-        author_claims = [row for row in claims if str(row.get("author_uid")) == uid]
+        author_claims = [row for row in claims if row.get("author_uid") and author_key(row) == uid]
         outcomes = []
         for claim in author_claims:
             claim_id = str(claim.get("claim_id") or claim.get("candidate_id") or "")
@@ -3886,8 +4107,8 @@ def report(args: argparse.Namespace) -> Dict[str, Any]:
 
     matrix_rows = []
     for uid in author_uids:
-        author_posts = [row for row in posts if str(row.get("profile_uid")) == uid]
-        author_claims = [row for row in claims if str(row.get("author_uid")) == uid]
+        author_posts = [row for row in posts if row.get("profile_uid") and profile_key(row) == uid]
+        author_claims = [row for row in claims if row.get("author_uid") and author_key(row) == uid]
         evidence_counter = Counter(
             str(row.get("evidence_level") or row.get("evidence_prelabel") or "?")
             for row in author_claims
@@ -4104,6 +4325,8 @@ def audit(args: argparse.Namespace) -> Dict[str, Any]:
     posts = read_jsonl(output / "archive" / "posts.jsonl")
     candidates = read_jsonl(output / "analysis" / "candidates.jsonl")
     reviewed = read_jsonl(output / "analysis" / "claims.reviewed.jsonl")
+    candidates = resolve_claim_platforms(candidates, posts)
+    reviewed = resolve_claim_platforms(reviewed, posts)
     market_rows = read_jsonl(output / "analysis" / "market" / "claims_market.jsonl")
     checks = []
 
@@ -4125,14 +4348,22 @@ def audit(args: argparse.Namespace) -> Dict[str, Any]:
         crawl.get("status") if isinstance(crawl, dict) else "missing",
     )
     streams = crawl.get("streams") or [] if isinstance(crawl, dict) else []
-    stream_pairs = {(row.get("profile_uid"), row.get("stream")) for row in streams}
-    uids = {str(row.get("profile_uid")) for row in posts if row.get("profile_uid")}
+    platform_by_uid: Dict[str, set] = defaultdict(set)
+    for profile in crawl.get("profiles") or []:
+        platform_by_uid[str(profile.get("uid") or "")].add(record_platform(profile))
+    for row in list(posts) + list(streams):
+        uid = str(row.get("profile_uid") or "")
+        source = row.get("source") if isinstance(row.get("source"), dict) else {}
+        if not row.get("platform") and not source.get("profile_url") and len(platform_by_uid[uid]) == 1:
+            row["platform"] = next(iter(platform_by_uid[uid]))
+    stream_pairs = {(profile_key(row), row.get("stream")) for row in streams}
+    uids = {profile_key(row) for row in posts if row.get("profile_uid")}
     # Build per-uid expected stream list from crawl_audit profiles (set by each adapter).
     # Fall back to ["all", "columns"] (Futu default) for older archives lacking the field.
     uid_expected: Dict[str, List[str]] = {}
     for _p in (crawl.get("profiles") or [] if isinstance(crawl, dict) else []):
         if isinstance(_p, dict) and _p.get("uid"):
-            uid_expected[str(_p["uid"])] = list(_p.get("expected_streams") or ["all", "columns"])
+            uid_expected[profile_key(_p)] = list(_p.get("expected_streams") or ["all", "columns"])
     missing_streams = [
         f"{uid}:{label}"
         for uid in sorted(uids)
@@ -4151,7 +4382,7 @@ def audit(args: argparse.Namespace) -> Dict[str, Any]:
     # Self-reposts are merged at archive time so posts.jsonl should already be clean.
     feed_ids = [str(row.get("feed_id")) for row in posts]
     post_pairs = [
-        (str(row.get("profile_uid") or ""), str(row.get("feed_id") or ""))
+        (profile_key(row), str(row.get("feed_id") or ""))
         for row in posts
     ]
     duplicate_pairs = [
@@ -4166,15 +4397,15 @@ def audit(args: argparse.Namespace) -> Dict[str, Any]:
         if not detail_path or not Path(detail_path).exists():
             missing_sources.append(row.get("feed_id"))
     add("normalized_posts_trace_to_detail", not missing_sources, "error", missing_sources[:50])
-    candidate_feeds = {str(row.get("feed_id")) for row in candidates}
-    unknown_candidate_feeds = sorted(candidate_feeds - set(feed_ids))
+    candidate_feeds = {(author_key(row), str(row.get("feed_id"))) for row in candidates}
+    unknown_candidate_feeds = sorted(candidate_feeds - set(post_pairs))
     add("candidates_trace_to_posts", not unknown_candidate_feeds, "error", unknown_candidate_feeds[:50])
-    post_by_feed = {str(row.get("feed_id")): row for row in posts}
+    post_by_feed = {(profile_key(row), str(row.get("feed_id"))): row for row in posts}
     unknown_reviewed_feeds = sorted(
         {
-            str(row.get("feed_id"))
+            f"{author_key(row)}:{row.get('feed_id')}"
             for row in reviewed
-            if str(row.get("feed_id")) not in post_by_feed
+            if (author_key(row), str(row.get("feed_id"))) not in post_by_feed
         }
     )
     add(
@@ -4204,7 +4435,7 @@ def audit(args: argparse.Namespace) -> Dict[str, Any]:
     )
     untraceable_spans = []
     for row in reviewed:
-        post = post_by_feed.get(str(row.get("feed_id")))
+        post = post_by_feed.get((author_key(row), str(row.get("feed_id"))))
         span = re.sub(r"\s+", " ", str(row.get("evidence_span") or "")).strip()
         source_text = re.sub(
             r"\s+",
@@ -4257,6 +4488,8 @@ def audit(args: argparse.Namespace) -> Dict[str, Any]:
         "error",
         unknown_market_claims[:50],
     )
+    binding_errors = market_binding_errors(reviewed or candidates, market_rows)
+    add("market_rows_match_frozen_claims", not binding_errors, "error", binding_errors[:50])
     time_violations = []
     for row in market_rows:
         published = parse_claim_time(row.get("published_at"))
@@ -4392,7 +4625,7 @@ def audit(args: argparse.Namespace) -> Dict[str, Any]:
             "note": "PASS validates traceability and chronology, not stable alpha.",
         },
     }
-    atomic_write_json(output / "qa" / "adversarial_audit.json", result)
+    atomic_write_json(confined_path(output, "qa", "adversarial_audit.json"), result)
     log(
         f"Adversarial audit {status}: errors={len(failed_errors)} warnings={len(warnings)}"
     )

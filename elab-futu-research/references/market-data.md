@@ -46,6 +46,8 @@ Automatic mappings cover common forms:
 - `SH.600000`-shaped codes → `.SS`
 - `SZ.000001`-shaped codes → `.SZ`
 
+Benchmark selection uses the same canonical market identity: prefix, suffix and supported five-digit bare Hong Kong forms all select the Hang Seng benchmark. Shanghai/Shenzhen forms select the mainland benchmark; equivalent symbol spellings must not change the benchmark.
+
 The examples describe formatting only; they are not research subjects.
 
 If a symbol is ambiguous, edit:
@@ -63,6 +65,10 @@ Map the raw symbol to a Yahoo-style provider symbol, or use an empty string to s
 - Horizons: 1/5/20/60 sessions.
 
 This deliberately conservative daily protocol avoids treating an incomplete same-day bar as known. It cannot establish an intraday fill.
+
+Every derived row binds to the full frozen claim using `claim_sha256`. After editing a reviewed claim, rerun `market` before `report` or `audit`. Older rows without a claim hash also require regeneration; retaining a claim ID alone does not establish that its direction, author, symbol or publication time is unchanged.
+
+Rows and the market manifest also record `market_calculation_version`; `report` and `audit` require the current calculation version, so missing or older versions require rerunning `market` even if the frozen claim is unchanged.
 
 ## Adjustment and quality
 

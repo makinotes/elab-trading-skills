@@ -102,7 +102,7 @@ class BrokerProfileTest(unittest.TestCase):
         for relative, needle in expected.items():
             text = (ROOT / relative).read_text(encoding="utf-8")
             self.assertIn(needle, text, relative)
-        self.assertEqual((ROOT / "_shared" / "SUITE_VERSION").read_text().strip(), "0.6.3")
+        self.assertRegex((ROOT / "_shared" / "SUITE_VERSION").read_text().strip(), r"^\d+\.\d+\.\d+$")
 
     def test_installer_copies_connector_to_all_supported_runtimes(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -110,7 +110,7 @@ class BrokerProfileTest(unittest.TestCase):
             for runtime in (".claude", ".codex", ".codebuddy", ".workbuddy"):
                 stale = home / runtime / "skills" / "elab-removed-from-suite"
                 stale.mkdir(parents=True)
-                (stale / "SKILL.md").write_text("must be removed\n", encoding="utf-8")
+                (stale / "SKILL.md").write_text("unmanaged extension must remain\n", encoding="utf-8")
             env = os.environ.copy()
             env["HOME"] = str(home)
             completed = subprocess.run(
@@ -122,7 +122,8 @@ class BrokerProfileTest(unittest.TestCase):
                 check=False,
             )
             self.assertEqual(completed.returncode, 0, completed.stderr)
-            self.assertIn("EdgeLab Skills 0.6.3", completed.stdout)
+            version = (ROOT / "_shared" / "SUITE_VERSION").read_text().strip()
+            self.assertIn(f"EdgeLab Skills {version}", completed.stdout)
             for runtime in (".claude", ".codex", ".codebuddy", ".workbuddy"):
                 skill_root = home / runtime / "skills"
                 self.assertTrue((skill_root / "elab" / "SKILL.md").is_file())
@@ -138,7 +139,8 @@ class BrokerProfileTest(unittest.TestCase):
                 helper = skill_root / "_shared" / "scripts" / "broker_profile.py"
                 self.assertTrue(helper.is_file())
                 self.assertTrue(os.access(helper, os.X_OK))
-                self.assertFalse((skill_root / "elab-removed-from-suite").exists())
+                self.assertEqual((skill_root / "elab-removed-from-suite" / "SKILL.md").read_text(),
+                                 "unmanaged extension must remain\n")
 
     def test_installer_refuses_foreign_shared_before_changing_any_runtime(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -214,7 +216,11 @@ class BrokerProfileTest(unittest.TestCase):
             (stale / "SKILL.md").write_text("must be removed\n", encoding="utf-8")
             env = os.environ.copy()
             env["HOME"] = str(home)
+            installed_result = subprocess.run(["bash", str(ROOT / "install.sh"), "codex", "claude"],
+                                              env=env, capture_output=True, text=True)
+            self.assertEqual(installed_result.returncode, 0, installed_result.stderr)
             foreign = home / ".claude" / "skills" / "_shared"
+            shutil.rmtree(foreign)
             foreign.mkdir(parents=True)
             (foreign / "keep.txt").write_text("foreign data\n", encoding="utf-8")
             rejected = subprocess.run(
@@ -231,6 +237,7 @@ class BrokerProfileTest(unittest.TestCase):
             self.assertTrue(stale.is_dir())
             self.assertEqual((foreign / "keep.txt").read_text(), "foreign data\n")
             shutil.rmtree(foreign)
+            shutil.copytree(ROOT / "_shared", foreign)
             completed = subprocess.run(
                 ["bash", str(repo / "update.sh"), "--to", "v0.4.0"],
                 cwd=repo,
@@ -247,7 +254,7 @@ class BrokerProfileTest(unittest.TestCase):
             installed = home / ".codex" / "skills"
             self.assertEqual((installed / "_shared" / "SUITE_VERSION").read_text().strip(), "0.4.0")
             self.assertTrue((installed / "elab" / "SKILL.md").is_file())
-            self.assertFalse((installed / "elab-newer-only").exists())
+            self.assertTrue((installed / "elab-newer-only").exists())
 
     def test_versioned_update_can_rollback_to_legacy_tag_without_version_file(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -276,6 +283,9 @@ class BrokerProfileTest(unittest.TestCase):
             (home / ".codex").mkdir(parents=True)
             env = os.environ.copy()
             env["HOME"] = str(home)
+            installed_result = subprocess.run(["bash", str(ROOT / "install.sh"), "codex"],
+                                              env=env, capture_output=True, text=True)
+            self.assertEqual(installed_result.returncode, 0, installed_result.stderr)
             completed = subprocess.run(
                 ["bash", str(repo / "update.sh"), "--to", "v0.3.0"],
                 cwd=repo,

@@ -18,7 +18,7 @@
 
 > provider 选择算法只维护在 `_shared/broker-connectors.md §二`，包括已保存默认和唯一可用连接。无可用连接时，任务允许才用公开源并披露；“只用某家”失败不得切源。财报原文等补充证据也需符合用户的数据范围限制。
 
-> **🔑 凭据纪律（硬规则）**：优先使用官方 OAuth、OpenD 或 CLI 原生凭据存储。确实使用 API key/App Secret/Access Token 的工具只能从环境变量或专用本地凭据存储读取，**禁硬编码进 skill/脚本，禁写入 `~/.elab/`、研报、存档、日志或任何输出**。
+> **🔑 凭据纪律（硬规则）**：优先使用官方 OAuth、OpenD 或 CLI 原生凭据存储。确实使用 API key/App Secret/Access Token 的工具只能从环境变量或专用本地凭据存储读取，**禁硬编码进 skill/脚本，禁写入研报、存档、日志、命令行参数或任何输出**。券商凭证不得写入 `~/.elab/`；仅 EdgeLab 会员 key 使用下文专用的 `~/.elab/token` 文件，不属于研究状态存档，也不得随存档同步。
 
 ## 一、登记表（每个工具：装/调 + 输入输出 + 状态）
 
@@ -46,18 +46,20 @@
 
 ### 自研（EdgeLab 权益内 · 会员 token gated）
 - **EdgeLab 市场数据 API** 🔵 —— 取恐慌指数 / 期权 / 美港股 / 13F / 拥挤度等**市场数据与指标**（客观数字，无买卖指令、无方向建议）。**唯一数据源 + 唯一对外 API，直接调，不是 MCP**：
-  1. 读 token：`cat ~/.elab/token`（`mk_live_…` key；如何获取见 EdgeLab 会员说明，不在本技术文档描述）
-  2. 发现可用数据集：`curl -H "Authorization: Bearer $(cat ~/.elab/token)" https://invest.makinote.cn/api/v1/radars` → 返回数据集类型 + 各自最新日期
-  3. 取数据：`curl -H "Authorization: Bearer $(cat ~/.elab/token)" "https://invest.makinote.cn/api/v1/signals?type=<数据集id>&limit=10"`（端点路径 `signals` 是历史命名，返回的是市场数据/指标）
-     - 参数：`type`（数据集 id）、`date`/`since`/`until`（YYYY-MM-DD）、`limit`（1..100，默认 30）。**先调 `/radars` 拿到当前可用 type 列表再查**（别写死）
+  1. 凭证由用户按会员说明放在 `~/.elab/token`（一行 `mk_live_…` key），文件须归当前用户所有、权限 `600`，不能是符号链接。**不要用 Read/cat 查看文件、不要让用户贴 key，也不要把 key 拼进 shell 参数。** 客户端在进程内读取并构造 HTTPS 请求；文件未配置或权限不合适时只报告错误码。
+  2. 发现可用数据集：`python3 <本 Skill 目录>/scripts/edgelab_api.py radars` → 返回数据集类型 + 各自最新日期。按实际安装目录定位脚本，路径含空格时正确引用。
+  3. 取数据：`python3 <本 Skill 目录>/scripts/edgelab_api.py signals --type <数据集id> --limit 10`（端点路径 `signals` 是历史命名，返回的是市场数据/指标）
+     - 参数：`--type`（数据集 id）、`--date` 或 `--since`/`--until`（YYYY-MM-DD）、`--limit`（1..100，默认 30）。单日与区间不可混用，区间起点不得晚于终点。**先调 `radars` 拿到当前可用 type 列表再查**（别写死）
+     - 客户端仅访问固定 HTTPS 域名 `invest.makinote.cn` 的这两个 API 路径，拒绝全部重定向，不接收自定义 URL，不经环境代理转发认证请求。输出是 `{ok, http_status, data}`；失败只向 stderr 输出 `{ok, http_status, error: {code, message}}`，不展示请求头、原始错误正文或异常细节。成功 exit 0，参数错误 exit 2，其余失败 exit 1；凭证文件错误的 `http_status` 为 null，不冒称已调用 API。
      - 12 个对外数据集 type：`fear_card`(恐慌指数) / `options_radar`(期权数据) / `trading_premarket`·`trading_midday`·`trading_close`(美股盘前/午间/收盘数据) / `hk_close`(港股收盘) / `hk_ipo`(港股打新) / `whale`(机构持仓) / `x_radar`(X 资讯) / `briefing_relay`(投资简报) / `thirteenf`(13F 异动) / `crowding`(拥挤度)
      - 返回已**合规投影**（荐股类字段已剥、方向/点评已脱敏）的中性市场数据；**模型拿到只做数据呈现和方法层分析，不转成"该买/卖/看这个"的方向建议**（930）
   4. **优雅降级（按状态码）**：
      - 401（无 token/无效/过期）→ 说明本次实际需要但缺失的数据项及影响。任务允许公开替代源时披露来源后继续；只用自研时不切源。无关问题不调用该 API，也不因缺会员 key 自动降低质量或插入促销文案。
-     - 429（限速，120 req/min/同出口 IP，多会员共享）→ 退避重试；多数 agent runtime 不会自动重试，提示用户稍后重跑
+     - 429（`rate_limited`）→ 客户端不自动重试；若返回数值 `retry_after_seconds`，等待该时长后按当前任务预算重试，否则提示用户稍后重跑。不要打印原始响应头。
      - 503（`not_ready`，该日期数据仍在合规处理）→ 报告该日期缺失；任务允许替代时点才查询其它日期，披露实际时间且不得超过研究截止时间，不能冒充原日期数据。
      - 500（服务故障）→ 报告失败和缺口；仅在任务允许替代源时披露后切换，遵守与 401 相同的范围限制。
   - 注：token 只在 skill 调 API 时用；和网站登录解耦（网站不经过这个 API）
+  - 本地失败：`token_unavailable` / `token_permissions` / `token_invalid` → 引导用户修复专用凭证文件；`network_error` / `redirect_blocked` / `invalid_response` → 报告实际失败层级，不改用 curl 或关闭 HTTPS 校验绕过。服务恢复后按用户原有数据范围重试。
 
 ### 可选研究 Agent（逐项验证）
 - 能力发现、权限、证据核验与候选官方链接统一见 `external-research.md`。未安装/未实测的项目不标成已支持。
