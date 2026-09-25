@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.7.6"
-  last_updated: "2026-09-21"
+  version: "0.7.7"
+  last_updated: "2026-09-25"
   visibility: "public"
   requires: '["_shared/broker-connectors.md（连接券商时）", "_shared/trading-consistency.md（记录或检查交易规则时）"]'
   outputs: '["~/.elab/trades/ (决策四层结构)"]'
@@ -56,7 +56,7 @@ metadata:
 | 把攒下的规律炼成成型可复用 playbook | **C playbook 沉淀** | `references/playbook-mode.md` |
 | 模糊 | 问一句："你是要记一笔新交易、复盘历史成交、还是炼 playbook？" |
 
-## 共享券商连接入口（v0.6.0 只读）
+## 共享券商连接入口（只读）
 
 用户提到富途、长桥、IBKR，或要求读取自己的持仓/订单/成交时，先读 `_shared/broker-connectors.md`：
 

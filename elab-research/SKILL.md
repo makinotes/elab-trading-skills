@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.8.7"
-  last_updated: "2026-09-21"
+  version: "0.8.8"
+  last_updated: "2026-09-25"
   visibility: "public"
   requires: '["_shared/broker-connectors.md（指定券商数据时）"]'
   outputs: '["中性研报 (可存进 elab-trade 04_待解)"]'
@@ -56,7 +56,7 @@ AI 当编排"大脑"，把研究对象拆成子问题、分派给工具取数算
 3. **混合**：本次方法确需公开/已授权数据与 EdgeLab 自研数据互补时才使用，不因标的在覆盖内自动调用。
 4. **多 agent 辩论（重·可选加深）**：综合完，再起**真独立子 agent** 做多空辩论 + 独立裁判（§三+）——**用于**：高不确定、大仓位、想把分歧摊透的深度研究。费 token，不是每次都上
 > 决策规则：先按问题选择必需证据，再选模式；给定材料足够或纯计算可不联网。会员身份和覆盖名单不决定研究质量。用户明确要独立辩论时才叠加模式 4，普通“深度”不自动意味着启动多个 Agent。
-> 不论哪个模式，**§三 的强制自我证伪都必跑**（不是可选）；模式 4 是在它之上再加重。
+> §三 的自我证伪是每份研报的必备段落（纯计算、用户指定 JSON 等严格格式按 §五 裁剪）；模式 4 是在它之上再加重。
 
 ## 二、编排流程（核心）
 

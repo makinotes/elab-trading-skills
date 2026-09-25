@@ -1,15 +1,15 @@
 ---
 name: elab-futu-research
 description: |
-  归档并审计富途（q.futunn.com）或老虎社区（laohu8.com）公开博主主页。用户给出主页 URL 或数字 UID，或要求先说明下一步、抓取、归档、复盘、比较富途/老虎博主时使用；即使用户说“先别执行”，也先加载本 skill 完成范围确认。数字 UID 默认富途；任何抓取前必须让用户明确选择时间范围。保存动态、专栏（仅富途）、原始证据和公开媒体（仅富途），结合发帖时点行情做证据有界研究。其他平台不适用。
-  Archive and audit public Futu or Tiger profiles from a profile URL or numeric UID. Invoke for planning-only requests too; a numeric UID defaults to Futu, and capture requires an explicit time window.
+  归档并审计富途（q.futunn.com）或老虎社区（laohu8.com）公开博主主页。用户给出主页 URL 或数字 UID，或要求先说明下一步、抓取、归档、复盘、比较富途/老虎博主时使用；即使用户说“先别执行”，也先加载本 skill 完成范围确认。数字 UID 默认富途。保存动态、专栏（仅富途）、原始证据和公开媒体（仅富途），结合发帖时点行情做证据有界研究。其他平台不适用。
+  Archive and audit public Futu or Tiger profiles from a profile URL or numeric UID. Invoke for planning-only requests too; a numeric UID defaults to Futu.
 license: CC-BY-NC-4.0
 metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "1.3.9"
-  last_updated: "2026-09-21"
+  version: "1.3.10"
+  last_updated: "2026-09-25"
   visibility: "public"
   requires: "[]"
   outputs: "可续跑公开内容归档；证据有界的博主研究报告；多博主能力矩阵与规则卡"
@@ -33,7 +33,7 @@ metadata:
 
 Turn one or more public profile URLs — Futu (q.futunn.com) or Tiger (laohu8.com) — into a resumable archive and an evidence-bounded research report. Start with alignment, including when the user only asks what happens next or says not to execute yet. After alignment is complete, run the confirmed workflow in one shot and return the report plus audit status.
 
-Version: `1.3.9` · Last updated: `2026-09-21`
+Version: `1.3.10` · Last updated: `2026-09-25`
 
 ## Invocation invariants (P0)
 

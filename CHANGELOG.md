@@ -2,6 +2,13 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-09-25 · EdgeLab Trading Skills 0.6.9 预发布：说明一致性修正
+
+- **问诊回复** — 决策型问题的首轮追问与「只要一句话」的极简回复规则统一：用户要求极短时只追问最关键的一项；极简回复说明决策权归属，再问一个回到自身规则的问题，需要时加一句共情。
+- **入口与触发** — 主入口不再用「帮我看看」这类泛化说法触发，改为「帮我看看这笔交易/持仓」；博主审计的时间范围确认保留在流程内，不再写进简介。
+- **说明修正** — 券商连接统一标注为只读，不再附带过期的组件版本号；研报自我证伪段写明纯计算与严格 JSON 输出按输出约定裁剪；概念拆解的失效条件指向正确的流程步骤。
+- **兼容与范围** — `elab-*` 调用名、安装和记录路径、数据权限均不变；组件补丁版本同步更新。延续预发布，上一预发布为 `v0.6.8`。
+
 ## 2026-09-21 · EdgeLab Trading Skills 0.6.8 预发布：仓库迁移至 makinotes
 
 - **仓库地址** — 仓库从 `edgelab101/elab-trading-skills` 迁移到 `makinotes/elab-trading-skills`。首页、各 Skill `homepage`、署名行、报告脚注与 `futu_research.py` 的公开链接同步更新；`elab-*` 调用名、安装路径与本地记录路径不变。已有安装请执行 `git remote set-url origin https://github.com/makinotes/elab-trading-skills.git` 后再 `update.sh`。

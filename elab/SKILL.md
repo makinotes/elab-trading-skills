@@ -2,7 +2,7 @@
 name: elab
 description: |
   EdgeLab Trading Skills 主入口。根据问题自动路由到交易记录、标的研究、决策消解、概念拆解、博主公开内容审计；用户要求连接、切换或指定富途/长桥/IBKR 数据时进入共享券商连接引导。
-  触发方式：$elab、/elab、「帮我看看」「我有个投研/期权的问题」「我要用富途/长桥/IBKR 数据」
+  触发方式：$elab、/elab、「我有个投研/期权的问题」「帮我看看这笔交易/持仓」「我要用富途/长桥/IBKR 数据」
   EdgeLab Trading Skills entry point. Routes to the right elab- skill.
   Trigger: $elab, /elab, "help me with my trade/research"
 license: CC-BY-NC-4.0
@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.6.6"
-  last_updated: "2026-09-21"
+  version: "0.6.7"
+  last_updated: "2026-09-25"
   visibility: "public"
   requires: "[]"
   outputs: "[]"
@@ -134,7 +134,6 @@ metadata:
 ## 纪律
 
 - 只路由，不展开分析（展开是子 skill 的事）
-- 触发词放宽：`/elab`、「帮我看看」「我有个问题」都进这里
 - 不编造不存在的 skill 能力；待建的就说待建
-- 券商连接器 v0.4.0 只读；“我要用某券商数据”不是下单、安装或扩大 OAuth 权限的授权
+- 券商连接器只读；“我要用某券商数据”不是下单、安装或扩大 OAuth 权限的授权
 - **沉淀收口（跨 skill 默认）**：任何 elab 对话聊出有价值的产出（判断/规律/交易想法）→ **结尾默认提醒用户沉淀一次**，按类型路由（状态→`elab-save`／交易想法未验证→ playbook `§〇 想法区`／成型规律→ playbook 条目）。统一规范见 `_shared/capture-closing.md`。提醒不硬存。
