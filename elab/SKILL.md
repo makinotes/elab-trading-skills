@@ -1,7 +1,7 @@
 ---
 name: elab
 description: |
-  EdgeLab Trading Skills 主入口。根据问题自动路由到交易记录、标的研究、决策消解、概念拆解、博主公开内容审计；用户要求连接、切换或指定富途/长桥/IBKR 数据时进入共享券商连接引导。
+  EdgeLab Trading Skills 主入口。根据问题自动路由到交易记录、标的研究、决策消解、交易能力训练、概念拆解、博主公开内容审计；用户要求连接、切换或指定富途/长桥/IBKR 数据时进入共享券商连接引导。
   触发方式：$elab、/elab、「我有个投研/期权的问题」「帮我看看这笔交易/持仓」「我要用富途/长桥/IBKR 数据」
   EdgeLab Trading Skills entry point. Routes to the right elab- skill.
   Trigger: $elab, /elab, "help me with my trade/research"
@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.6.7"
-  last_updated: "2026-09-25"
+  version: "0.6.8"
+  last_updated: "2026-09-28"
   visibility: "public"
   requires: "[]"
   outputs: "[]"
@@ -47,6 +47,7 @@ metadata:
 > - **记/复盘自己的交易**（立案 · 持仓 · 交割单诊断 · 炼 playbook）→ `elab-trade`
 > - **研究一只票/期权/板块**（含会员自研数据：恐慌 · 拥挤度 · 期权异动 · 13F）→ `elab-research`
 > - **决策卡住**（该不该割/加、能不能买）→ `elab-diagnosis`（陪你把决定梳清楚，结论你自己下）
+> - **练交易能力**（总拿不住、死扛、临时起意，这个月该练什么，跟练与复测）→ `elab-coach`（一次只练一项，不给方向）
 > - **拆概念**（IV、Delta 中性、对冲到底啥意思）→ `elab-deconstruct`
 > - **找对标**（谁真赚到、我能不能复制）→ `elab-benchmark`
 > - **研究富途/老虎博主**（归档公开主页 · 时点行情 · 证据审计）→ `elab-futu-research`
@@ -71,7 +72,7 @@ metadata:
 
 判断权、方向永远在用户手里；工具只让决策**可见、可回溯、可迭代**（也是 930 护栏：可见 = 人机边界清楚）。
 
-> 交易层的心法地基（8 条 EdgeLab 交易公理：统计优势 / 关键事件定结果 / 风险敞口可控 / 交易一致性 / 仓位匹配 edge / 死拿是标的属性 / 预案两阶段+不出招可证伪 / 不确定性定价+前沿三边界——**策略中立，不预设方向性/卖方/价差**）见 `elab-diagnosis §0`。
+> 交易层的心法地基（8 条 EdgeLab 交易公理：统计优势 / 关键事件定结果 / 风险敞口可控 / 交易一致性 / 仓位匹配 edge / 死拿是标的属性 / 预案两阶段+不出招可证伪 / 不确定性定价+前沿三边界——**策略中立，不预设方向性/卖方/价差**）见 `_shared/trading-axioms.md`（SSOT）；在行为层的可观察落点见 `_shared/trading-ability.md`，由 `elab-coach` 诊断与训练。
 
 ## 路由表
 
@@ -85,6 +86,7 @@ metadata:
 | 出复盘报告 | `elab-report` | 免费 |
 | "这个投研/期权问题成不成立"、决策卡住 | `elab-diagnosis` | 免费 |
 | 交易一致性是什么、想破例/改规则、检查打法是否前后一致 | `elab-diagnosis`；明确要求记录规则或复盘已有交易则 `elab-trade`，后续读取同一份 `_shared/trading-consistency.md` | 不新增顶层 Skill；纯研究/计算不因“一致性”一词改道 |
+| 诊断或提升自己的交易能力、总是拿不住/死扛/临时起意、这个月该练什么、跟练进度与复测 | `elab-coach`；具体一笔该不该割/加仍走 `elab-diagnosis`，成交数据由 `elab-trade` 提供 | 免费（纯本地） |
 | "谁真赚到、我能不能复制"找对标 | `elab-benchmark` | 免费 |
 | 富途/老虎博主主页归档、历史发言复盘、多博主比较、交易风格与纪律审计 | `elab-futu-research` | 免费；只处理公开内容，不登录、不读取 Cookie |
 | “我要连接/使用/默认/比较富途、长桥或 IBKR 数据” | 读取 `_shared/broker-connectors.md` 完成连接或 provider 选择；研究数据续接 `elab-research`，账户/订单/成交续接 `elab-trade` | v0.4.0 只读；外部软件安装与 OAuth 需用户授权 |
@@ -136,4 +138,4 @@ metadata:
 - 只路由，不展开分析（展开是子 skill 的事）
 - 不编造不存在的 skill 能力；待建的就说待建
 - 券商连接器只读；“我要用某券商数据”不是下单、安装或扩大 OAuth 权限的授权
-- **沉淀收口（跨 skill 默认）**：任何 elab 对话聊出有价值的产出（判断/规律/交易想法）→ **结尾默认提醒用户沉淀一次**，按类型路由（状态→`elab-save`／交易想法未验证→ playbook `§〇 想法区`／成型规律→ playbook 条目）。统一规范见 `_shared/capture-closing.md`。提醒不硬存。
+- **沉淀收口（跨 skill 默认）**：任何 elab 对话聊出有价值的产出（判断/规律/交易想法）→ **结尾默认提醒用户沉淀一次**，按类型路由（状态→`elab-save`／交易想法未验证→ playbook `§〇 想法区`／成型规律→ playbook 条目／反复出现的执行或退出问题→`elab-coach`）。统一规范见 `_shared/capture-closing.md`。提醒不硬存。

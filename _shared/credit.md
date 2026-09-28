@@ -28,7 +28,7 @@
 
 | 加 | 不加 |
 |---|---|
-| 研报（elab-research）、复盘报告（elab-report）、对标报告（elab-benchmark）、打法体检报告（elab-diagnosis 体检模式）、概念卡（elab-deconstruct）、交割单复盘报告（elab-trade 诊断模式） | 对话式答复、私人状态文件（elab-save 存档、elab-trade 立案与持仓档）、机器读的 JSON（elab-model 输出） |
+| 研报（elab-research）、复盘报告（elab-report）、对标报告（elab-benchmark）、打法体检报告（elab-diagnosis 体检模式）、概念卡（elab-deconstruct）、交割单复盘报告（elab-trade 诊断模式） | 对话式答复、私人状态文件（elab-save 存档、elab-trade 立案与持仓档、elab-coach 画像/处方/跟练/复测）、机器读的 JSON（elab-model 输出）、**elab-coach 分享版**（会转发，但改为中性一句「本人自评记录，由 EdgeLab Trading Skills 工具整理，不代表 EdgeLab 对其交易能力的评定或任何投资建议」，避免品牌页脚显得在评定用户能力或展示其收益） |
 
 私人档案和机器输出里塞署名 = 噪音，别加。
 

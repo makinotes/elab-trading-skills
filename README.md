@@ -10,7 +10,7 @@
 
 [![license](https://img.shields.io/badge/license-CC%20BY--NC%204.0-informational)](LICENSE)
 
-把研究、决策梳理、交易记录和结果复盘接成一套可继续使用的工作流。11 个 Agent Skills 覆盖股票与期权研究、概念拆解、策略计算和公开博主证据审阅，并帮助你保存进度、接续上次研究、整理复盘报告。
+把研究、决策梳理、交易记录和结果复盘接成一套可继续使用的工作流。12 个 Agent Skills 覆盖股票与期权研究、概念拆解、策略计算、交易能力训练和公开博主证据审阅，并帮助你保存进度、接续上次研究、整理复盘报告。
 
 如果研究散在多个聊天、笔记和表格里，下一次往往只记得结论，忘了依据。这套 Skills 要保留的是判断过程：**事实与来源、AI 推断、本人判断、后续结果分别记录**；原判断留下来，修改另记依据，让复盘能对照当时真正掌握的信息。
 
@@ -55,6 +55,7 @@
 | [elab-research](elab-research/README.md) | 研究股票、ETF、期权或板块，汇集数据、风险与反证 | 想了解标的基本面、期权环境、板块拥挤度或当前行情 |
 | [elab-diagnosis](elab-diagnosis/README.md) | 梳理交易决策中的依据、风险、规则与情绪，检查整套打法 | 卡在“该不该买、卖、加仓”，需要把问题想清楚 |
 | [elab-trade](elab-trade/README.md) | 记录交易决策，读取持仓与成交，复盘交割单并整理交易规则 | 要立案、更新判断、回填结果，或复盘自己的交易 |
+| [elab-coach](elab-coach/README.md) | 诊断六个交易能力维度，每次只开一张处方，跟练后复测 | 总是拿不住、死扛或临时起意，想知道自己先练什么 |
 | [elab-model](elab-model/README.md) | 用本地脚本计算期望收益、Kelly 比例和期权结构的风险收益 | 已有胜率、盈亏或合约参数，想把数学关系算清楚 |
 | [elab-deconstruct](elab-deconstruct/README.md) | 解释期权与投资概念的定义、操作含义、易混点和失效条件 | 想弄懂 IV、Delta 中性、对冲，或辨别模糊术语 |
 | [elab-benchmark](elab-benchmark/README.md) | 检查交易者或策略的证据、方法与可复制条件 | 想判断某套打法值不值得学、哪些部分可以借鉴 |
@@ -63,9 +64,9 @@
 | [elab-restore](elab-restore/README.md) | 找回已有存档，呈现之前的判断、待办与未解问题 | 换了会话，需要接着上次研究 |
 | [elab-report](elab-report/README.md) | 将多份已有存档按时间与主题合并为投研复盘报告 | 想整理一段时间的研究与决策变化，复核后分享 |
 
-**容易混淆的区别**：研究外部标的用 `research`；梳理眼前决策用 `diagnosis`；记录与复盘自己的交易用 `trade`。`save` 保存一次进度，`restore` 找回进度，`report` 合并多次存档。
+**容易混淆的区别**：研究外部标的用 `research`；梳理眼前决策用 `diagnosis`；记录与复盘自己的交易用 `trade`。`diagnosis` 的体检一次性拆整套打法、出体检报告；`coach` 出六维能力画像、每次只开一张处方，跟练十笔或四周后复测。`save` 保存一次进度，`restore` 找回进度，`report` 合并多次存档。
 
-券商连接是[共享能力](_shared/broker-connectors.md)，不计入 11 个顶层 Skill。公开市场数据交给 `research`，用户账户与成交数据交给 `trade`；`futu-research` 只研究公开社区内容，**不是富途账户接口**。
+券商连接是[共享能力](_shared/broker-connectors.md)，不计入 12 个顶层 Skill。公开市场数据交给 `research`，用户账户与成交数据交给 `trade`；`futu-research` 只研究公开社区内容，**不是富途账户接口**。
 
 研究时可以说“比较这家公司两期财报”“分析产业链瓶颈”“按我提供的方法研究”或“请外部研究 Agent 找反证”。`elab-research` 会按问题选方法并核验证据；外部 Agent 是按需验证的可选执行方式，不代表已安装或已连接。通用方法、用户方法与第三方方法分别保留出处，品牌署名由杰尼马（EdgeLab）统一维护，日常短答保持简洁。
 
@@ -93,7 +94,7 @@ cd elab-skills
 bash install.sh
 ```
 
-脚本按本机目录识别安装目标，把 11 个 `elab*` skill 和 `_shared` 装进对应 skills 目录。`elab-futu-research` 已内置，不再需要单独安装另一个仓库。支持以下四种安装路径；这张表说明安装位置，不代表四个宿主均已完成行为实测：
+脚本按本机目录识别安装目标，把 12 个 `elab*` skill 和 `_shared` 装进对应 skills 目录。`elab-futu-research` 已内置，不再需要单独安装另一个仓库。支持以下四种安装路径；这张表说明安装位置，不代表四个宿主均已完成行为实测：
 
 安装和更新用本机 `.elab-install.json` 清单管理套件文件，先检查所有目标再暂存与替换；失败会回滚。复制模式保留未管理文件和第三方扩展，软链模式遇混合目录会停止。`_shared` 必须单独验证归属；源码与替换目标相交时拒绝安装。清单内的本地修改仍会被替换，请先备份。
 
@@ -208,7 +209,7 @@ v0.4.0 支持引导连接富途官方 Agent Skills + OpenD、长桥官方 CLI/MC
 
 **EdgeLab Trading Skills — research, decision review, and trade journaling for your AI agent.**
 
-Give each trading decision a rationale, a record, and a review. These 11 skills help connect equity and options research, decision review, trade records, and follow-up. Save what you learned, resume it in a later session, and compare outcomes with what you recorded at the time.
+Give each trading decision a rationale, a record, and a review. These 12 skills help connect equity and options research, decision review, trade records, and follow-up. Save what you learned, resume it in a later session, and compare outcomes with what you recorded at the time.
 
 **Facts and sources, AI inferences, your own judgments, and later outcomes stay distinct.** Original judgments are preserved, with reasons recorded for subsequent changes. This makes it easier to examine how evidence, rules, and execution shaped a decision.
 
@@ -233,7 +234,7 @@ The current version is in [`_shared/SUITE_VERSION`](_shared/SUITE_VERSION); see 
 
 Use each skill independently or connect them through the shared record formats and source labels. Steps are invoked as needed.
 
-### The 11 skills
+### The 12 skills
 
 | Skill | What it does |
 |---|---|
@@ -241,6 +242,7 @@ Use each skill independently or connect them through the shared record formats a
 | [`elab-research`](elab-research/README.md) | Research a stock, ETF, option or sector; picks a method per question, ends with forced self-refutation |
 | [`elab-diagnosis`](elab-diagnosis/README.md) | Work through a trading decision — rationale, risk, rules, emotion; or audit your whole approach |
 | [`elab-trade`](elab-trade/README.md) | Log decisions before entry, update positions, diagnose broker statements, distil a playbook |
+| [`elab-coach`](elab-coach/README.md) | Diagnose six trading-ability dimensions, prescribe one rule at a time, track practice and retest |
 | [`elab-model`](elab-model/README.md) | Local scripts for expected value, Kelly fraction and options structure math |
 | [`elab-deconstruct`](elab-deconstruct/README.md) | Break options concepts (IV, delta-neutral, hedging) down to operational atoms |
 | [`elab-benchmark`](elab-benchmark/README.md) | Check whether a trader's claimed results and method are real and reproducible |
