@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.6.8"
-  last_updated: "2026-09-28"
+  version: "0.6.9"
+  last_updated: "2026-09-29"
   visibility: "public"
   requires: "[]"
   outputs: "[]"
@@ -86,7 +86,7 @@ metadata:
 | 出复盘报告 | `elab-report` | 免费 |
 | "这个投研/期权问题成不成立"、决策卡住 | `elab-diagnosis` | 免费 |
 | 交易一致性是什么、想破例/改规则、检查打法是否前后一致 | `elab-diagnosis`；明确要求记录规则或复盘已有交易则 `elab-trade`，后续读取同一份 `_shared/trading-consistency.md` | 不新增顶层 Skill；纯研究/计算不因“一致性”一词改道 |
-| 诊断或提升自己的交易能力、总是拿不住/死扛/临时起意、这个月该练什么、跟练进度与复测 | `elab-coach`；具体一笔该不该割/加仍走 `elab-diagnosis`，成交数据由 `elab-trade` 提供 | 免费（纯本地） |
+| 诊断或提升自己的交易能力、总是拿不住/死扛/临时起意、又卖飞了或想改掉口头结果词、这个月该练什么、跟练进度与复测 | `elab-coach`；具体一笔该不该割/加仍走 `elab-diagnosis`，成交数据由 `elab-trade` 提供 | 免费（纯本地） |
 | "谁真赚到、我能不能复制"找对标 | `elab-benchmark` | 免费 |
 | 富途/老虎博主主页归档、历史发言复盘、多博主比较、交易风格与纪律审计 | `elab-futu-research` | 免费；只处理公开内容，不登录、不读取 Cookie |
 | “我要连接/使用/默认/比较富途、长桥或 IBKR 数据” | 读取 `_shared/broker-connectors.md` 完成连接或 provider 选择；研究数据续接 `elab-research`，账户/订单/成交续接 `elab-trade` | v0.4.0 只读；外部软件安装与 OAuth 需用户授权 |

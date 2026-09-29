@@ -55,7 +55,7 @@
 | [elab-research](elab-research/README.md) | 研究股票、ETF、期权或板块，汇集数据、风险与反证 | 想了解标的基本面、期权环境、板块拥挤度或当前行情 |
 | [elab-diagnosis](elab-diagnosis/README.md) | 梳理交易决策中的依据、风险、规则与情绪，检查整套打法 | 卡在“该不该买、卖、加仓”，需要把问题想清楚 |
 | [elab-trade](elab-trade/README.md) | 记录交易决策，读取持仓与成交，复盘交割单并整理交易规则 | 要立案、更新判断、回填结果，或复盘自己的交易 |
-| [elab-coach](elab-coach/README.md) | 诊断六个交易能力维度，每次只开一张处方，跟练后复测；把口头结果词换成规则语 | 总是拿不住、死扛或临时起意，想知道自己先练什么 |
+| [elab-coach](elab-coach/README.md) | 诊断六个交易能力维度，每次只开一张处方，跟练后复测；把口头结果词换成可核对的过程表述 | 总是拿不住、死扛或临时起意，想知道自己先练什么 |
 | [elab-model](elab-model/README.md) | 用本地脚本计算期望收益、Kelly 比例和期权结构的风险收益 | 已有胜率、盈亏或合约参数，想把数学关系算清楚 |
 | [elab-deconstruct](elab-deconstruct/README.md) | 解释期权与投资概念的定义、操作含义、易混点和失效条件 | 想弄懂 IV、Delta 中性、对冲，或辨别模糊术语 |
 | [elab-benchmark](elab-benchmark/README.md) | 检查交易者或策略的证据、方法与可复制条件 | 想判断某套打法值不值得学、哪些部分可以借鉴 |
