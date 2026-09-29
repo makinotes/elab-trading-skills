@@ -18,7 +18,7 @@
 | `~/.elab/sessions/<slug>/<时间戳>-<标题slug>.md` | elab-save | elab-restore / elab-report | 投研状态存档（跨会话记忆） |
 | `~/.elab/sessions/<slug>/report-<date>[-后缀].md` | elab-report | 用户 / 经权限检查的分享版 | 合并存档生成的复盘报告（`<date>` = `date +%Y%m%d`），重名加时间或递增后缀；分享版另加 `public` 标记。**是产物不是存档**：elab-restore / elab-report 读存档时一律排除 `report-*.md` |
 | `~/.elab/trades/<标的>/` | elab-trade Mode A | elab-trade | 交易决策四层结构（01_事实/02_规律/03_定格/04_待解） |
-| `~/.elab/coach/` | elab-coach（`参考打法.md` 由用户或课程放入，只读输入） | elab-coach | 交易能力画像、处方、跟练记录、复测与分享版（维度与等级见 `_shared/trading-ability.md`，文件格式见 `elab-coach/references/records.md`） |
+| `~/.elab/coach/` | elab-coach（`参考打法.md` 由用户或课程放入，只读输入） | elab-coach | 交易能力画像、处方、跟练记录、复测、分享版与用户自选词汇（维度与等级见 `_shared/trading-ability.md`，文件格式见 `elab-coach/references/records.md`） |
 | `~/.elab/token` | 用户按会员说明配置 | elab-research 专用客户端在进程内读 | 会员 API key（一行，当前用户所有、权限 `600`、非软链）；不是状态存档，不进入同步或模型上下文 |
 
 - **slug 规范**：先用本轮明确项目，再用当前任务已确认的项目，否则才从 `basename $(pwd)` 推导；转小写、非 `[a-z0-9-]` 替换成 `-`，合并连续连字符并去掉首尾连字符。家目录、无明确项目或规范化后为空时用 `default`。若两个项目归一后同名且已有不同内容，列出冲突并让用户选唯一项目名，不能混档。
