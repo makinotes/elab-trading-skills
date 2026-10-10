@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.7.7"
-  last_updated: "2026-09-25"
+  version: "0.7.8"
+  last_updated: "2026-10-10"
   visibility: "public"
   requires: '["_shared/broker-connectors.md（连接券商时）", "_shared/trading-consistency.md（记录或检查交易规则时）"]'
   outputs: '["~/.elab/trades/ (决策四层结构)"]'

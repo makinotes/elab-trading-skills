@@ -9,8 +9,8 @@ author: 杰尼马（EdgeLab）
 homepage: https://github.com/makinotes/elab-trading-skills
 license: CC-BY-NC-4.0
 invocation: user
-version: 0.3.1
-last_updated: 2026-09-21
+version: 0.3.2
+last_updated: 2026-10-10
 visibility: public
 requires: []
 outputs: ["~/.elab/sessions/ (存档)"]
