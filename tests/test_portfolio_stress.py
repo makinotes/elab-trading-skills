@@ -92,6 +92,11 @@ class PortfolioStressTests(unittest.TestCase):
         self.assertLess(out["base"]["systemic_shock_to_floor"], out["base"]["targeted_shock_to_floor"])
         self.assertLessEqual(out["base"]["targeted_shock_to_floor_maint_bump"], out["base"]["targeted_shock_to_floor"])
 
+    def test_warns_when_buffer_already_below_floor(self):
+        out = self.cli("stress", "--portfolio", self.dump("p.json", self.portfolio(floor=25000)))
+        self.assertEqual(out["base"]["targeted_shock_to_floor"], 0.0)
+        self.assertTrue(any("already below the floor" in w for w in out["warnings"]))
+
     def test_selling_releases_maintenance_times_value(self):
         out = self.cli("stress", "--portfolio", self.dump("p.json", self.portfolio(sell_scenarios=[["A"]])))
         sc = out["sell_scenarios"][0]

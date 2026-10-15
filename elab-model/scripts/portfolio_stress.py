@@ -146,6 +146,8 @@ def cmd_stress(args):
         return out
 
     base = profile(pos, cash)
+    if base["buffer"] is not None and base["buffer"] < floor:
+        warnings.append(f"Buffer is already below the floor ({base['buffer']:.0f} < {floor:.0f}); shock_to_floor values are 0 by construction.")
     if equity <= 0:
         warnings.append("Equity is not positive; ratios are undefined.")
     release = sorted(({"id": p["id"], "buffer_release_per_10000": r4(10000 * p["maint"] * k),
@@ -378,6 +380,9 @@ def cmd_replay(args):
                                   args.series_dir, cache, anchors, days)
         paths[p["id"]] = dict(segs)
     usable = [a for a in anchors if all(a in paths[i] for i in paths)]
+    start_buf = buffer_after(pos, cash0, k, 0, {}, 0)
+    if start_buf < floor:
+        warnings.append(f"Buffer starts below the floor ({start_buf:.0f} < {floor:.0f}); prob_floor_before_first_exit is 1 by construction and carries no information.")
     if len(usable) < 10:
         warnings.append(f"Only {len(usable)} anchors cover every non-frozen series; freeze off-scenario positions to widen the sample.")
     plans_out = []

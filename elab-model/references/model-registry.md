@@ -490,4 +490,5 @@ replay 强平     buffer < 0 当日按 liquidation_order 以收盘价卖出，�
 | 锚点 < 30 | `"Only N anchors: treat rates as direction, not precision."` |
 | 含合成杠杆 | `"…synthetic Nx daily reset; real products add fees, financing and premium/discount gaps."` |
 | replay 覆盖锚点 < 10 | `"Only N anchors cover every non-frozen series…"` |
+| 起点缓冲已低于 `floor` | `"Buffer is already below the floor (…); shock_to_floor values are 0 by construction."`（replay：`prob_floor_before_first_exit` 恒为 1，无信息量） |
 | 固定提示 | 维持比例上调假设、样本内选择、强平与成交为收盘近似 |
