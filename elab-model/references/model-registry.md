@@ -414,7 +414,7 @@ breakeven     = strike − debit           # per-share
 | `positions[]` | list | 每项：`id`（用户标签）、`qty`、`price`、`fx_to_base`（价格币种 ÷ 基准币种的汇率，缺省 1）、`maint_ratio`（0–1）、`leverage`（产品对底层的倍数，缺省 1）、`bucket`（冲击分组）、`series`（replay 用的日线文件名，不含 `.csv`） |
 | `bucket_betas` | dict | 板块冲击：各 bucket 相对冲击幅度的倍数，未列出的 bucket 不动 |
 | `systemic_betas` | dict，可选 | 系统性冲击，缺省 `{"*": 1.0}`（所有 bucket 同跌） |
-| `maint_bump` | float，可选 | 维持比例统一上调幅度（绝对值），缺省 0.10 |
+| `maint_bump` | float，可选 | 维持比例统一上调幅度，**绝对值**（0.10 = 10 个百分点，不是相对上调 10%），缺省 0.10 |
 | `sell_scenarios` | list[list[id]]，可选 | 要对比的卖出组合 |
 
 **情景配置 JSON（regime / replay）**
@@ -470,7 +470,7 @@ replay 强平     buffer < 0 当日按 liquidation_order 以收盘价卖出，�
 }
 ```
 
-`regime` 输出 `anchors`、`n_anchors`、`exit_results[]`（`label`、`rule`、`n`、`win_rate`、`payoff_ratio`、`mean`、`median`、`worst`、`mean_ci90`、`win_rate_ci90`、`split_half_mean`）、`levels[]`（`touch[].prob`、`buy[].fill_prob` 与 `after_fill_20d`、`prob_reach_cost_basis`）。`replay` 输出 `plans[]`（`end_equity_median` / `p25` / `p10`、`prob_floor_before_first_exit`、`prob_forced_liquidation`、`prob_no_exit_filled`、`prob_touch_target`）。
+`regime` 输出 `anchors`、`n_anchors`、`effective_params`（实际生效的 tp / sl / max_days / 窗口 / bootstrap 参数）、`exit_results[]`（`label`、`rule`、`n`、`win_rate`、`payoff_ratio`、`mean`、`median`、`worst`、`mean_ci90`、`win_rate_ci90`、`split_half_mean`）、`levels[]`（`fill_window_days`、`touch[].prob`、`buy[].fill_prob` 与 `after_fill_20d`、`prob_reach_cost_basis`）。`replay` 输出 `plans[]`（`end_equity_median` / `p25` / `p10`、`prob_floor_before_first_exit`、`prob_forced_liquidation`、`prob_no_exit_filled`、`prob_touch_target`）。
 
 ### 适用边界 + 已知失效场景
 
@@ -488,6 +488,8 @@ replay 强平     buffer < 0 当日按 liquidation_order 以收盘价卖出，�
 | 追保线与比例和相差 >15% | `"Broker margin line differs from the sum of position ratios (k=…)…"` |
 | 未给 `margin_call` | `"margin_call not supplied; using the sum of position ratios without calibration."` |
 | 锚点 < 30 | `"Only N anchors: treat rates as direction, not precision."` |
+| 任一候选规则或买档成交后样本 < 30 | `"Sub-samples below 30: …. Read these rates as direction only."` |
+| replay 路径 10–29 条 | `"Only N replay paths: read probabilities as direction, not precision."` |
 | 含合成杠杆 | `"…synthetic Nx daily reset; real products add fees, financing and premium/discount gaps."` |
 | replay 覆盖锚点 < 10 | `"Only N anchors cover every non-frozen series…"` |
 | 起点缓冲已低于 `floor` | `"Buffer is already below the floor (…); shock_to_floor values are 0 by construction."`（replay：`prob_floor_before_first_exit` 恒为 1，无信息量） |
