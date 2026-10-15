@@ -1,17 +1,18 @@
 ---
 name: elab-model
 description: |
-  EdgeLab · 用可审计公式计算 EV、Kelly 仓位、策略结构数学（bull put spread 等）。触发：/elab-model、「算EV」「期望收益」「Kelly」「策略数学」「这单结构怎么样」「收得薄不薄」
-  EdgeLab · Auditable-formula model layer: EV, Kelly sizing, and options strategy math. Trigger: /elab-model, "calculate EV", "expected value", "Kelly", "strategy math", "how does this structure look"
+  EdgeLab · 用可审计公式计算 EV、Kelly 仓位、策略结构数学（bull put spread 等），以及组合保证金压力与历史类比。触发：/elab-model、「算EV」「期望收益」「Kelly」「策略数学」「这单结构怎么样」「收得薄不薄」「保证金缓冲」「再跌多少会追保」「历史上类似情况」「抄底胜率赔率」「组合重演」
+  EdgeLab · Auditable-formula model layer: EV, Kelly sizing, options strategy math, portfolio margin stress and historical analogs. Trigger: /elab-model, "calculate EV", "expected value", "Kelly", "strategy math", "how does this structure look", "margin buffer", "how far until a margin call", "historical analogs", "portfolio replay"
 author: 杰尼马（EdgeLab）
 homepage: https://github.com/makinotes/elab-trading-skills
 license: CC-BY-NC-4.0
 invocation: user
-version: 0.1.7
-last_updated: 2026-09-21
+version: 0.2.0
+last_updated: 2026-10-15
 visibility: public
 requires:
   - "scripts/ev_model.py 与 scripts/strategy_models.py 必须同处 scripts/ 目录（跨脚本 import 依赖，strategy_models 通过 sys.path.insert + import ev_model 串联，不用 subprocess）"
+  - "scripts/portfolio_stress.py 独立运行，不 import 其他脚本；只读用户提供的本地 JSON / CSV，不联网"
 outputs:
   - "脚本 stdout：JSON（AI 只读不改）"
   - "调用方 AI 输出：人话解读（须过 _shared/schema.md §三 标签 lint）"
@@ -50,8 +51,11 @@ outputs:
 | covered call 结构数学 | `strategy_models.py covered-call` | premium 收入 + 让利上限 + 行权价距离/期限提示（不含被行权概率） | 免费·纯本地计算 |
 | cash-secured put 结构数学 | `strategy_models.py cash-secured-put` | 类 covered call 逻辑，看多标的 | 免费·纯本地计算 |
 | long put 结构数学 | `strategy_models.py long-put` | 对冲或方向性下行 debit 结构 | 免费·纯本地计算 |
+| 保证金缓冲 / 再跌多少会追保 / 卖掉一部分能释放多少 | `portfolio_stress.py stress` | 缓冲、看穿杠杆、板块与系统性冲击下触及保底线和追保线的跌幅、维持比例上调敏感性、每卖 1 万的释放量、卖出情景对比 | 免费·纯本地计算 |
+| 历史上类似情况之后怎样 / 抄底的胜率赔率 / 某价位多大概率触及 | `portfolio_stress.py regime` | 回撤条件定义锚点日，统计候选标的在各退出规则下的结果、价位触及与成交概率；含 bootstrap 区间与前后半样本对照 | 免费·纯本地计算 |
+| 整个组合放回历史路径会怎样 | `portfolio_stress.py replay` | 组合逐日重演：用户给定的退出价位、缓冲转负时按顺序强平、期末权益分布与各类概率 | 免费·纯本地计算 |
 
-> 不在此做：精确希腊值/期权定价（需 py_vollib，违反无 pip 原则）；组合级 VaR；实时信号。
+> 不在此做：精确希腊值/期权定价（需 py_vollib，违反无 pip 原则）；组合级 VaR 与相关性矩阵；实时信号；行情抓取（`portfolio_stress.py` 只读用户或券商连接层提供的本地文件）。
 
 > **回测说明**：回测请求/结果协议见 `scripts/backtest_protocol.md`。会员注意：quant-engine 实现（数据管道、防过拟合执行）不随 elab-skills 分发，运行回测需自备数据管道并按协议格式输出结果 JSON。
 
@@ -109,6 +113,15 @@ win_rate = pop                 # 来源须带标签
 - `--config` 缺省自动指向同目录 `thresholds.json`；JSON 解析失败 → fallback 代码内常量 + warnings 注明"使用内置默认阈值"。
 - 两脚本必须同处 `scripts/` 目录（`strategy_models.py` 通过 `sys.path.insert(0, os.path.dirname(__file__))` + `import ev_model` 串联，见 `requires`）。
 
+### portfolio_stress 调用
+
+- **输入来源**：持仓、价格、维持保证金比例、券商追保线来自用户导出或 `_shared/broker-connectors.md` 的只读连接；日线 CSV（`date,close[,high]`）由用户提供或经已授权的数据工具导出。脚本不联网、不补数。格式与字段见 `references/model-registry.md §六`。
+- **口径**：`id` 用用户自定的标签即可，不要求真实代码；跨币种持仓必须给 `fx_to_base`。券商追保线与「市值 × 维持比例」之和不一致时，脚本按比值 `calibration_k` 校准，结果是近似值，warnings 会提示。
+- **锚点与杠杆**：锚点条件、代理标的、杠杆倍数、年化费用都由用户给。杠杆产品用底层每日收益 × 倍数合成，再扣年化费用，不等于真实产品净值；亚洲市场标的用 `shift_days` 对齐到锚点次日。
+- **样本**：锚点少于 30 个时 warnings 提示只看方向；`mean_ci90` / `win_rate_ci90` 跨过 0 或 50% 时，解读必须说明区间跨过了这条线；`split_half_mean` 前后两半符号相反时，说明结论不稳定。在同一批锚点上挑出的价位组合属于样本内结果。
+- **来源标签**：regime / replay 的胜率、概率一律标 `[回测 N个锚点 OOS=否]`，再喂 `ev_model` 时同样传 N。
+- **输出边界**：`release_ranking` 是每卖 1 万的数学释放量排序，不是卖出顺序；`touch` 是历史路径触及概率，不是目标价；`replay.plans` 里的退出价位与比例必须由用户给出，AI 不代拟。解读不得把结果整理成带股数的挂单清单。
+
 ## 单位纪律
 
 | 字段 | 单位 | 说明 |
@@ -139,6 +152,8 @@ win_rate = pop                 # 来源须带标签
 5. 「（这个结构）适合现在做」
 6. 将"warnings 为空"或"数学上没问题"解读为隐性开仓许可
 7. 比较多个结构"哪个更好"时，给出"A 更优/更有优势"类比较结论（只允许并列各自数学画像与假设敏感性）
+8. 「按释放量排序，先卖 X」「建议减 X 来补缓冲」——`release_ranking` 只陈述数字
+9. 「挂在 X 价位」「卖档可以这样设」——价位与比例只能复述用户给的输入
 
 ### 固定收尾措辞
 
@@ -174,3 +189,5 @@ win_rate = pop                 # 来源须带标签
 | `elab-research` 期权面 | strategy_models 输出策略完整数学画像；引用 registry §三 |
 | `elab-deconstruct` 活例子 | strategy_models 作为数字基础；引用 registry §三 |
 | `elab-trade` 立案前 | 把 thesis 翻译成结构数学；引用 registry §三 |
+| `elab-trade` Mode B（持仓诊断） | 杠杆持仓的保证金缓冲、冲击跌幅、组合重演；引用 registry §六 |
+| `elab-diagnosis` | 「还扛得住吗 / 再跌多少会追保」类问题的缓冲数学；引用 registry §六 |

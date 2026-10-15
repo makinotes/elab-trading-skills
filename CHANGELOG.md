@@ -2,6 +2,13 @@
 
 EdgeLab elab-skills 版本变更记录。**改任何 skill 都要：① bump 该 skill `SKILL.md` frontmatter 的 `version` + `last_updated` ② 在这里加一条**。
 
+## 2026-10-15 · EdgeLab Trading Skills 0.8.0 预发布：组合保证金压力与历史类比
+
+- **elab-model 0.2.0** — 新增 `scripts/portfolio_stress.py`（纯标准库、只读本地文件、不联网），三个子命令：`stress` 计算保证金缓冲、看穿杠杆、板块与系统性冲击下触及保底线和追保线的跌幅、维持比例上调敏感性、每卖 1 万的释放量和卖出情景对比，券商追保线与比例和不一致时按 `calibration_k` 校准；`regime` 按回撤条件找历史锚点，统计候选标的在持有期、止盈止损、回到均线、移动止盈等退出规则下的结果，以及价位触及和买档成交概率，给出 bootstrap 90% 区间与前后半样本对照，杠杆产品按底层每日收益合成并扣年化费用；`replay` 把整个组合放回每条历史路径，按用户给定的退出价位与比例成交，缓冲转负时按顺序强平，输出期末权益分布与各类概率。registry 新增 §六（输入协议、公式、黄金 case、失效场景、warnings）；930 禁句型新增两条：释放量排序不是卖出顺序，价位与比例只复述用户输入。新增 `tests/test_portfolio_stress.py`。
+- **elab-trade 0.7.9** — Mode B 遇到杠杆或融资持仓的承受力问题时转 `portfolio_stress.py`（registry §六）；`references/diagnosis-mode.md` 的 FIFO 段新增现金流交叉核对：净股数与当前持仓不符、已清仓标的现金流与 FIFO 盈亏相差明显时，先排查拆合股、导出起点前的持仓和期权行权产生的正股成交。
+- **入口** — `elab` 0.6.10：路由加「保证金缓冲 / 再跌多少会追保 / 历史上类似情况 / 组合重演」→ elab-model。首页与 elab-model 子 README 同步一句。
+- **兼容与范围** — 新增能力，原有调用名、安装和记录路径不变；不出挂单清单，不抓行情。上一发布 tag 为 `v0.7.3`，0.7.4 为未打 tag 的预发布。
+
 ## 2026-10-10 · EdgeLab Trading Skills 0.7.4 预发布：富途 OpenD 成交导入要点
 
 - **elab-trade 0.7.8** — `references/broker-ingest.md` 富途一节新增「OpenD 成交记录要点」（2026-10 只读实测）：期权代码拆法与港股期权简码映射、成交价不含乘数与港股乘数查法（过期代码查不到快照）、方向四个值与 schema 的对应、手续费不在成交记录里要用 `order_fee_query` 按订单补、到期作废与行权会生成价格为 0 的成交行（较早期间可能缺失、提前指派可能只有正股行）、拆合股不回溯调整、组合单靠 `order_id` 配对、查询时区与综合账户去重；字段映射补 OpenD 直连一行。

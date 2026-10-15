@@ -395,3 +395,99 @@ breakeven     = strike − debit           # per-share
 | `debit_width_min_ratio` | 0.20 | bear-put-spread：`debit/width` 低于此值触发成本比例提示，不判断保护范围 | §四 bear-put-spread |
 
 `--config` 文件缺失或 JSON 解析失败时，脚本回退代码内 fallback 常量（与此表值相同），warnings 追加 `"使用内置默认阈值"`，不 crash、不静默。
+
+---
+
+## 六、组合压力与历史类比（portfolio_stress.py）
+
+> 三个子命令共用同一份持仓输入。全部纯标准库、只读本地文件、不联网。结果是给定假设下的数学，不是交易指令。
+
+### 输入协议
+
+**持仓 JSON（stress / replay）**
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `equity` | float | 账户权益（基准币种） |
+| `margin_call` | float，可选 | 券商给出的追保线；给了就用于校准 `calibration_k`，不给按 Σ市值×维持比例 |
+| `floor` | float，可选 | 用户自定的缓冲保底线，缺省 0 |
+| `positions[]` | list | 每项：`id`（用户标签）、`qty`、`price`、`fx_to_base`（价格币种 ÷ 基准币种的汇率，缺省 1）、`maint_ratio`（0–1）、`leverage`（产品对底层的倍数，缺省 1）、`bucket`（冲击分组）、`series`（replay 用的日线文件名，不含 `.csv`） |
+| `bucket_betas` | dict | 板块冲击：各 bucket 相对冲击幅度的倍数，未列出的 bucket 不动 |
+| `systemic_betas` | dict，可选 | 系统性冲击，缺省 `{"*": 1.0}`（所有 bucket 同跌） |
+| `maint_bump` | float，可选 | 维持比例统一上调幅度（绝对值），缺省 0.10 |
+| `sell_scenarios` | list[list[id]]，可选 | 要对比的卖出组合 |
+
+**情景配置 JSON（regime / replay）**
+
+| 字段 | 说明 |
+|---|---|
+| `anchor.conditions[]` | 每项 `series` + `drawdown_le` 或 `drawdown_ge`（较 `window` 日高点的回撤），全部满足的日子为锚点 |
+| `anchor.window` / `gap_days` | 回撤窗口（缺省 20）；锚点最小间隔自然日（缺省 35） |
+| `candidates[]` | `label`、`series`、`leverage`、`annual_cost`（年化费用，按 252 日每日扣）、`daily_drag`、`shift_days` |
+| `exit_rules` | `names`（`T<N>`、`TP_SL`、`MA_REVERT`、`TRAIL`）、`tp` / `sl`（按杠杆 "1"/"2"/"3" 给）、`max_days`（缺省 40） |
+| `levels[]` | `price_now`、`touch_levels`、`buy_levels`、`fill_window`（缺省 10）、`horizon`（缺省 40）、`cost_basis` |
+| `bootstrap` | `iterations`（缺省 1000）、`seed` |
+| `replay` | `days`、`target_equity`、`freeze`（不随历史移动的 id）、`liquidation_order`、`series_leverage`、`annual_cost`、`shift_days`、`plans[]`（`label` + `exits`：每个 id 一组 `{price, fraction}`，`fraction` 为原持仓比例，合计不超过 1） |
+
+**日线 CSV**：`date,close[,high]`，日期 `YYYY-MM-DD`，至少 60 行；缺 `high` 时用 `close`。
+
+### 公式口径（明文）
+
+```
+mv_i            = qty_i × price_i / fx_i
+cash            = equity − Σ mv_i
+k               = margin_call / Σ (mv_i × maint_i)          # 未给 margin_call 时 k = 1
+buffer          = Σ mv_i + cash − k × Σ (mv_i × maint_i)
+冲击 s 后       mv_i(s) = mv_i × max(1 − lev_i × beta_bucket × s, 0)
+shock_to_X      = 使 buffer(s) < X 的最小 s（步长 0.25%，上限 95%；找不到为 null）
+release_i       = 10000 × maint_i × k                         # 每卖 1 万释放的缓冲
+合成杠杆        V_t = V_{t-1} × max(1 + L × r_t − annual_cost / 252 − daily_drag, 1e-6)
+MA_REVERT       首个 收盘 ≥ 20 日均线 的交易日退出，或第 max_days 日
+TP_SL           收益 ≥ tp 或 ≤ sl，或第 max_days 日
+TRAIL           ≤ sl；或峰值收益 ≥ tp/2 后自峰值回撤 ≥ tp/2；或第 max_days 日
+bootstrap       有放回重抽 n 个结果，取均值与胜率的 5% / 95% 分位
+replay 强平     buffer < 0 当日按 liquidation_order 以收盘价卖出，直到 buffer ≥ 0
+```
+
+**黄金 case（测试覆盖）**：权益 60000、追保线 40000，A：1000 股 × 50、维持 0.5、板块 beta 1；B：500 股 × 100、维持 0.3、不受板块冲击。则 k=1，缓冲 20000；板块冲击 `buffer = 20000 − 25000s`，到保底线 5000 输出 0.6025、到追保线 0.8025（步长 0.25%，取首个低于阈值的 s）；系统性冲击 `buffer = 20000 − 60000s`，输出 0.25 与 0.335；维持比例 +0.10 后板块冲击到保底线输出 0.2525；卖出 A 后缓冲增加 25000。
+
+### 输出 JSON 骨架
+
+```json
+{
+  "model": "portfolio_stress.stress",
+  "calibration_k": 1.0,
+  "floor": 5000,
+  "base": {"equity": 60000, "market_value": 100000, "cash": -40000, "gross_ratio": 1.6667,
+           "look_through_ratio": 1.6667, "buffer": 20000,
+           "targeted_shock_to_floor": 0.6025, "targeted_shock_to_margin_call": 0.8025,
+           "targeted_shock_to_floor_maint_bump": 0.2525, "systemic_shock_to_floor": 0.25,
+           "systemic_shock_to_margin_call": 0.335, "systemic_shock_to_floor_maint_bump": 0.1},
+  "release_ranking": [{"id": "A", "buffer_release_per_10000": 5000, "look_through_release_per_10000": 10000}],
+  "sell_scenarios": [{"sold": ["A"], "buffer": 45000, "...": "..."}],
+  "warnings": ["..."],
+  "units": {"money": "base_currency", "ratios": "fraction_of_equity", "shock": "underlying_fractional_decline"}
+}
+```
+
+`regime` 输出 `anchors`、`n_anchors`、`exit_results[]`（`label`、`rule`、`n`、`win_rate`、`payoff_ratio`、`mean`、`median`、`worst`、`mean_ci90`、`win_rate_ci90`、`split_half_mean`）、`levels[]`（`touch[].prob`、`buy[].fill_prob` 与 `after_fill_20d`、`prob_reach_cost_basis`）。`replay` 输出 `plans[]`（`end_equity_median` / `p25` / `p10`、`prob_floor_before_first_exit`、`prob_forced_liquidation`、`prob_no_exit_filled`、`prob_touch_target`）。
+
+### 适用边界 + 已知失效场景
+
+- **线性保证金近似**：真实券商按组合、集中度和波动分档，压力期可能临时上调；`maint_bump` 只是一档敏感性，不是券商规则。
+- **冲击是瞬时的**：stress 不含杠杆产品的路径损耗；路径效应看 regime / replay。
+- **合成杠杆偏乐观**：没有溢价折价、跟踪误差、限额和停牌；`annual_cost` 要按产品实际费用与融资成本填。
+- **样本小且重叠**：锚点通常几十个，前向窗口长于 `gap_days` 时互相重叠；只看方向，不看小数。
+- **样本内选择**：在同一批锚点上比较多组价位，选出的最好组合天然偏乐观；用 `split_half_mean` 看稳定性，有条件就留出样本外区间。
+- **强平与成交是收盘近似**：盘中触价、跳空、费用、汇率变化都未计入。
+
+### warnings 文案模板
+
+| 触发条件 | 文案 |
+|---|---|
+| 追保线与比例和相差 >15% | `"Broker margin line differs from the sum of position ratios (k=…)…"` |
+| 未给 `margin_call` | `"margin_call not supplied; using the sum of position ratios without calibration."` |
+| 锚点 < 30 | `"Only N anchors: treat rates as direction, not precision."` |
+| 含合成杠杆 | `"…synthetic Nx daily reset; real products add fees, financing and premium/discount gaps."` |
+| replay 覆盖锚点 < 10 | `"Only N anchors cover every non-frozen series…"` |
+| 固定提示 | 维持比例上调假设、样本内选择、强平与成交为收盘近似 |

@@ -56,7 +56,7 @@
 | [elab-diagnosis](elab-diagnosis/README.md) | 梳理交易决策中的依据、风险、规则与情绪，检查整套打法 | 卡在“该不该买、卖、加仓”，需要把问题想清楚 |
 | [elab-trade](elab-trade/README.md) | 记录交易决策，读取持仓与成交，复盘交割单并整理交易规则 | 要立案、更新判断、回填结果，或复盘自己的交易 |
 | [elab-coach](elab-coach/README.md) | 诊断六个交易能力维度，每次只开一张处方，跟练后复测；把口头结果词换成可核对的过程表述 | 总是拿不住、死扛或临时起意，想知道自己先练什么 |
-| [elab-model](elab-model/README.md) | 用本地脚本计算期望收益、Kelly 比例和期权结构的风险收益 | 已有胜率、盈亏或合约参数，想把数学关系算清楚 |
+| [elab-model](elab-model/README.md) | 用本地脚本计算期望收益、Kelly 比例、期权结构的风险收益，以及组合保证金压力与历史类比 | 已有胜率、盈亏、合约参数或持仓与日线文件，想把数学关系算清楚 |
 | [elab-deconstruct](elab-deconstruct/README.md) | 解释期权与投资概念的定义、操作含义、易混点和失效条件 | 想弄懂 IV、Delta 中性、对冲，或辨别模糊术语 |
 | [elab-benchmark](elab-benchmark/README.md) | 检查交易者或策略的证据、方法与可复制条件 | 想判断某套打法值不值得学、哪些部分可以借鉴 |
 | [elab-futu-research](elab-futu-research/README.md) | 归档富途或老虎博主公开内容，按时点证据审阅观点与声称的交易 | 要研究博主历史发言、比较多人方法或整理证据 |
@@ -243,7 +243,7 @@ Use each skill independently or connect them through the shared record formats a
 | [`elab-diagnosis`](elab-diagnosis/README.md) | Work through a trading decision — rationale, risk, rules, emotion; or audit your whole approach |
 | [`elab-trade`](elab-trade/README.md) | Log decisions before entry, update positions, diagnose broker statements, distil a playbook |
 | [`elab-coach`](elab-coach/README.md) | Diagnose six trading-ability dimensions, prescribe one rule at a time, track practice and retest; reframe outcome words into rule language |
-| [`elab-model`](elab-model/README.md) | Local scripts for expected value, Kelly fraction and options structure math |
+| [`elab-model`](elab-model/README.md) | Local scripts for expected value, Kelly fraction, options structure math, portfolio margin stress and historical analogs |
 | [`elab-deconstruct`](elab-deconstruct/README.md) | Break options concepts (IV, delta-neutral, hedging) down to operational atoms |
 | [`elab-benchmark`](elab-benchmark/README.md) | Check whether a trader's claimed results and method are real and reproducible |
 | [`elab-futu-research`](elab-futu-research/README.md) | Archive public Futu/Tiger blogger pages and audit claims against point-in-time prices |
