@@ -164,7 +164,7 @@ def cmd_stress(args):
         scenarios.append(dict(sold=sorted(ids), **profile(keep, c)))
     if any(p["lev"] > 1 for p in pos):
         warnings.append("Leveraged products are stressed as leverage x shock on the day; daily-reset path effects are ignored here.")
-    warnings.append(f"maint_bump scenario adds {bump:.0%} to every maintenance ratio, approximating a broker raising requirements under stress.")
+    warnings.append(f"maint_bump scenario adds {bump:.2f} (absolute, i.e. {bump * 100:.0f} percentage points) to every maintenance ratio, approximating a broker raising requirements under stress.")
     out = dict(model="portfolio_stress.stress", calibration_k=r4(k), floor=floor, base=base,
                release_ranking=release, sell_scenarios=scenarios, warnings=warnings,
                units=dict(money="base_currency", ratios="fraction_of_equity",
@@ -317,6 +317,10 @@ def cmd_regime(args):
         warnings.append(f"Only {len(anchors)} anchors: treat rates as direction, not precision.")
     warnings.append(f"Anchors are at least {gap} calendar days apart, but forward windows longer than the gap overlap and are not independent.")
     results = []
+    effective = dict(tp=rules.get("tp", DEFAULT_TP), sl=rules.get("sl", DEFAULT_SL), max_days=int(rules.get("max_days", 40)),
+                     ma_window=20, rule_names=rule_names, anchor_window=int(cfg["anchor"].get("window", 20)), gap_days=gap,
+                     bootstrap_iterations=iters, bootstrap_seed=int(boot.get("seed", 7)))
+    small = set()
     for c in cfg.get("candidates", []):
         lev, paths = candidate_paths(c, args.series_dir, cache, anchors, 61)
         if lev != 1:
@@ -324,6 +328,8 @@ def cmd_regime(args):
         for rule in rule_names:
             vals = [v for _, (p, m) in paths for v in [exit_outcome(p, m, rule, lev, rules)] if v is not None]
             half = len(vals) // 2
+            if 0 < len(vals) < 30:
+                small.add(f"{c.get('label', c['series'])} {rule} n={len(vals)}")
             results.append(dict(label=c.get("label", c["series"]), rule=rule, **summarize(vals, rng, iters),
                                 split_half_mean=[r4(statistics.fmean(vals[:half])) if half else None,
                                                  r4(statistics.fmean(vals[half:])) if len(vals) - half else None]))
@@ -333,7 +339,8 @@ def cmd_regime(args):
         now = num(lv.get("price_now"), "levels.price_now", 1e-9)
         lev, paths = candidate_paths(lv, args.series_dir, cache, anchors, max(horizon, 30) + 21)
         ps = [p for _, (p, _) in paths]
-        entry = dict(label=lv.get("label", lv["series"]), n=len(ps), horizon_days=horizon, touch=[], buy=[])
+        entry = dict(label=lv.get("label", lv["series"]), n=len(ps), horizon_days=horizon,
+                     fill_window_days=int(lv.get("fill_window", 10)), touch=[], buy=[])
         for t in lv.get("touch_levels", []):
             entry["touch"].append(dict(level=t, prob=r4(sum(max(p[:horizon + 1]) >= t / now for p in ps) / len(ps)) if ps else None))
         fill_window = int(lv.get("fill_window", 10))
@@ -343,15 +350,19 @@ def cmd_regime(args):
                 hit = next((j for j in range(fill_window + 1) if p[j] <= b / now), None)
                 if hit is not None and hit + 20 < len(p):
                     fills.append(p[hit + 20] / (b / now) - 1)
+            if 0 < len(fills) < 30:
+                small.add(f"{entry['label']} buy {b} after-fill n={len(fills)}")
             entry["buy"].append(dict(level=b, fill_prob=r4(len(fills) / len(ps)) if ps else None,
                                      after_fill_20d=summarize(fills, rng, iters)))
         if lv.get("cost_basis"):
             need = num(lv["cost_basis"], "cost_basis", 1e-9) / now
             entry["prob_reach_cost_basis"] = r4(sum(max(p[:horizon + 1]) >= need for p in ps) / len(ps)) if ps else None
         levels.append(entry)
+    if small:
+        warnings.append("Sub-samples below 30: " + "; ".join(sorted(small)) + ". Read these rates as direction only.")
     warnings.append("Grid choices made on these same anchors are in-sample; compare split_half_mean before trusting a level set.")
     out = dict(model="portfolio_stress.regime", anchors=[a.isoformat() for a in anchors], n_anchors=len(anchors),
-               exit_results=results, levels=levels, warnings=warnings,
+               effective_params=effective, exit_results=results, levels=levels, warnings=warnings,
                units=dict(returns="fraction", prob="fraction", levels="instrument_price", horizon="trading_days"))
     print(json.dumps(out, ensure_ascii=False, allow_nan=False))
 
@@ -385,6 +396,8 @@ def cmd_replay(args):
         warnings.append(f"Buffer starts below the floor ({start_buf:.0f} < {floor:.0f}); prob_floor_before_first_exit is 1 by construction and carries no information.")
     if len(usable) < 10:
         warnings.append(f"Only {len(usable)} anchors cover every non-frozen series; freeze off-scenario positions to widen the sample.")
+    elif len(usable) < 30:
+        warnings.append(f"Only {len(usable)} replay paths: read probabilities as direction, not precision.")
     plans_out = []
     for plan in rp.get("plans", [{"label": "hold", "exits": {}}]):
         exits = plan.get("exits", {})

@@ -96,6 +96,7 @@ class PortfolioStressTests(unittest.TestCase):
         out = self.cli("stress", "--portfolio", self.dump("p.json", self.portfolio(floor=25000)))
         self.assertEqual(out["base"]["targeted_shock_to_floor"], 0.0)
         self.assertTrue(any("already below the floor" in w for w in out["warnings"]))
+        self.assertTrue(any("absolute" in w and "percentage points" in w for w in out["warnings"]))
 
     def test_selling_releases_maintenance_times_value(self):
         out = self.cli("stress", "--portfolio", self.dump("p.json", self.portfolio(sell_scenarios=[["A"]])))
@@ -144,6 +145,10 @@ class PortfolioStressTests(unittest.TestCase):
         lo, hi = by[("S1", "T20")]["mean_ci90"]
         self.assertLessEqual(lo, by[("S1", "T20")]["mean"])
         self.assertGreaterEqual(hi, by[("S1", "T20")]["mean"])
+        self.assertEqual(out["effective_params"]["max_days"], 40)
+        self.assertIn("3", out["effective_params"]["tp"])
+        self.assertEqual(out["levels"][0]["fill_window_days"], 10)
+        self.assertTrue(any("Sub-samples below 30" in w for w in out["warnings"]))
         lv = out["levels"][0]
         touch = {t["level"]: t["prob"] for t in lv["touch"]}
         self.assertEqual(touch[300], 0.0)
