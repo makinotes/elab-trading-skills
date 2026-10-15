@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.7.8"
-  last_updated: "2026-10-10"
+  version: "0.7.9"
+  last_updated: "2026-10-15"
   visibility: "public"
   requires: '["_shared/broker-connectors.md（连接券商时）", "_shared/trading-consistency.md（记录或检查交易规则时）"]'
   outputs: '["~/.elab/trades/ (决策四层结构)"]'
@@ -166,7 +166,7 @@ metadata:
 ---
 
 # Mode B · 券商数据 / 交割单诊断 → `_shared/broker-connectors.md` + `references/diagnosis-mode.md`
-查看当前持仓、未完成订单、历史订单或成交时，优先使用用户指定且已验证的只读连接；需要批量/离线复盘或连接不可用时用 `references/broker-ingest.md` 导入文件。用户仅要去重、FIFO、费用或当前数量核对时，交付对应结果表、异常与数据缺口即可，不追加未要求的收益率、权利金回收率、Kelly 或整套打法结论。明确要求完整诊断时，字段归一后走 **FIFO 配对算法**，按 `references/diagnosis-mode.md` 的样本口径计算历史统计；所需正负条件均值齐全时才交 `elab-model` 算 EV/breakeven（引用 registry §一），再分析持仓、规则与执行。
+查看当前持仓、未完成订单、历史订单或成交时，优先使用用户指定且已验证的只读连接；需要批量/离线复盘或连接不可用时用 `references/broker-ingest.md` 导入文件。用户仅要去重、FIFO、费用或当前数量核对时，交付对应结果表、异常与数据缺口即可，不追加未要求的收益率、权利金回收率、Kelly 或整套打法结论。明确要求完整诊断时，字段归一后走 **FIFO 配对算法**，按 `references/diagnosis-mode.md` 的样本口径计算历史统计；所需正负条件均值齐全时才交 `elab-model` 算 EV/breakeven（引用 registry §一），再分析持仓、规则与执行。用户问杠杆或融资持仓「还能扛多少」「再跌多少会追保」「历史上类似情况之后怎样」时，持仓、维持比例与券商追保线归一后交 `elab-model` `portfolio_stress.py`（引用 registry §六）；退出价位只复述用户给定的输入，不代拟挂单。
 
 # Mode C · playbook 沉淀 → `references/playbook-mode.md`
 把想法/规律/复盘炼成成型可复用 playbook。含：**`§〇 想法区`（raw 交易想法暂存 → 晋级漏斗）** → **一条规律怎么才算数（样本/逻辑/运气vs技巧/失效条件四关）** → 条目框架（每字段怎么填）→ 沉淀流程 → 回头用闭环。读那份分册执行。**"沉淀自己的交易想法"= 先落想法区，别等成型。** 策略条目可用 `elab-model` strategy_models 算结构数学补充画像（引用 elab-model registry §四）。

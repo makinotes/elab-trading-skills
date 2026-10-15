@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.6.9"
-  last_updated: "2026-09-29"
+  version: "0.6.10"
+  last_updated: "2026-10-15"
   visibility: "public"
   requires: "[]"
   outputs: "[]"
@@ -94,6 +94,7 @@ metadata:
 | "IV/Delta 中性/对冲到底啥意思"拆期权概念 | `elab-deconstruct` | 免费 |
 | "我这算不算 X"（X=俚语/黑话/自造词，如"苦肉计""delta中性反脆弱轮动"）——转译口语类比 / 识破伪概念 | `elab-deconstruct`（§0.5 伪概念闸 + §0.6 俚语转译） | 免费 |
 | 算EV、期望收益、Kelly、策略数学、这单结构怎么样、收得薄不薄 | `elab-model`（模型计算：EV/仓位/策略结构数学） | 免费（纯本地计算） |
+| 保证金缓冲、再跌多少会追保、历史上类似情况之后怎样、组合放回历史重演 | `elab-model` `portfolio_stress.py`（组合压力与历史类比，registry §六） | 免费（纯本地计算，需自备持仓与日线文件） |
 
 > 内容创作 / 营销文案类（钩子/标题/传播/AI 味检测）不在 elab 内做；期权策略系统教学走 EdgeLab 课件，也不在 elab 内重做。
 
