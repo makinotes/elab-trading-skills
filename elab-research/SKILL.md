@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.8.8"
-  last_updated: "2026-09-25"
+  version: "0.8.9"
+  last_updated: "2026-11-26"
   visibility: "public"
   requires: '["_shared/broker-connectors.md（指定券商数据时）"]'
   outputs: '["中性研报 (可存进 elab-trade 04_待解)"]'

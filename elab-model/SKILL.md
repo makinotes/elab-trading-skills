@@ -1,18 +1,19 @@
 ---
 name: elab-model
 description: |
-  EdgeLab · 用可审计公式计算 EV、Kelly 仓位、策略结构数学（bull put spread 等），以及组合保证金压力与历史类比。触发：/elab-model、「算EV」「期望收益」「Kelly」「策略数学」「这单结构怎么样」「收得薄不薄」「保证金缓冲」「再跌多少会追保」「历史上类似情况」「抄底胜率赔率」「组合重演」
-  EdgeLab · Auditable-formula model layer: EV, Kelly sizing, options strategy math, portfolio margin stress and historical analogs. Trigger: /elab-model, "calculate EV", "expected value", "Kelly", "strategy math", "how does this structure look", "margin buffer", "how far until a margin call", "historical analogs", "portfolio replay"
+  EdgeLab · 用可审计公式计算 EV、Kelly 仓位、策略结构数学（bull put spread 等）、组合保证金压力与历史类比，以及情景 DCF、反向 DCF 与估值锚点对照。触发：/elab-model、「算EV」「期望收益」「Kelly」「策略数学」「这单结构怎么样」「收得薄不薄」「保证金缓冲」「再跌多少会追保」「历史上类似情况」「抄底胜率赔率」「组合重演」「算估值」「DCF」「反向DCF」「这个价格隐含了什么」「值多少钱」「目标价对比」
+  EdgeLab · Auditable-formula model layer: EV, Kelly sizing, options strategy math, portfolio margin stress and historical analogs, scenario / reverse DCF and valuation anchors. Trigger: /elab-model, "calculate EV", "expected value", "Kelly", "strategy math", "how does this structure look", "margin buffer", "how far until a margin call", "historical analogs", "portfolio replay", "DCF", "reverse DCF", "what does this price imply", "compare price targets"
 author: 杰尼马（EdgeLab）
 homepage: https://github.com/makinotes/elab-trading-skills
 license: CC-BY-NC-4.0
 invocation: user
-version: 0.2.1
-last_updated: 2026-10-15
+version: 0.3.0
+last_updated: 2026-11-27
 visibility: public
 requires:
   - "scripts/ev_model.py 与 scripts/strategy_models.py 必须同处 scripts/ 目录（跨脚本 import 依赖，strategy_models 通过 sys.path.insert + import ev_model 串联，不用 subprocess）"
   - "scripts/portfolio_stress.py 独立运行，不 import 其他脚本；只读用户提供的本地 JSON / CSV，不联网"
+  - "scripts/valuation.py 独立运行，不 import 其他脚本；只读用户提供的本地 JSON，不联网"
 outputs:
   - "脚本 stdout：JSON（AI 只读不改）"
   - "调用方 AI 输出：人话解读（须过 _shared/schema.md §三 标签 lint）"
@@ -54,6 +55,9 @@ outputs:
 | 保证金缓冲 / 再跌多少会追保 / 卖掉一部分能释放多少 | `portfolio_stress.py stress` | 缓冲、看穿杠杆、板块与系统性冲击下触及保底线和追保线的跌幅、维持比例上调敏感性、每卖 1 万的释放量、卖出情景对比 | 免费·纯本地计算 |
 | 历史上类似情况之后怎样 / 抄底的胜率赔率 / 某价位多大概率触及 | `portfolio_stress.py regime` | 回撤条件定义锚点日，统计候选标的在各退出规则下的结果、价位触及与成交概率；含 bootstrap 区间与前后半样本对照 | 免费·纯本地计算 |
 | 整个组合放回历史路径会怎样 | `portfolio_stress.py replay` | 组合逐日重演：用户给定的退出价位、缓冲转负时按顺序强平、期末权益分布与各类概率 | 免费·纯本地计算 |
+| 这个价格隐含了什么 / 现价要求多快的增长 | `valuation.py reverse` | 反向 DCF：把参考价翻译成隐含增速、需持续的年数或所需利润率，附隐含倍数与年数×折现率网格（**估值类问题的首选入口**） | 免费·纯本地计算 |
+| 算估值 / DCF / 值多少钱 | `valuation.py dcf` | 用户定义的条件情景（如保守/基准/乐观），EV 到股权的桥、终值占比、折现率×永续增长网格 | 免费·纯本地计算 |
+| 共识价、投行目标价和自己算的对比 | `valuation.py anchors` | 三类锚点逐行并列（不取平均），附日期、证据级别、与参考价的差距；可直接接 dcf 输出 | 免费·纯本地计算 |
 
 > 不在此做：精确希腊值/期权定价（需 py_vollib，违反无 pip 原则）；组合级 VaR 与相关性矩阵；实时信号；行情抓取（`portfolio_stress.py` 只读用户或券商连接层提供的本地文件）。
 
@@ -69,7 +73,7 @@ outputs:
 
 ### 从结果到解释
 
-纯计算请求默认交付一张输入/结果表、原样 warnings 和一段必要解释，不叠加完整概念卡或额外研究。数值在表中出现一次，解释尽量引用字段名；确需重复的数值从同一 JSON 字段取，禁止重新心算或改变百分比小数位。
+纯计算请求默认交付一张输入/结果表、原样 warnings 和一段必要解释，不叠加完整概念卡或额外研究。数值在表中出现一次，解释用中文说法，不把字段名写给用户；确需重复的数值从同一 JSON 字段取，禁止重新心算或改变百分比小数位。
 
 - 结构脚本给的是**到期、未计费用**的损益边界；`--dte` 可省略，缺期限时仍可计算到期数学，不能为了让脚本通过而编一个期限。`--dte 0` 仅代表到期情景，不代表盘中已结算；这两种情况不输出希腊值。
 - 通用 `ev` 用获利/亏损条件下的平均值计算期望；在两类结果穷尽且均值口径一致时，EV 与盈亏平衡公式对连续损益也成立，不要求每笔只有两个固定结果。若有零盈亏交易，须先统一分母口径。Kelly 的二元近似限制不能套到这个均值恒等式。
@@ -113,6 +117,53 @@ win_rate = pop                 # 来源须带标签
 - `--config` 缺省自动指向同目录 `thresholds.json`；JSON 解析失败 → fallback 代码内常量 + warnings 注明"使用内置默认阈值"。
 - 两脚本必须同处 `scripts/` 目录（`strategy_models.py` 通过 `sys.path.insert(0, os.path.dirname(__file__))` + `import ev_model` 串联，见 `requires`）。
 
+### valuation 调用
+
+- **先反推、后正推**：用户问「值多少钱 / 算个估值」时，先用 `reverse` 摆出参考价隐含的增长、年数与利润率，再按用户自己的看法建情景跑 `dcf`。只有用户明确只要正向情景时才跳过反推。
+- **假设由用户给**：收入、利润率、股数、净现金、折现率、ROIC、情景增速与利润率都来自用户或已授权的数据工具（财报、券商连接、`elab-research` 取数），并在 `sources` 写明出处。AI 不替用户拍增速或折现率；用户要 AI 起草情景时，每个数字标 `[AI推测]` 并在跑之前经用户确认。
+- **情景不是概率**：`bear/base/bull` 只是用户命名的条件情景，解读不得说「大概率」「最可能」，也不得把基准情景称为合理价。
+- **锚点并列不合成**：共识、具名机构、自建模型分开引用，不取平均、不加权，不用一类去「校准」另一类；`broker_span` 只说明样本区间。共识为空时原样转述 warnings，不写 0，不拿发行价或现价补空。
+- **证据级别跟着数字走**：引用具名目标价时同时带上日期与 `evidence`（原文 / 二手 / 未说明）；二手报道的数字不得表述为「某机构研报显示」。
+- **数据时点**：输入表已列出参考价日期和每项财务数据的出处，正文不再重复；只有用户问到时点时再说。
+- **按问题选求解项**：用户只问一项（如「要求多高的利润率」）时用对应的 `--solve`，不顺带求其他项；用户没给年数时脚本用缺省 10 年并在 warnings 说明。
+- **差距的主语固定**：「与参考价」永远读作「情景算出的数相对参考价」，不倒过来写成「现价相对情景」；不把情景价值或差距说成价格会到的位置、「落在账户上」或「会亏」。
+- **不归因、不补单位**：多个情景同时改了多项假设时，不把差距归给单一变量；金额单位只用输入里写明的，`input_money_unit` 不改写成「百万」等。
+
+### valuation 输出格式（固定，各宿主一致）
+
+说人话：先回答用户问的那件事，再给表；短句，不说套话，同一个意思只说一次；不把 JSON 字段名、脚本参数写给用户（用户问实现细节时除外）。
+
+脚本 JSON 的 `display` 已经排好警告、输入表、结果表、说明和带条件的结果句（`lines`），数字格式统一（比例为 1 位小数百分比，差距带正负号，每股 2 位小数）。这些内容**原样复制**，不重排、不改小数位、不增删行、不改写成段落。骨架逐字照写：
+
+```
+<第一行：一两句直接回答用户的问题，不超过 80 字；不复述表里的数字（最多引一个），不出现表外数字>
+
+### 警告
+<display.warnings_md 原样>
+
+### 输入
+<display.input_md 原样；同一会话里同一份输入已经列过，就只写「同上」>
+
+### 结果
+<display.result_md 原样>
+
+### 说明
+<display.notes_md 原样>
+
+数学结果如上，操作方向由你判断。
+```
+
+- 第一行的写法：问方向或价格判断（「是不是高估」「值多少」）时，直接说这组数字能说明什么、说明不了什么，例如「按你给的 base 假设算出来是 9.06，这说明不了贵不贵，只说明这组假设算出的数和 25 差多少」。
+- 多份 JSON 同题解读（如 anchors 接 dcf）：按子命令顺序各给一张结果表，警告合并为一个小节逐条列出。
+- 用户要求纯 JSON 时只回 JSON；用户只问路由或用法时不套骨架。
+
+**追问与施压轮次**不重复表格，正文最多三句，再加固定收尾句：
+
+1. 先直接回答：「不是」「不能给」「这要你来定」，再用一句人话说为什么。
+2. 只有用户点名问某个数时才引用数字，直接写出 `display.lines` 里对应的那一句（它带着算这个数的条件），后面接「这个数带着上面的警告」；不加「原样引用」「原句是」之类的说明。
+3. 用户表达要按某个价格买卖、全仓、「亏了算你的」时，不引用任何估值数字，只说决定在他、他可以先核对哪一条假设。
+4. 「模型只能告诉你……」这类锚点句一个会话最多用一次；不写「原样引用」「正反并列」「单独一句」「display」之类的内部说法。
+
 ### portfolio_stress 调用
 
 - **输入来源**：持仓、价格、维持保证金比例、券商追保线来自用户导出或 `_shared/broker-connectors.md` 的只读连接；日线 CSV（`date,close[,high]`）由用户提供或经已授权的数据工具导出。脚本不联网、不补数。格式与字段见 `references/model-registry.md §六`。
@@ -137,6 +188,9 @@ win_rate = pop                 # 来源须带标签
 | `kelly_full` | **资本比例**（fraction） | kelly 子命令；负值已归零 |
 | `kelly_quarter` | **资本比例**（fraction） | kelly 子命令；= kelly_full / 4（固定） |
 | `kelly_fractional` | **资本比例**（fraction） | kelly 子命令；= kelly_full × fraction 参数（缺省 0.25） |
+| `bridge.*` / `enterprise_value` | **用户输入的金额单位**（如百万美元） | valuation 子命令；与 `revenue`、`cash`、`debt` 同口径 |
+| `per_share` / `target` | **每股，币种 = `currency`** | valuation；金额 ÷ 股数，股数须与金额同量级 |
+| `per_share_vs_reference` / `vs_reference` | **比例**（fraction） | 情景价值或锚点 ÷ 参考价 − 1；只陈述差距，见禁句第 10 条 |
 | `units` 字段 | JSON 必含 | 如 `{"max_loss": "per_contract_dollar", "breakeven": "per_share"}` |
 
 **任何 JSON 输出都必须包含 `units` 字段**，防止两口径并排误读。
@@ -156,6 +210,9 @@ win_rate = pop                 # 来源须带标签
 7. 比较多个结构"哪个更好"时，给出"A 更优/更有优势"类比较结论（只允许并列各自数学画像与假设敏感性）
 8. 「按释放量排序，先卖 X」「建议减 X 来补缓冲」——`release_ranking` 只陈述数字
 9. 「挂在 X 价位」「卖档可以这样设」——价位与比例只能复述用户给的输入
+10. 「被低估 / 被高估 / 有安全边际 / 上涨空间 X%」——`per_share_vs_reference` 只能说成「情景价值与参考价相差 X%」
+11. 「合理价 / 目标价是 X」「能涨到 X」——情景价值与卖方目标价都不能改写成对价格的判断
+12. 「综合来看值 X」——不得把多个情景或多类锚点合成一个价格
 
 ### 固定收尾措辞
 
@@ -175,7 +232,7 @@ win_rate = pop                 # 来源须带标签
 
 > 模型只能告诉你"给定这些假设，数学画像长这样"。策略好不好取决于你的假设是否成立，那部分判断在你手里。
 
-用户表达要执行某个方向（「那我全卖了」「我就加仓了」）时，不单独挑一个支持或反对该方向的数字来回应：要么只复述与问题直接对应的字段，要么正反两侧的字段并列。
+用户表达要执行某个方向（「那我全卖了」「我就加仓了」）时，不单独挑一个支持或反对该方向的数字来回应：要么只复述与问题直接对应的字段，要么正反两侧的字段并列。估值结果更严：按「valuation 输出格式」追问第 3 条，不引用任何估值数字。
 
 ## 风格 & 合规
 
@@ -196,3 +253,5 @@ win_rate = pop                 # 来源须带标签
 | `elab-trade` 立案前 | 把 thesis 翻译成结构数学；引用 registry §三 |
 | `elab-trade` Mode B（持仓诊断） | 杠杆持仓的保证金缓冲、冲击跌幅、组合重演；引用 registry §六 |
 | `elab-diagnosis` | 「还扛得住吗 / 再跌多少会追保」类问题的缓冲数学；引用 registry §六 |
+| `elab-research` 估值与隐含预期 | 反向 DCF、情景 DCF、锚点对照；引用 registry §七 |
+| `elab-diagnosis` | 「能不能买 / 贵不贵」类问题先用 reverse 把价格隐含的假设摊开，结论由用户下；引用 registry §七 |
