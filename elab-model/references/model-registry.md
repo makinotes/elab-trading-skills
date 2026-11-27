@@ -494,3 +494,119 @@ replay 强平     buffer < 0 当日按 liquidation_order 以收盘价卖出，�
 | replay 覆盖锚点 < 10 | `"Only N anchors cover every non-frozen series…"` |
 | 起点缓冲已低于 `floor` | `"Buffer is already below the floor (…); shock_to_floor values are 0 by construction."`（replay：`prob_floor_before_first_exit` 恒为 1，无信息量） |
 | 固定提示 | 维持比例上调假设、样本内选择、强平与成交为收盘近似 |
+
+---
+
+## 七、估值：情景 DCF、反向 DCF 与锚点对照（valuation.py）
+
+> 三个子命令都是纯标准库、只读用户给的本地 JSON、不联网。**反向 DCF 是首选入口**：把一个价格翻译成它隐含的增长、年数或利润率（Rappaport / Mauboussin 的预期投资法），不出公允价。正向 DCF 只出用户定义的条件情景；锚点对照把共识、具名机构目标价与自建模型逐行并列，不取平均。
+
+### 输入协议（公司 JSON，dcf / reverse 共用）
+
+| 字段 | 类型 | 说明 |
+|---|---|---|
+| `name` / `currency` / `as_of` | str | 仅回显；`currency` 决定 per-share 单位 |
+| `archetype` | str，可选 | 缺省 `operating`；`bank` / `insurance` 直接拒绝（FCFF 对资产负债表型业务口径错误） |
+| `revenue` | float > 0 | 最近 12 个月或上一财年收入，金额单位由用户定（如百万） |
+| `operating_margin` | float | 当前经营利润率（EBIT / 收入） |
+| `tax_rate` | float 0–0.99 | 有效税率 |
+| `cash` / `debt` / `other_claims` | float ≥ 0 | 现金及短投、有息负债（含租赁按用户口径）、少数股东权益等其他索取权 |
+| `shares` | float > 0 | 摊薄股数，与金额同一量级（金额 ÷ 股数 = 每股） |
+| `discount_rate` | float | 折现率（WACC），由用户给出 |
+| `terminal_growth` | float | 永续增长率，缺省 0.025，必须 < 折现率 |
+| `terminal_roic` | float，可选 | 终值期新增资本回报率；缺省 = 折现率（价值中性） |
+| `roic` | float | 显性期增量资本回报率，决定再投资 = NOPAT × g ÷ ROIC；情景内可覆盖 |
+| `risk_free` | float，可选 | 给了就检查永续增长率是否超过它 |
+| `mid_year` | bool，可选 | 年中折现惯例，缺省 false |
+| `tam` | float，可选 | 用户给的市场规模；末年收入占比 > 50% 时报警 |
+| `trailing_growth` | float，可选 | 过去增速，仅回显，并作为 reverse 求年数 / 利润率时的默认持有增速 |
+| `reference_price` | `{value, label, as_of}` | 现价、发行价等参考价；reverse 必填 |
+| `sources` | dict | 字段 → 来源说明；`revenue`、`operating_margin`、`tax_rate`、`cash`、`debt`、`shares` 缺来源时报警 |
+| `scenarios` | dict（dcf 必填） | 每项：`years`（1–60，缺省 10）、`growth_start`（或 `growth`）、`growth_end`（缺省 = start，线性渐变）、`margin_target`（缺省 = 当前，线性渐变到第 N 年）、可选覆盖 `roic` / `discount_rate` / `terminal_growth` / `terminal_roic` |
+| `reverse` | dict，可选 | reverse 的持有假设：`years`、`margin`、`growth`、`roic`；命令行 `--years --margin --growth --roic` 优先 |
+
+**锚点 JSON（anchors）**：`as_of`（必填）、`currency`、`reference_price{value,label}`、`consensus{source, as_of, mean, median, high, low, n_analysts, ratings}`（可为空对象，表示查询无覆盖）、`brokers[]{name, target, rating, date, horizon_months, evidence: primary|secondary|unknown, source, currency}`、`own_model{label, values{情景: 每股}, warnings[]}`；或用 `--dcf-result` 直接接 dcf 的输出 JSON（连同它的 warnings）。
+
+### 公式口径（明文）
+
+```
+g_t   = growth_start + (growth_end − growth_start) × (t−1)/(N−1)        # N=1 时取 growth_start
+m_t   = m_0 + (margin_target − m_0) × t/N
+Rev_t = Rev_{t−1} × (1 + g_t)
+NOPAT_t        = Rev_t × m_t × (1 − tax)
+Reinvestment_t = NOPAT_t × g_t / ROIC
+FCFF_t         = NOPAT_t − Reinvestment_t
+PV_t  = FCFF_t / (1 + r)^(t − s)              # s = 0.5（mid_year）否则 0
+TV_N  = Rev_N × (1 + g_T) × m_N × (1 − tax) × (1 − g_T / RONIC) / (r − g_T)
+PV_TV = TV_N / (1 + r)^(N − s)
+EV    = Σ PV_t + PV_TV
+Equity = EV + cash − debt − other_claims ;  per_share = Equity / shares
+```
+
+RONIC 缺省等于 r 时 `TV_N = NOPAT_{N+1} / r`，永续增长不改变价值，终值不夹带第二段增长故事。
+
+**reverse**：利润率在显性期内保持不变，三种求解：
+- `growth`：持有年数与利润率，在 −30%～100% 年增速内扫描后二分求解；
+- `years`：持有增速与利润率，找价值首次不低于参考价的最短年数（1–60）；
+- `margin`：持有增速与年数，在 0～90% 内求解。
+
+无解时报 `reachable=false` 并给出扫描范围内的价值区间，不外推、不编数。另输出参考价对应的 EV、EV/收入、EV/NOPAT，以及隐含增速在 5/10/15 年 × 折现率 ±2 个百分点下的网格。
+
+**黄金 case（实现必须 ±0.01 对上）**：revenue=1000，margin=0.2，tax=0.25，cash=100，debt=50，shares=100，r=0.10，g_T=0，ROIC=0.2：
+- 零增长任意年数 → EV=1500，Equity=1550，每股 15.5；
+- 1 年、g=10% → FCFF₁=82.5，PV=75，PV_TV=1500，EV=1575，终值占比 0.9524。
+
+### 输出 JSON 骨架
+
+```json
+{
+  "model": "valuation.dcf",
+  "scenarios": {
+    "base": {
+      "assumptions": {"years": 10, "growth_start": 0.08, "...": "..."},
+      "bridge": {"pv_explicit_fcff": 0, "pv_terminal_value": 0, "enterprise_value": 0,
+                 "plus_cash": 0, "minus_debt": 0, "minus_other_claims": 0, "equity_value": 0, "shares": 0},
+      "per_share": 0, "terminal_value_share": 0.62, "per_share_vs_reference": 0.05, "rows": ["..."]
+    }
+  },
+  "sensitivity": {"scenario": "base", "discount_rates": ["..."], "terminal_growths": ["..."], "per_share": [["..."]]},
+  "limits": ["情景是给定假设下的条件推演，不是概率分布、目标价或预测", "..."],
+  "warnings": ["..."],
+  "units": {"money": "input_money_unit", "per_share": "USD_per_share", "rates": "fraction"}
+}
+```
+
+三个子命令都输出 `display`：`warnings_md`（warnings 逐条，空为「- 无」）、`input_md`（项目 / 数值 / 来源；数据类字段缺来源写「未标来源」，折现率等假设类字段缺来源写「用户假设」）、`result_md`（固定表头，见 SKILL「valuation 输出格式」）、`notes_md`（按条件选出的标准说明句）、`lines`（每个结果一句带计算条件的人话，追问引用数字时原样使用）。展示字符串由脚本从未取整的数值格式化：比例为 1 位小数百分比，差距带正负号，每股 2 位小数，金额带千分位。
+
+`reverse` 输出 `held`、`implied_at_price`、`implied_growth{growth, reachable, final_year_revenue, final_revenue_share_of_tam}`、`implied_growth_grid`、`implied_years`、`implied_margin`。`anchors` 输出 `consensus`、`brokers[]`（含 `vs_reference`、`age_days`、`evidence`）、`broker_span{n, low, high}`（只给区间，不给均值）、`own_model{values, model_warnings}`。
+
+### 适用边界 + 已知失效场景
+
+- **折现率是单一常数**：不随期限、资本结构变化；WACC 怎么来由用户负责，网格只看敏感度。
+- **亏损公司**：当前利润率不为正时不反推增长，须用 `--margin` 给出假设的稳态利润率。
+- **金融业**：银行、保险直接拒绝。
+- **周期股**：用单一年份的利润率会高估或低估，先由用户给出周期中位的利润率。
+- **ROIC 是最敏感的隐藏假设**：ROIC 低于折现率时增长毁灭价值，反推结论随之翻转。
+- **卖方目标价与 DCF 时间口径不同**：前者通常是 12 个月后的价格，后者是当下的情景价值；锚点只并列，不互相校准。
+- **共识为空 ≠ 无人覆盖**：只说明该数据源当时没有返回数据。
+- **`reachable` 的含义**：扫描范围内存在数学解，不表示业务上能做到。
+
+### warnings 文案模板
+
+| 触发条件 | 文案 |
+|---|---|
+| 必需字段缺来源 | `"{收入、经营利润率…}没标来源，按你给的数直接用"` |
+| 多个情景同一条警告 | 合并为一条：`"base、bull：…"` |
+| 显性期 FCFF 现值为负 | `"{情景}：前 N 年再投入比赚的多，现金流是负的，价值全靠终值撑着"`（此时不再报终值占比） |
+| 终值占 EV > 75% | `"{情景}：企业价值有 X% 来自终值，结果主要看终值那部分的假设"` |
+| g_T > 无风险利率 / 未给时 > 4% | `"永续增长率 X 比无风险利率 Y 还高"` / `"…高于 4%，长期看整体经济一般长不了这么快"` |
+| ROIC < 折现率且增长 > 0 | `"新投入的回报 X 低于折现率 Y，这种情况下增长越快反而越不值钱"` |
+| RONIC ≠ 折现率 | `"终值期新投入的回报设成了 X，不等于折现率，终值里多算了一块增长价值"` |
+| 末年收入 / TAM > 50% | `"到第 N 年，收入要占到你给的市场规模的 X%"` |
+| reverse 无解 | `"年增速从 … 试到 …，N 年内都算不到参考价，这组假设解释不了这个价格"` / `"…一直涨 60 年也算不到参考价"` |
+| reverse 未指定持有年数 | `"你没给年数，按默认 10 年算"` |
+| 共识为空 | `"共识是空的：只说明 {source} 在 {as_of} 没返回数据，不等于没人覆盖；不当成 0，也不拿参考价补"` |
+| 共识人数 < 5 / 缺人数 | `"共识只有 N 位分析师，样本很小"` / `"共识没给分析师人数"` |
+| 目标价非原文 / 超 90 天 / 缺日期 | `"{机构}的目标价来自二手报道，没核对研报原文"` / `"…是 N 天前的，之后的信息可能没算进去"` / `"{机构}没有发布日期"` |
+| 具名目标价 < 3 家 | `"具名目标价只有 N 家，只是样本，代表不了全市场"` |
+| 含自建模型 | `"自建模型的数完全取决于你的假设；券商目标价一般指 12 个月后，DCF 算的是现在，两者不是一个时间口径"` |
