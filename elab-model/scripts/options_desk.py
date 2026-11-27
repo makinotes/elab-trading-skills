@@ -500,6 +500,8 @@ def cmd_check(args):
 
     notes = ["规则来自你自己的文件，这里只核对，不替你改规则",
              "到期盈亏按行权价之间的直线算，最多赚、最多亏和盈亏平衡价都是精确值"]
+    if grid_md_s:
+        notes.append("要看没到期前盈亏怎么变，可以再要一张持有期盈亏表")
     out["display"] = dict(
         warnings_md=md_list(warnings),
         legs_md=md_table(["腿", "行权价", "权利金", "到期", "Delta", "IV"], legs_rows(legs)),
