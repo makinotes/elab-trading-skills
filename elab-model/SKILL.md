@@ -7,7 +7,7 @@ author: 杰尼马（EdgeLab）
 homepage: https://github.com/makinotes/elab-trading-skills
 license: CC-BY-NC-4.0
 invocation: user
-version: 0.4.0
+version: 0.4.1
 last_updated: 2026-11-27
 visibility: public
 requires:

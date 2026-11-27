@@ -10,7 +10,7 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.1.0"
+  version: "0.1.1"
   last_updated: "2026-11-27"
   visibility: "public"
   requires: '["elab-model/scripts/options_desk.py", "_shared/schema.md", "_shared/broker-connectors.md（可选：读期权链与持仓）", "elab-trade playbook（可选：规则出处）"]'
@@ -99,7 +99,7 @@ metadata:
 <display.result_md>
 
 ### 持有期盈亏
-<display.grid_md>（有 IV 时才有；说明一句「假设 IV 不变」已在警告里，不再重复）
+<display.grid_md>（只在用户问到持有期、中途平仓、没到期前的盈亏时才给，其余时候整节省掉；给的时候整张表原样照抄，一格都不改）
 
 ### 说明
 <display.notes_md>

@@ -114,6 +114,7 @@ class OptionsDeskTests(unittest.TestCase):
         at_expiry = [row[-1] for row in grid["pl"]]
         self.assertAlmostEqual(at_expiry[0], -760)   # -15%: below the long strike
         self.assertAlmostEqual(at_expiry[3], 240)    # unchanged: both puts expire worthless
+        self.assertIn("要看没到期前盈亏怎么变", out["display"]["notes_md"])
 
     def test_covered_call_and_naked_call(self):
         cc = [{"type": "stock", "side": "long", "premium": 100}, {"type": "call", "side": "short", "strike": 110, "premium": 2, "dte": 30}]
