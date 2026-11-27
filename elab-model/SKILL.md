@@ -7,13 +7,14 @@ author: 杰尼马（EdgeLab）
 homepage: https://github.com/makinotes/elab-trading-skills
 license: CC-BY-NC-4.0
 invocation: user
-version: 0.3.0
+version: 0.4.0
 last_updated: 2026-11-27
 visibility: public
 requires:
   - "scripts/ev_model.py 与 scripts/strategy_models.py 必须同处 scripts/ 目录（跨脚本 import 依赖，strategy_models 通过 sys.path.insert + import ev_model 串联，不用 subprocess）"
   - "scripts/portfolio_stress.py 独立运行，不 import 其他脚本；只读用户提供的本地 JSON / CSV，不联网"
   - "scripts/valuation.py 独立运行，不 import 其他脚本；只读用户提供的本地 JSON，不联网"
+  - "scripts/options_desk.py 独立运行，不 import 其他脚本；只读用户提供的本地 JSON，不联网"
 outputs:
   - "脚本 stdout：JSON（AI 只读不改）"
   - "调用方 AI 输出：人话解读（须过 _shared/schema.md §三 标签 lint）"
@@ -58,6 +59,7 @@ outputs:
 | 这个价格隐含了什么 / 现价要求多快的增长 | `valuation.py reverse` | 反向 DCF：把参考价翻译成隐含增速、需持续的年数或所需利润率，附隐含倍数与年数×折现率网格（**估值类问题的首选入口**） | 免费·纯本地计算 |
 | 算估值 / DCF / 值多少钱 | `valuation.py dcf` | 用户定义的条件情景（如保守/基准/乐观），EV 到股权的桥、终值占比、折现率×永续增长网格 | 免费·纯本地计算 |
 | 共识价、投行目标价和自己算的对比 | `valuation.py anchors` | 三类锚点逐行并列（不取平均），附日期、证据级别、与参考价的差距；可直接接 dcf 输出 | 免费·纯本地计算 |
+| 期权单子对照自己的规则 / 移仓 / 被行权 / 保证金 | `options_desk.py check / roll / assign / margin` | 多腿到期与持有期盈亏（Black-Scholes）、规则逐条核对、移仓净收付与新最多亏、接盘现金与实际成本、Reg-T 保证金估算；由 `elab-options` 编排与输出（registry §八） | 免费·纯本地计算 |
 
 > 不在此做：精确希腊值/期权定价（需 py_vollib，违反无 pip 原则）；组合级 VaR 与相关性矩阵；实时信号；行情抓取（`portfolio_stress.py` 只读用户或券商连接层提供的本地文件）。
 
@@ -254,4 +256,5 @@ win_rate = pop                 # 来源须带标签
 | `elab-trade` Mode B（持仓诊断） | 杠杆持仓的保证金缓冲、冲击跌幅、组合重演；引用 registry §六 |
 | `elab-diagnosis` | 「还扛得住吗 / 再跌多少会追保」类问题的缓冲数学；引用 registry §六 |
 | `elab-research` 估值与隐含预期 | 反向 DCF、情景 DCF、锚点对照；引用 registry §七 |
+| `elab-options` | 开仓前检查、移仓、被行权、保证金；输出格式以 elab-options SKILL §四 为准；引用 registry §八 |
 | `elab-diagnosis` | 「能不能买 / 贵不贵」类问题先用 reverse 把价格隐含的假设摊开，结论由用户下；引用 registry §七 |

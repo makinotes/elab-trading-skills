@@ -10,8 +10,8 @@ metadata:
   author: "杰尼马（EdgeLab）"
   homepage: "https://github.com/makinotes/elab-trading-skills"
   invocation: "user"
-  version: "0.6.11"
-  last_updated: "2026-11-26"
+  version: "0.6.12"
+  last_updated: "2026-11-27"
   visibility: "public"
   requires: "[]"
   outputs: "[]"
@@ -48,6 +48,7 @@ metadata:
 > - **研究一只票/期权/板块**（含会员自研数据：恐慌 · 拥挤度 · 期权异动 · 13F）→ `elab-research`
 > - **决策卡住**（该不该割/加、能不能买）→ `elab-diagnosis`（陪你把决定梳清楚，结论你自己下）
 > - **练交易能力**（总拿不住、死扛、临时起意，这个月该练什么，跟练与复测）→ `elab-coach`（一次只练一项，不给方向）
+> - **管自己的期权单子**（开仓前对照规则 · 移仓 · 被行权 · 保证金）→ `elab-options`
 > - **拆概念**（IV、Delta 中性、对冲到底啥意思）→ `elab-deconstruct`
 > - **找对标**（谁真赚到、我能不能复制）→ `elab-benchmark`
 > - **研究富途/老虎博主**（归档公开主页 · 时点行情 · 证据审计）→ `elab-futu-research`
@@ -95,9 +96,10 @@ metadata:
 | "我这算不算 X"（X=俚语/黑话/自造词，如"苦肉计""delta中性反脆弱轮动"）——转译口语类比 / 识破伪概念 | `elab-deconstruct`（§0.5 伪概念闸 + §0.6 俚语转译） | 免费 |
 | 算EV、期望收益、Kelly、策略数学、这单结构怎么样、收得薄不薄 | `elab-model`（模型计算：EV/仓位/策略结构数学） | 免费（纯本地计算） |
 | 保证金缓冲、再跌多少会追保、历史上类似情况之后怎样、组合放回历史重演 | `elab-model` `portfolio_stress.py`（组合压力与历史类比，registry §六） | 免费（纯本地计算，需自备持仓与日线文件） |
+| 检查一张期权单子是否符合自己的规则、要不要移仓/移仓怎么算、被行权会怎样、保证金为什么这么高、把期权规则写下来 | `elab-options`（计算调 `elab-model` `options_desk.py`，registry §八） | 免费（纯本地计算，期权数据自备或经只读券商连接） |
 | 算估值、DCF、这个价格隐含了什么、共识价/投行目标价和自己算的对比 | `elab-model` `valuation.py`（反向 DCF、情景 DCF、锚点并列，registry §七）；要先补财务数据或研报证据时走 `elab-research` 估值方法 | 免费（纯本地计算，财务数据自备或经已授权工具取得） |
 
-> 内容创作 / 营销文案类（钩子/标题/传播/AI 味检测）不在 elab 内做；期权策略系统教学走 EdgeLab 课件，也不在 elab 内重做。
+> 内容创作 / 营销文案类（钩子/标题/传播/AI 味检测）不在 elab 内做；期权策略的系统教学走 EdgeLab 课件，elab 不讲课；但用户自己的期权单子（开仓前检查、移仓、被行权、保证金）由 `elab-options` 处理。
 
 ## 常见请求怎么梳（不是堵，是梳）⭐
 
